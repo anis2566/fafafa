@@ -1,0 +1,302 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Class {
+  Two
+  Three
+  Four
+  Five
+  Six
+  Seven
+  Eight
+  Nine
+  Ten
+  HscFirstYear
+  HscSecondYear
+}
+
+enum Shift {
+  Morning
+  Day
+  Evening
+  Night
+}
+
+enum Religion {
+  Islam
+  Hinduism
+  Christianity
+  Buddhism
+  Other
+}
+
+enum Group {
+  Science
+  Humanities
+  BusinessStudies
+}
+
+enum Nationality {
+  Bangladeshi
+  Foreigner
+}
+
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+enum PaymentStatus {
+  Paid
+  Unpaid
+  NA
+}
+
+enum PaymentMethod {
+  Cash
+  MobileBanking
+}
+
+enum Month {
+  January
+  February
+  March
+  April
+  May
+  June
+  July
+  August
+  September
+  October
+  Novembewr
+  December
+}
+
+enum Role {
+  User
+  Teacher
+  Management
+  Accountant
+  HR
+  Admin
+}
+
+enum Status {
+  Pending
+  Active
+  Suspended
+}
+
+enum RoomStatus {
+  Active
+  Deactive
+}
+
+
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String          @unique
+  password      String?         @db.Text
+  emailVerified DateTime?
+  image         String?
+  role          Role            @default(User)
+  status        Status          @default(Pending)
+
+  accounts      Account[]
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([email, id])
+}
+ 
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@id([provider, providerAccountId])
+}
+ 
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@id([identifier])
+}
+ 
+
+model Student {
+  id            String          @id @default(cuid())
+  session       Int
+  studentId     Int
+  name          String
+  nameBangla    String
+  fName         String
+  mName         String
+  gender        Gender
+  dob           DateTime
+  nationality   Nationality
+  religion      Religion
+  imageUrl      String
+
+  school        String
+  class         Class
+  section       String?
+  shift         Shift?
+  group         Group?
+  roll          Int
+
+  fPhone        String
+  mPhone        String
+
+  presentHouseNo      String
+  presentMoholla      String
+  presentPost         String
+  presentThana        String
+  permanentVillage    String
+  permanentPost       String
+  permanentThana      String
+  permanentDistrict   String
+
+  admissionFee        Int
+  monthlyFee          Int
+
+  batchId             String?
+  batch               Batch?     @relation(fields: [batchId], references: [id])
+
+  admissionPayment   AdmissionPayment?
+  payments           MonthlyPayment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id])
+}
+
+
+model Counter {
+  id            String          @id @default(cuid())
+  class         Class
+  count         Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, class])
+}
+
+
+model AdmissionFee {
+  id            String          @id @default(cuid())
+  class         Class
+  amount         Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, class])
+}
+
+
+model MonthlyFee {
+  id            String          @id @default(cuid())
+  class         Class
+  amount         Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, class])
+}
+
+
+model AdmissionPayment {
+  id            String          @id @default(cuid())
+  amount        Int
+  method        PaymentMethod
+  status        PaymentStatus   @default(Unpaid)
+
+  studentId     String @unique
+  student       Student     @relation(fields: [studentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, studentId])
+}
+
+
+model MonthlyPayment {
+  id            String          @id @default(cuid())
+  amount        Int
+  month         Month
+  method        PaymentMethod?
+  status        PaymentStatus   @default(Unpaid)
+
+  studentId     String
+  student       Student     @relation(fields: [studentId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, studentId, month])
+}
+
+
+model Room {
+  id            String          @id @default(cuid())
+  name          Int
+  capacity      Int
+  status        RoomStatus      @default(Deactive) 
+  availableTime String[]        @default([])
+  bookTime      String[]        @default([])
+
+  batches       Batch[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id])
+}
+
+
+model Batch {
+  id            String          @id @default(cuid())
+  name          String
+  class         Class
+  capacity      Int
+  time          String[]
+
+  roomId        String
+  room          Room            @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  students      Student[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id])
+}
