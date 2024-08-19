@@ -8,7 +8,7 @@ interface AdmissionFeeState {
 }
 
 export const useAdmissionFee = create<AdmissionFeeState>()((set) => ({
-  open: false,
+  open: false, 
   onOpen: () => set({ open: true }),
   onClose: () => set({ open: false }),
 }));
