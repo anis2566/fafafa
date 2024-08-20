@@ -75,8 +75,18 @@ enum Month {
   August
   September
   October
-  Novembewr
+  November
   December
+}
+
+enum Day {
+  Saturday
+  Sunday
+  Monday
+  Tuesday
+  Wednesday
+  Thursday
+  Friday
 }
 
 enum Role {
@@ -99,6 +109,11 @@ enum RoomStatus {
   Deactive
 }
 
+enum Level {
+  Primary
+  Seconday
+  HigherSecondary
+}
 
 model User {
   id            String          @id @default(cuid())
@@ -294,9 +309,108 @@ model Batch {
   room          Room            @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   students      Student[]
+  classes       BatchClass[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([id])
+}
+
+
+model Subject {
+  id            String          @id @default(cuid())
+  name          String
+  class         Class
+  group         Group?
+
+  teachers      TeacherSubject[]
+  classes       BatchClass[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id])
+}
+
+
+model Teacher {
+  id            String          @id @default(cuid())
+  teacherId     Int
+  name          String
+  fName         String
+  mName         String
+  dob           String
+  gender        Gender
+  nationality   Nationality
+  religion      Religion
+  imageUrl      String
+
+  presentHouseNo      String
+  presentMoholla      String
+  presentPost         String
+  presentThana        String
+  permanentVillage    String
+  permanentPost       String
+  permanentThana      String
+  permanentDistrict   String
+
+  phone         String
+  altPhone      String
+
+  level         Level
+
+  subjects      TeacherSubject[]
+  classes       BatchClass[]
+  bookings      Booking[]
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id])
+}
+
+
+model TeacherSubject {
+  id         String  @id @default(cuid())
+  teacherId  String
+  teacher    Teacher  @relation(fields: [teacherId], references: [id])
+  subjectId  String
+  subject    Subject  @relation(fields: [subjectId], references: [id])
+
+  @@unique([teacherId, subjectId])
+}
+
+
+model Booking {
+  id            String          @id @default(cuid())
+  time          String[]
+  day            Day
+
+  teacherId     String
+  teacher       Teacher         @relation(fields: [teacherId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([time, day, teacherId])
+}
+
+
+model BatchClass {
+  id            String          @id @default(cuid())
+  time          String[]
+  day            Day
+
+  subjectId     String
+  subject       Subject         @relation(fields: [subjectId], references: [id])
+  teacherId     String
+  teacher       Teacher         @relation(fields: [teacherId], references: [id])
+  batchId       String
+  batch         Batch           @relation(fields: [batchId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, teacherId, subjectId])
 }

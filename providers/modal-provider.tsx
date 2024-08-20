@@ -15,6 +15,15 @@ import { DeleteRoomModal } from "@/app/dashboard/room/_components/delete-modal"
 // ROOM
 import { UpdateAdmissionPaymentModal } from "@/app/dashboard/salary/admission/_components/update-modal"
 
+// STUDNET
+import { AddStudentModal } from "@/app/dashboard/batch/[id]/_components/add-student-modal"
+import { RemoveStudentModal } from "@/app/dashboard/batch/[id]/_components/remove-student-modal"
+
+// SUBJECT
+import { AddSubjectModal } from "@/app/dashboard/subject/_components/add-subject-modal"
+import { EditSubjectModal } from "@/app/dashboard/subject/_components/edit-subject-modal"
+import { DeleteSubjectModal } from "@/app/dashboard/subject/_components/delete-subject-modal"
+
 export const ModalProvider = () => {
     return (
         <>
@@ -34,6 +43,15 @@ export const ModalProvider = () => {
 
             {/* ROOM */}
             <DeleteRoomModal />
+
+            {/* STUDENT */}
+            <AddStudentModal />
+            <RemoveStudentModal />
+
+            {/* SUBJECT */}
+            <AddSubjectModal />
+            <EditSubjectModal />
+            <DeleteSubjectModal />
         </>
     )
 }

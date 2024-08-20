@@ -15,11 +15,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ContentLayout } from "../_components/content-layout";
 import { db } from "@/lib/prisma";
 import { CustomPagination } from "@/components/custom-pagination";
-import { BatchList } from "./_components/batch-list";
+import { AddSubjectButton } from "./_components/add-subject-button";
+import { SubjectList } from "./_components/subject-list";
 import { Header } from "./_components/header";
 
 export const metadata: Metadata = {
-    title: "BEC | Batch",
+    title: "BEC | Subject",
     description: "Basic Education Care",
 };
 
@@ -29,33 +30,18 @@ interface Props {
         name: string;
         page: string;
         perPage: string;
-        room: string;
     }
 }
 
-const Batch = async ({ searchParams }: Props) => {
-    const { name, className, page, perPage, room } = searchParams;
+const Subject = async ({ searchParams }: Props) => {
+    const { name, className, page, perPage } = searchParams;
     const itemsPerPage = parseInt(perPage) || 5;
     const currentPage = parseInt(page) || 1;
-    const formatedRoom = parseInt(room) || undefined
 
-    const batches = await db.batch.findMany({
+    const subjects = await db.subject.findMany({
         where: {
             ...(className && { class: className }),
             ...(name && { name: { contains: name, mode: "insensitive" } }),
-            ...(formatedRoom && {
-                room: {
-                    name: formatedRoom
-                }
-            })
-        },
-        include: {
-            room: true,
-            students: {
-                select: {
-                    id: true
-                }
-            }
         },
         orderBy: {
             createdAt: "desc"
@@ -64,22 +50,17 @@ const Batch = async ({ searchParams }: Props) => {
         take: itemsPerPage,
     })
 
-    const totalBatch = await db.batch.count({
+    const totalSubject = await db.batch.count({
         where: {
             ...(className && { class: className }),
             ...(name && { name: { contains: name, mode: "insensitive" } }),
-            ...(formatedRoom && {
-                room: {
-                    name: formatedRoom
-                }
-            })
         },
     })
 
-    const totalPage = Math.ceil(totalBatch / itemsPerPage)
+    const totalPage = Math.ceil(totalSubject / itemsPerPage)
 
     return (
-        <ContentLayout title="Batch">
+        <ContentLayout title="Subject">
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
@@ -89,26 +70,29 @@ const Batch = async ({ searchParams }: Props) => {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>Batch</BreadcrumbPage>
+                        <BreadcrumbPage>Subject</BreadcrumbPage>
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
 
-            <Card className="mt-4">
-                <CardHeader>
-                    <CardTitle>Batch List</CardTitle>
-                    <CardDescription>
-                        A collection of batch.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <Header />
-                    <BatchList batches={batches} />
-                    <CustomPagination totalPage={totalPage} />
-                </CardContent>
-            </Card>
+            <div className="mt-4 space-y-4">
+                <AddSubjectButton />
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Subject List</CardTitle>
+                        <CardDescription>
+                            A collection of subject.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <Header />
+                        <SubjectList subjects={subjects} />
+                        <CustomPagination totalPage={totalPage} />
+                    </CardContent>
+                </Card>
+            </div>
         </ContentLayout>
     )
 }
 
-export default Batch
+export default Subject

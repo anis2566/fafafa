@@ -40,6 +40,9 @@ const Room = async ({ searchParams }: Props) => {
         where: {
             ...(formatedRoom && { name: formatedRoom })
         },
+        include: {
+            batches: true
+        },
         orderBy: {
             createdAt: "desc"
         },

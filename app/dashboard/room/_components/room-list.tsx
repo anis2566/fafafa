@@ -1,4 +1,4 @@
-import { Room } from "@prisma/client"
+import { Batch, Room } from "@prisma/client"
 
 import {
     Table,
@@ -17,8 +17,12 @@ import { Badge } from "@/components/ui/badge"
 
 import { Action } from "./action"
 
+interface RoomWithBatch extends Room {
+    batches: Batch[]
+}
+
 interface Props {
-    rooms: Room[]
+    rooms: RoomWithBatch[]
 }
 
 export const RoomList = ({ rooms }: Props) => {
@@ -45,20 +49,21 @@ export const RoomList = ({ rooms }: Props) => {
                                     <HoverCard>
                                         <HoverCardTrigger asChild>
                                             <Badge>
-                                                {(room.availableTime.length - room.bookTime.length) / 2} Unit
+                                                {(room.availableTime.length - room.bookTime.length) / 2} Hours
                                             </Badge>
                                         </HoverCardTrigger>
                                         <HoverCardContent className="w-60">
-                                            <div className="grid grid-cols-2 gap-2">
-                                                {
-                                                    room.availableTime.map(time => (
-                                                        <Badge variant="outline" key={time} className="flex justify-center bg-slate-500 text-white">{time}</Badge>
-                                                    ))
-                                                }
-                                            </div>
                                             {
-                                                room.availableTime.length === 0 && (
+                                                room.bookTime.filter(time => room.availableTime.includes(time)).length !== 0 ? (
                                                     <p className="italic text-muted-foreground text-center">No available time!</p>
+                                                ) : (
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        {
+                                                            room.availableTime.map(time => (
+                                                                <Badge variant="outline" key={time} className="flex justify-center bg-slate-500 text-white">{time}</Badge>
+                                                            ))
+                                                        }
+                                                    </div>
                                                 )
                                             }
                                         </HoverCardContent>
@@ -70,7 +75,7 @@ export const RoomList = ({ rooms }: Props) => {
                                     <HoverCard>
                                         <HoverCardTrigger asChild>
                                             <Badge variant="destructive">
-                                                {(room.bookTime.length) / 2} Unit
+                                                {(room.bookTime.length) / 2} Hours
                                             </Badge>
                                         </HoverCardTrigger>
                                         <HoverCardContent className="w-60">
@@ -90,7 +95,7 @@ export const RoomList = ({ rooms }: Props) => {
                                     </HoverCard>
                                 </TableCell>
                             </TableCell>
-                            <TableCell className="py-1">{3}</TableCell>
+                            <TableCell className="py-1">{room.batches.length}</TableCell>
                             <TableCell className="py-1">
                                 <Action id={room.id} />
                             </TableCell>

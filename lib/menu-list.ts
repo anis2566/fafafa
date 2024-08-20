@@ -33,6 +33,8 @@ import {
   UserCheck,
   UserX,
   School,
+  BookOpen,
+  UserRoundPen,
 } from "lucide-react";
 
 type Submenu = {
@@ -96,6 +98,38 @@ export function getMenuList(pathname: string): Group[] {
               label: "Absent",
               active: pathname === "/dashboard/student/absent",
               icon: UserX,
+            },
+          ],
+        },
+        {
+          href: "/dashboard/subject",
+          label: "Subject",
+          active: pathname.includes("/dashboard/subject"),
+          icon: BookOpen,
+          submenus: [],
+        },
+      ],
+    },
+    {
+      groupLabel: "Teacher Management",
+      menus: [
+        {
+          href: "",
+          label: "Teacher",
+          active: pathname.includes("/dashboard/teacher"),
+          icon: UserRoundPen,
+          submenus: [
+            {
+              href: "/dashboard/teacher/create",
+              label: "Create",
+              active: pathname === "/dashboard/teacher/create",
+              icon: PlusCircle,
+            },
+            {
+              href: "/dashboard/teacher",
+              label: "List",
+              active: pathname === "/dashboard/teacher",
+              icon: List,
             },
           ],
         },

@@ -18,6 +18,13 @@ export const CREATE_BATCH = async (values: BatchSchemaType) => {
       name: data.name,
       class: data.class,
     },
+    include: {
+      room: {
+        select: {
+          availableTime: true,
+        },
+      },
+    },
   });
 
   if (batch) {
@@ -27,6 +34,17 @@ export const CREATE_BATCH = async (values: BatchSchemaType) => {
   await db.batch.create({
     data: {
       ...data,
+    },
+  });
+
+  await db.room.update({
+    where: {
+      id: data.roomId,
+    },
+    data: {
+      bookTime: {
+        push: data.time,
+      },
     },
   });
 

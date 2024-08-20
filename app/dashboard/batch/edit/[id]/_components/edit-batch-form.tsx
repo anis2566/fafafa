@@ -1,13 +1,13 @@
 "use client"
 
-import { Class, Room } from "@prisma/client"
+import { Batch, Class, Room } from "@prisma/client"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -29,11 +29,16 @@ import {
 } from "@/components/ui/select"
 import { MultiSelect } from "@/components/ui/multi-select"
 
-import { BatchSchema } from "../schema"
 import { formatString } from "@/lib/utils"
-import { CREATE_BATCH, GET_ROOMS } from "../action"
+import { GET_ROOMS } from "../../../create/action"
+import { BatchSchema } from "../../../create/schema"
+import { UPDATE_BATCH } from "../action"
 
-export const CreateBatchForm = () => {
+interface Props {
+    batch: Batch
+}
+
+export const EditBatchForm = ({ batch }: Props) => {
     const [room, setRoom] = useState<Room | null>()
 
     const router = useRouter()
@@ -46,18 +51,24 @@ export const CreateBatchForm = () => {
         }
     })
 
-    const { mutate: createBatch, isPending } = useMutation({
-        mutationFn: CREATE_BATCH,
+    useEffect(() => {
+        if (rooms) {
+            setRoom(rooms.find(room => room.id === batch.roomId))
+        }
+    }, [rooms, batch.roomId])
+
+    const { mutate: updateBatch, isPending } = useMutation({
+        mutationFn: UPDATE_BATCH,
         onSuccess: (data) => {
             form.reset()
             toast.success(data.success, {
-                id: "create-batch"
+                id: "update-batch"
             });
             router.push("/dashboard/batch")
         },
         onError: (error) => {
             toast.error(error.message, {
-                id: "create-batch"
+                id: "update-batch"
             });
         }
     })
@@ -65,28 +76,29 @@ export const CreateBatchForm = () => {
     const form = useForm<z.infer<typeof BatchSchema>>({
         resolver: zodResolver(BatchSchema),
         defaultValues: {
-            name: undefined,
-            class: undefined,
-            capacity: undefined,
-            roomId: "",
-            time: []
+            name: batch.name || undefined,
+            class: batch.class || undefined,
+            capacity: batch.capacity || undefined,
+            roomId: batch.roomId || "",
+            time: batch.time || []
         },
     })
 
     function onSubmit(values: z.infer<typeof BatchSchema>) {
-        toast.loading("Batch creating...", {
-            id: "create-batch"
+        toast.loading("Batch updating...", {
+            id: "update-batch"
         });
-        createBatch(values)
+        updateBatch({ id: batch.id, values })
     }
 
-    const options = room?.availableTime.filter(time => !room.bookTime.includes(time))
+    const existRoomOptions = room ? [...batch.time, ...room.availableTime.filter(time => !room.bookTime.includes(time))].map(item => ({ label: item, value: item })) : []
+    const newRoomOptions = room ? room.availableTime.filter(time => !room.bookTime.includes(time)).map(item => ({ label: item, value: item })) : []
 
     return (
         <Card className="mt-4">
             <CardHeader>
-                <CardTitle>Batch Form</CardTitle>
-                <CardDescription>Fill up batch information.</CardDescription>
+                <CardTitle>Edit Batch Form</CardTitle>
+                <CardDescription>Customize batch information.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
@@ -148,8 +160,14 @@ export const CreateBatchForm = () => {
                                 <FormItem>
                                     <FormLabel>Room</FormLabel>
                                     <Select defaultValue={field.value} onValueChange={(value) => {
-                                        field.onChange(value)
-                                        setRoom(rooms?.find(item => item.id === value))
+                                        if (value !== batch.roomId) {
+                                            field.onChange(value)
+                                            setRoom(rooms?.find(item => item.id === value))
+                                            form.setValue("time", [""])
+                                        } else {
+                                            field.onChange(value)
+                                            setRoom(rooms?.find(item => item.id === value))
+                                        }
                                     }}>
                                         <FormControl>
                                             <SelectTrigger>
@@ -168,32 +186,28 @@ export const CreateBatchForm = () => {
                                 </FormItem>
                             )}
                         />
-                        {
-                            room && options && (
-                                <FormField
-                                    control={form.control}
-                                    name="time"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Time</FormLabel>
-                                            <FormControl>
-                                                <MultiSelect
-                                                    options={options?.map(item => ({ label: item, value: item }))}
-                                                    onValueChange={field.onChange}
-                                                    defaultValue={field.value}
-                                                    placeholder="Select time"
-                                                    variant="inverted"
-                                                    animation={2}
-                                                    maxCount={3}
-                                                    disabled={isPending}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            )
-                        }
+                        <FormField
+                            control={form.control}
+                            name="time"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Time</FormLabel>
+                                    <FormControl>
+                                        <MultiSelect
+                                            options={form.watch("roomId") === batch.roomId ? existRoomOptions : newRoomOptions}
+                                            onValueChange={field.onChange}
+                                            defaultValue={field.value}
+                                            placeholder="Select time"
+                                            variant="inverted"
+                                            animation={2}
+                                            maxCount={3}
+                                            disabled={isPending}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                         <Button type="submit" disabled={isPending}>Submit</Button>
                     </form>
                 </Form>

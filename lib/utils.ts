@@ -16,3 +16,16 @@ export function saltAndHashPassword(password: any) {
   const hash = bcrypt.hashSync(password, salt);
   return hash;
 }
+
+export function adjustTime(time: string): string {
+  const [hours, minutesPart] = time.split(":");
+  let [minutes, period] = minutesPart.split(" ");
+
+  let minutesNumber = parseInt(minutes);
+
+  if (minutesNumber >= 30) {
+    minutes = "00";
+  }
+
+  return `${hours}:${minutes.padStart(2, "0")} ${period}`;
+}
