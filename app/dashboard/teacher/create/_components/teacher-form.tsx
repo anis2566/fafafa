@@ -1,15 +1,15 @@
 "use client"
 
-import { Check, DollarSign, Edit, MapPin, PhoneCall, School, Trash2, User } from "lucide-react"
+import { Check, Edit, MapPin, PhoneCall, School, Trash2, User } from "lucide-react"
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { Gender, Nationality, Religion, Class as PrismaClass, Shift, Group, Level } from "@prisma/client"
+import { Gender, Nationality, Religion, Level } from "@prisma/client"
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { toast } from "sonner"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button"
 import { cn, formatString } from "@/lib/utils"
 import { UploadButton } from "@/lib/uploadthing"
 import { TeacherSchema, TeacherSchemaType } from "../schema"
+import { CREATE_TEACHER } from "../action"
 
 const steps = [
     {
@@ -52,10 +53,25 @@ const steps = [
 
 
 export const TeacherForm = () => {
-    const [currentStep, setCurrentStep] = useState<number>(3)
+    const [currentStep, setCurrentStep] = useState<number>(0)
     const [dob, setDob] = useState<Date>(new Date())
 
     const router = useRouter()
+
+    const { mutate: createTeacher, isPending } = useMutation({
+        mutationFn: CREATE_TEACHER,
+        onSuccess: (data) => {
+            toast.success(data?.success, {
+                id: "create-teacher"
+            })
+            router.push(`/dashboard/teacher`)
+        },
+        onError: (error) => {
+            toast.error(error.message, {
+                id: "create-teacher"
+            })
+        }
+    })
 
     const form = useForm<z.infer<typeof TeacherSchema>>({
         resolver: zodResolver(TeacherSchema),
@@ -87,10 +103,10 @@ export const TeacherForm = () => {
     type FieldName = keyof TeacherSchemaType
 
     function onSubmit(values: z.infer<typeof TeacherSchema>) {
-        toast.loading("Student creating...", {
-            id: "create-student"
+        toast.loading("Teacher creating...", {
+            id: "create-teacher"
         })
-        // createStudent(values)
+        createTeacher(values)
     }
 
     const next = async () => {
@@ -538,7 +554,7 @@ export const TeacherForm = () => {
                                         <Input {...field} onChange={(e) => {
                                             field.onChange(e.target.value)
                                             trigger("phone")
-                                        }} />
+                                        }} disabled={isPending} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -554,7 +570,7 @@ export const TeacherForm = () => {
                                         <Input {...field} onChange={(e) => {
                                             field.onChange(e.target.value)
                                             trigger("altPhone")
-                                        }} />
+                                        }} disabled={isPending} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -563,9 +579,9 @@ export const TeacherForm = () => {
                     </div>
 
                     <div className="flex justify-center items-center gap-x-4">
-                        <Button type="button" variant="outline" onClick={() => setCurrentStep(currentStep - 1)} >Back</Button>
-                        <Button type="button" onClick={next} className={cn("", currentStep === 4 && "hidden")}>Next</Button>
-                        <Button type="submit" className={cn("", currentStep !== 4 && "hidden")}>Submit</Button>
+                        <Button type="button" variant="outline" onClick={() => setCurrentStep(currentStep - 1)} disabled={isPending}>Back</Button>
+                        <Button type="button" onClick={next} className={cn("", currentStep === 3 && "hidden")}>Next</Button>
+                        <Button type="submit" className={cn("", currentStep !== 3 && "hidden")} disabled={isPending}>Submit</Button>
                     </div>
                 </form>
             </Form>

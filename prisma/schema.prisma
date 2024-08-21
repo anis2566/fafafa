@@ -21,6 +21,21 @@ enum Class {
   HscSecondYear
 }
 
+enum CounterClass {
+  Two
+  Three
+  Four
+  Five
+  Six
+  Seven
+  Eight
+  Nine
+  Ten
+  HscFirstYear
+  HscSecondYear
+  Teacher
+}
+
 enum Shift {
   Morning
   Day
@@ -214,7 +229,7 @@ model Student {
 
 model Counter {
   id            String          @id @default(cuid())
-  class         Class
+  class         CounterClass
   count         Int
 
   createdAt DateTime @default(now())
@@ -270,6 +285,7 @@ model MonthlyPayment {
   month         Month
   method        PaymentMethod?
   status        PaymentStatus   @default(Unpaid)
+  note          String?         @db.Text
 
   studentId     String
   student       Student     @relation(fields: [studentId], references: [id])
@@ -279,7 +295,6 @@ model MonthlyPayment {
 
   @@unique([id, studentId, month])
 }
-
 
 model Room {
   id            String          @id @default(cuid())
@@ -322,6 +337,7 @@ model Subject {
   id            String          @id @default(cuid())
   name          String
   class         Class
+  level         Level
   group         Group?
 
   teachers      TeacherSubject[]
@@ -340,7 +356,7 @@ model Teacher {
   name          String
   fName         String
   mName         String
-  dob           String
+  dob           DateTime
   gender        Gender
   nationality   Nationality
   religion      Religion
@@ -356,13 +372,15 @@ model Teacher {
   permanentDistrict   String
 
   phone         String
-  altPhone      String
+  altPhone      String?
 
   level         Level
 
   subjects      TeacherSubject[]
   classes       BatchClass[]
   bookings      Booking[]
+
+  status         Status    @default(Active)
  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -379,7 +397,7 @@ model TeacherSubject {
   subject    Subject  @relation(fields: [subjectId], references: [id])
 
   @@unique([teacherId, subjectId])
-}
+} 
 
 
 model Booking {

@@ -13,6 +13,7 @@ export const MonthlyPaymentSchema = z.object({
       message: "required",
     }),
   amount: z.number().min(1, { message: "required" }),
+  note: z.string().optional()
 });
 
 export type MonthlyPaymentSchemaType = z.infer<typeof MonthlyPaymentSchema>;

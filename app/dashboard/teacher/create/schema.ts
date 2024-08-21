@@ -1,10 +1,7 @@
 import { z } from "zod";
 import {
   Nationality,
-  Class as PrismaClass,
-  Shift,
   Religion,
-  Group,
   Gender,
   Level,
 } from "@prisma/client";

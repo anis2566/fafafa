@@ -111,6 +111,18 @@ export function getMenuList(pathname: string): Group[] {
       ],
     },
     {
+      groupLabel: "Statistics",
+      menus: [
+        {
+          href: "/dashboard/stat/salary",
+          label: "Salary",
+          active: pathname.includes("/dashboard/stat/salary"),
+          icon: HandCoins,
+          submenus: [],
+        },
+      ],
+    },
+    {
       groupLabel: "Teacher Management",
       menus: [
         {

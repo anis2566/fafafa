@@ -3,13 +3,17 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { Month, PaymentMethod, Student } from "@prisma/client"
+import { MonthlyPayment, PaymentMethod, Student } from "@prisma/client"
 import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { useState } from "react"
+import { Edit, Lock } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -18,19 +22,33 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MonthlyPaymentSchema } from "../schema"
 
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import {
+    Collapsible,
+    CollapsibleContent,
+} from "@/components/ui/collapsible"
+import { Textarea } from "@/components/ui/textarea"
 
 import { PAY_WITH_CASH } from "../action"
 import { PAY_WITH_MBL } from "@/services/payment-service"
 
+
+interface StudentWithPayment extends Student {
+    payments: MonthlyPayment[]
+}
+
 interface Props {
-    student: Student;
+    student: StudentWithPayment;
 }
 
 export const PaymentForm = ({ student }: Props) => {
+    const [enableEdit, setEnableEdit] = useState<boolean>(false)
+
+    const router = useRouter()
 
     const { mutate: payWithCash, isPending } = useMutation({
         mutationFn: PAY_WITH_CASH,
@@ -38,7 +56,7 @@ export const PaymentForm = ({ student }: Props) => {
             toast.success("Success", {
                 id: "payment"
             })
-            alert("paid")
+            router.push("/dashboard/salary/monthly")
         },
         onError: (error) => {
             toast.error(error.message, {
@@ -65,6 +83,7 @@ export const PaymentForm = ({ student }: Props) => {
             month: undefined,
             amount: student.monthlyFee,
             method: undefined,
+            note: ""
         },
     })
 
@@ -73,7 +92,7 @@ export const PaymentForm = ({ student }: Props) => {
             id: "payment"
         })
         if (values.method === PaymentMethod.Cash) {
-            payWithCash({ values, studentId: student.id })
+            payWithCash({ values, studentId: student.id, })
         } else {
             payWithMobileBanking({ month: values.month, studentId: student.id, amount: student.monthlyFee.toString() })
         }
@@ -92,15 +111,15 @@ export const PaymentForm = ({ student }: Props) => {
                             name="month"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Class</FormLabel>
+                                    <FormLabel>Month</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending || isLoading}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select status" />
+                                                <SelectValue placeholder="Select month" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {Object.values(Month).map((v) => (
+                                            {Object.values(student.payments.map(item => item.month)).map((v) => (
                                                 <SelectItem key={v} value={v}>
                                                     {v}
                                                 </SelectItem>
@@ -118,7 +137,14 @@ export const PaymentForm = ({ student }: Props) => {
                                 <FormItem>
                                     <FormLabel>Amoont</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Enter amount..." {...field} type="number" disabled />
+                                        <div className="relative">
+                                            <Input placeholder="Enter amount..." {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} type="number" disabled={!enableEdit} />
+                                            <Button variant="ghost" size="icon" className="absolute right-0 top-0" type="button" onClick={() => setEnableEdit(!enableEdit)}>
+                                                {
+                                                    enableEdit ? <Lock className="w-4 h-4" /> : <Edit className="w-4 h-4" />
+                                                }
+                                            </Button>
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -159,6 +185,30 @@ export const PaymentForm = ({ student }: Props) => {
                                 </FormItem>
                             )}
                         />
+                        <Collapsible open={enableEdit}>
+                            <CollapsibleContent>
+                                <FormField
+                                    control={form.control}
+                                    name="note"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Note</FormLabel>
+                                            <FormControl>
+                                                <Textarea
+                                                    className="resize-none"
+                                                    {...field}
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                Describe salary reduction reason.
+                                            </FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </CollapsibleContent>
+                        </Collapsible>
+
                         <Button type="submit" disabled={isPending || isLoading}>Pay Now</Button>
                     </form>
                 </Form>

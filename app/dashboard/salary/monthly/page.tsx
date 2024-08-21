@@ -62,7 +62,7 @@ const MonthlyPayment = async ({ searchParams }: Props) => {
             studentId: true,
             imageUrl: true,
             class: true,
-            payments: true
+            payments: true,
         },
         orderBy: {
             createdAt: "desc"

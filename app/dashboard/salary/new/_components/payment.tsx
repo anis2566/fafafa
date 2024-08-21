@@ -30,18 +30,17 @@ const formSchema = z.object({
         .refine((val) => Object.values(Class).includes(val), {
             message: "required",
         }),
-    id: z.number().min(1, {message: "required"}),
-    name: z.string().optional()
+    id: z.number().min(1, { message: "required" }),
 });
 
 export const PaymentForm = () => {
 
     const router = useRouter()
 
-    const { mutate: findStudent } = useMutation({
+    const { mutate: findStudent, isPending } = useMutation({
         mutationFn: FIND_STUDENT,
         onSuccess: (data) => {
-            router.push(`/dashboard/finance/new/${data.student.id}`)
+            router.push(`/dashboard/salary/new/${data.student.id}`)
         },
         onError: (error) => {
             toast.error(error.message, {
@@ -56,14 +55,10 @@ export const PaymentForm = () => {
             session: new Date().getFullYear(),
             class: undefined,
             id: undefined,
-            name: ""
         },
     })
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        toast.loading("Searching...", {
-            id: "find-student"
-        })
         findStudent({ ...values, className: values.class })
     }
 
@@ -84,7 +79,7 @@ export const PaymentForm = () => {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Session</FormLabel>
-                                            <Select defaultValue={new Date().getFullYear().toString()} onValueChange={(value) => field.onChange(parseInt(value))}>
+                                            <Select defaultValue={new Date().getFullYear().toString()} onValueChange={(value) => field.onChange(parseInt(value))} disabled={isPending}>
                                                 <FormControl>
                                                     <SelectTrigger className="w-[150px]">
                                                         <SelectValue placeholder="Select session" />
@@ -108,7 +103,7 @@ export const PaymentForm = () => {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Class</FormLabel>
-                                            <Select onValueChange={(value) => field.onChange(value as Class)}>
+                                            <Select onValueChange={(value) => field.onChange(value as Class)} disabled={isPending}>
                                                 <FormControl>
                                                     <SelectTrigger className="w-[150px]">
                                                         <SelectValue placeholder="Select class" />
@@ -130,30 +125,17 @@ export const PaymentForm = () => {
                                     control={form.control}
                                     name="id"
                                     render={({ field }) => (
-                                        <FormItem className="flex-1">
+                                        <FormItem>
                                             <FormLabel>ID</FormLabel>
                                             <FormControl>
-                                                <Input {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} type="number" />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="name"
-                                    render={({ field }) => (
-                                        <FormItem className="flex-1">
-                                            <FormLabel>Name</FormLabel>
-                                            <FormControl>
-                                                <Input {...field} />
+                                                <Input {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} type="number" disabled={isPending} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
                             </div>
-                            <Button type="submit">Submit</Button>
+                            <Button type="submit" disabled={isPending}>Submit</Button>
                         </form>
                     </Form>
                 </CardContent>

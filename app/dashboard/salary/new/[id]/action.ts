@@ -1,7 +1,8 @@
 "use server";
 
-import { db } from "@/lib/prisma";
 import { PaymentMethod, PaymentStatus } from "@prisma/client";
+
+import { db } from "@/lib/prisma";
 import { MonthlyPaymentSchemaType } from "./schema";
 
 type PayWithCash = {
@@ -25,10 +26,6 @@ export const PAY_WITH_CASH = async ({ values, studentId }: PayWithCash) => {
     throw new Error("Invalid month");
   }
 
-  if (dueMonth.student.monthlyFee !== values.amount) {
-    throw new Error("Invalid amount");
-  }
-
   await db.monthlyPayment.update({
     where: {
       id: dueMonth.id,
@@ -36,6 +33,8 @@ export const PAY_WITH_CASH = async ({ values, studentId }: PayWithCash) => {
     data: {
       status: PaymentStatus.Paid,
       method: PaymentMethod.Cash,
+      amount: values.amount,
+      note: values.note
     },
   });
 

@@ -1,5 +1,3 @@
-"use client"
-
 import { Subject } from "@prisma/client"
 import { Edit, EllipsisVertical, Trash2 } from "lucide-react"
 
@@ -36,6 +34,7 @@ export const SubjectList = ({ subjects }: Props) => {
                 <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Class</TableHead>
+                    <TableHead>Level</TableHead>
                     <TableHead>Group</TableHead>
                     <TableHead>Action</TableHead>
                 </TableRow>
@@ -46,6 +45,7 @@ export const SubjectList = ({ subjects }: Props) => {
                         <TableRow key={subject.id}>
                             <TableCell>{subject.name}</TableCell>
                             <TableCell>{formatString(subject.class)}</TableCell>
+                            <TableCell>{formatString(subject.level)}</TableCell>
                             <TableCell>{formatString(subject.group ? subject.group : "-")}</TableCell>
                             <TableCell className="py-3">
                                 <DropdownMenu>

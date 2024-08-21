@@ -24,6 +24,9 @@ import { AddSubjectModal } from "@/app/dashboard/subject/_components/add-subject
 import { EditSubjectModal } from "@/app/dashboard/subject/_components/edit-subject-modal"
 import { DeleteSubjectModal } from "@/app/dashboard/subject/_components/delete-subject-modal"
 
+// TEACHER
+import { AddTeacherSubjectModal } from "@/app/dashboard/teacher/[id]/_components/add-subject-modal"
+
 export const ModalProvider = () => {
     return (
         <>
@@ -52,6 +55,9 @@ export const ModalProvider = () => {
             <AddSubjectModal />
             <EditSubjectModal />
             <DeleteSubjectModal />
+
+            {/* TEACHER */}
+            <AddTeacherSubjectModal />
         </>
     )
 }
