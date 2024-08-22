@@ -1,8 +1,7 @@
 import Link from "next/link";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { BookOpen, Building, Clock } from "lucide-react";
-import { PaymentStatus } from "@prisma/client";
+import { BookOpen, Building, Clock, PlusCircle } from "lucide-react";
 
 import {
     Breadcrumb,
@@ -16,14 +15,14 @@ import { ContentLayout } from "@/app/dashboard/_components/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button";
 
 import { adjustTime } from "@/lib/utils";
 import { AddStudentButton } from "./_components/add-student-button";
 import { StudentList } from "./_components/student-list";
-import { Header } from "./_components/header";
-import { CustomPagination } from "@/components/custom-pagination";
 import { db } from "@/lib/prisma";
-import { AddClassButton } from "./_components/add-class-button";
+import { ClassList } from "./_components/class-list";
+import { TeacherList } from "./_components/teacher-list";
 
 export const metadata: Metadata = {
     title: "BEC | Batch Details",
@@ -34,60 +33,50 @@ interface Props {
     params: {
         id: string;
     },
-    searchParams: {
-        studentId: string;
-        name: string;
-        page: string;
-        perPage: string;
-    }
 }
 
-const BatchDetails = async ({ params: { id }, searchParams }: Props) => {
-    const { studentId, name, page, perPage } = searchParams;
-    const itemsPerPage = parseInt(perPage) || 5;
-    const currentPage = parseInt(page) || 1;
-    const formatedId = studentId ? parseInt(studentId) : undefined
+const BatchDetails = async ({ params: { id } }: Props) => {
 
     const batch = await db.batch.findUnique({
         where: {
             id
         },
         include: {
-            room: true
+            room: true,
+            students: {
+                include: {
+                    payments: true
+                }
+            },
+            classes: {
+                include: {
+                    teacher: {
+                        include: {
+                            classes: {
+                                include: {
+                                    batch: true,
+                                    subject: true
+                                }
+                            },
+                        }
+                    },
+                    subject: true
+                }
+            }
         }
     })
 
     if (!batch) redirect("/dashboard")
 
-    const students = await db.student.findMany({
+    const teachers = await db.batchClass.findMany({
         where: {
             batchId: id,
-            ...(formatedId && { studentId: formatedId }),
-            ...(name && { name: { contains: name, mode: "insensitive" } })
         },
         include: {
-            payments: {
-                where: {
-                    status: PaymentStatus.Unpaid
-                },
-            }
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
-
-    const totalStudent = await db.student.count({
-        where: {
-            batchId: id,
-            ...(formatedId && { studentId: formatedId }),
-            ...(name && { name: { contains: name, mode: "insensitive" } })
+            subject: true,
+            teacher: true
         }
     })
-
-    const totalPage = Math.ceil(totalStudent / itemsPerPage)
 
     return (
         <ContentLayout title="Batch">
@@ -133,12 +122,17 @@ const BatchDetails = async ({ params: { id }, searchParams }: Props) => {
                         </div>
                         <div className="flex items-center gap-x-3">
                             <AddStudentButton id={id} className={batch.class} />
-                            <AddClassButton id={id} className={batch.class} />
+                            <Button asChild className="bg-amber-600 hover:bg-amber-700">
+                                <Link href={`/dashboard/batch/${id}/class`} className="mt-4 flex items-center gap-x-2">
+                                    <PlusCircle className="w-5 h-5" />
+                                    Add Class
+                                </Link>
+                            </Button>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Tabs defaultValue="account" className="w-full">
+                <Tabs defaultValue="students" className="w-full">
                     <TabsList className="flex justify-center mb-4">
                         <TabsTrigger value="students">Students</TabsTrigger>
                         <TabsTrigger value="class">Class</TabsTrigger>
@@ -150,14 +144,33 @@ const BatchDetails = async ({ params: { id }, searchParams }: Props) => {
                                 <CardTitle>Student List</CardTitle>
                                 <CardDescription>A collection of batch student.</CardDescription>
                             </CardHeader>
-                            <CardContent>
-                                <Header />
-                                <StudentList students={students} />
-                                <CustomPagination totalPage={totalPage} />
+                            <CardContent className="space-y-4">
+                                <StudentList students={batch.students} />
                             </CardContent>
                         </Card>
                     </TabsContent>
-                    <TabsContent value="password">Change your password here.</TabsContent>
+                    <TabsContent value="class">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Class List</CardTitle>
+                                <CardDescription>A collection of batch class.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <ClassList classes={batch.classes} />
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                    <TabsContent value="teachers">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Teacher List</CardTitle>
+                                <CardDescription>A collection of batch teacher.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <TeacherList classes={teachers} />
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
                 </Tabs>
 
             </div>

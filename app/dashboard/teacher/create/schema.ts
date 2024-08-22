@@ -41,11 +41,7 @@ export const TeacherSchema = z.object({
   permanentPost: requiredString,
   permanentThana: requiredString,
   permanentDistrict: requiredString,
-  level: z
-    .nativeEnum(Level)
-    .refine((val) => Object.values(Level).includes(val), {
-      message: "required",
-    }),
+  level: z.array(z.nativeEnum(Level)).min(1, { message: "required" }),
 });
 
 export type TeacherSchemaType = z.infer<typeof TeacherSchema>;

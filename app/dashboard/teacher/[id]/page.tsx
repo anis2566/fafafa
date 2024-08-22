@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
+import Image from "next/image";
 
 import {
     Breadcrumb,
@@ -9,20 +11,18 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
 import { ContentLayout } from "../../_components/content-layout";
 import { db } from "@/lib/prisma";
-import { redirect } from "next/navigation";
-import { Card, CardContent} from "@/components/ui/card";
-import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
-import { AddSubjectButton } from "./_components/add-subject-button,";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { SubjectList } from "./_components/subject-list";
-import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { AddPaymentButton } from "./_components/add-payment-button,";
+import { ClassList } from "./_components/class-list";
+import { Profile } from "./_components/profile";
 
 export const metadata: Metadata = {
-    title: "BEC | Teacher Details",
+    title: "BEC | Teacher Profile",
     description: "Basic Education Care",
 };
 
@@ -36,19 +36,19 @@ const TeacherDetails = async ({ params: { id } }: Props) => {
     const teacher = await db.teacher.findUnique({
         where: {
             id
+        },
+        include: {
+            classes: {
+                include: {
+                    batch: true,
+                    subject: true,
+                }
+            },
+            payments: true
         }
     })
 
     if (!teacher) redirect("/dashboard")
-
-    const subjects = await db.teacherSubject.findMany({
-        where: {
-            teacherId: id
-        },
-        include: {
-            subject: true
-        }
-    })
 
     return (
         <ContentLayout title="Teacher">
@@ -94,27 +94,29 @@ const TeacherDetails = async ({ params: { id } }: Props) => {
                             </div>
                         </div>
                         <div className="flex items-center gap-x-3">
-                            <AddSubjectButton id={id} />
-                            {/* <Button asChild>
-                                <Link href={`/dashboard/teacher/${id}/booking`} className="flex items-center gap-x-2 bg-indigo-500 hover:bg-indigo-600">
-                                    <PlusCircle className="w-5 h-5" />
-                                    Add Booking
-                                </Link>
-                            </Button> */}
+                            <AddPaymentButton id={id} />
                         </div>
                     </CardContent>
                 </Card>
 
-                <Tabs defaultValue="subjects" className="w-full">
+                <Tabs defaultValue="class" className="w-full">
                     <TabsList className="flex justify-center mb-4">
-                        <TabsTrigger value="subjects">Subjects</TabsTrigger>
                         <TabsTrigger value="class">Class</TabsTrigger>
-                        <TabsTrigger value="teachers">Teachers</TabsTrigger>
+                        <TabsTrigger value="profile">Profile</TabsTrigger>
                     </TabsList>
-                    <TabsContent value="subjects">
-                        <SubjectList subjects={subjects} />
+                    <TabsContent value="class">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Class List</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <ClassList classes={teacher.classes} />
+                            </CardContent>
+                        </Card>
                     </TabsContent>
-                    <TabsContent value="password">Change your password here.</TabsContent>
+                    <TabsContent value="profile">
+                        <Profile teacher={teacher} />
+                    </TabsContent>
                 </Tabs>
             </div>
         </ContentLayout>

@@ -3,6 +3,7 @@
 import { db } from "@/lib/prisma";
 import { Class } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { TeacherPaymentSchema, TeacherPaymentSchemaType } from "./schema";
 
 export const GET_SUBJECTS_FOR_TEACHER = async (className: Class) => {
   const subjects = await db.subject.findMany({
@@ -18,36 +19,40 @@ export const GET_SUBJECTS_FOR_TEACHER = async (className: Class) => {
 
 type AddTeacherSubject = {
   teacherId: string;
-  subjectId: string;
+  values: TeacherPaymentSchemaType;
 };
 
-export const ADD_TEACHER_SUBJECT = async ({
+export const ADD_TEACHER_PAYMENT = async ({
   teacherId,
-  subjectId,
+  values,
 }: AddTeacherSubject) => {
-  const subject = await db.teacherSubject.findUnique({
+  const { data, success } = TeacherPaymentSchema.safeParse(values);
+
+  if (!success) {
+    throw new Error("Invalid input value");
+  }
+
+  const payment = await db.teacherPayment.findFirst({
     where: {
-      teacherId_subjectId: {
-        teacherId,
-        subjectId,
-      },
+      teacherId,
+      level: data.level,
     },
   });
 
-  if (subject) {
-    throw new Error("Subject already exists");
+  if (payment) {
+    throw new Error("Payment already exists");
   }
 
-  await db.teacherSubject.create({
+  await db.teacherPayment.create({
     data: {
       teacherId,
-      subjectId,
+      ...data,
     },
   });
 
   revalidatePath(`/dashboard/teacher/${teacherId}`);
 
   return {
-    success: "Subject added",
+    success: "Payment added",
   };
 };

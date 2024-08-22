@@ -296,6 +296,21 @@ model MonthlyPayment {
   @@unique([id, studentId, month])
 }
 
+
+model TeacherPayment {
+  id            String          @id @default(cuid())
+  amount        Int
+  level         Level
+
+  teacherId     String
+  teacher       Teacher          @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, teacherId])
+}
+
 model Room {
   id            String          @id @default(cuid())
   name          Int
@@ -319,6 +334,7 @@ model Batch {
   class         Class
   capacity      Int
   time          String[]
+  level         Level
 
   roomId        String
   room          Room            @relation(fields: [roomId], references: [id], onDelete: Cascade)
@@ -340,7 +356,6 @@ model Subject {
   level         Level
   group         Group?
 
-  teachers      TeacherSubject[]
   classes       BatchClass[]
 
   createdAt DateTime @default(now())
@@ -374,11 +389,10 @@ model Teacher {
   phone         String
   altPhone      String?
 
-  level         Level
+  level         Level[]
 
-  subjects      TeacherSubject[]
   classes       BatchClass[]
-  bookings      Booking[]
+  payments      TeacherPayment[]
 
   status         Status    @default(Active)
  
@@ -389,36 +403,10 @@ model Teacher {
 }
 
 
-model TeacherSubject {
-  id         String  @id @default(cuid())
-  teacherId  String
-  teacher    Teacher  @relation(fields: [teacherId], references: [id])
-  subjectId  String
-  subject    Subject  @relation(fields: [subjectId], references: [id])
-
-  @@unique([teacherId, subjectId])
-} 
-
-
-model Booking {
-  id            String          @id @default(cuid())
-  time          String[]
-  day            Day
-
-  teacherId     String
-  teacher       Teacher         @relation(fields: [teacherId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([time, day, teacherId])
-}
-
-
 model BatchClass {
   id            String          @id @default(cuid())
   time          String[]
-  day            Day
+  day           Day[]
 
   subjectId     String
   subject       Subject         @relation(fields: [subjectId], references: [id])

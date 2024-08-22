@@ -1,3 +1,5 @@
+"use client"
+
 import { Subject } from "@prisma/client"
 import { Edit, EllipsisVertical, Trash2 } from "lucide-react"
 

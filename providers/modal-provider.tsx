@@ -24,8 +24,11 @@ import { AddSubjectModal } from "@/app/dashboard/subject/_components/add-subject
 import { EditSubjectModal } from "@/app/dashboard/subject/_components/edit-subject-modal"
 import { DeleteSubjectModal } from "@/app/dashboard/subject/_components/delete-subject-modal"
 
-// TEACHER
-import { AddTeacherSubjectModal } from "@/app/dashboard/teacher/[id]/_components/add-subject-modal"
+// CLASS
+import { RemoveClassModal } from "@/app/dashboard/batch/[id]/_components/remove-class-modal"
+
+// TEACHER PAYMENT
+import { AddTeacherPaymentModal } from "@/app/dashboard/teacher/[id]/_components/add-payment-modal"
 
 export const ModalProvider = () => {
     return (
@@ -56,8 +59,11 @@ export const ModalProvider = () => {
             <EditSubjectModal />
             <DeleteSubjectModal />
 
-            {/* TEACHER */}
-            <AddTeacherSubjectModal />
+            {/* CLASS */}
+            <RemoveClassModal />
+
+            {/* TEACHER PAYMENT */}
+            <AddTeacherPaymentModal />
         </>
     )
 }

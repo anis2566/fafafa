@@ -18,8 +18,9 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { MultiSelect } from "@/components/ui/multi-select"
 
-import { cn, formatString } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import { UploadButton } from "@/lib/uploadthing"
 import { TeacherSchema, TeacherSchemaType } from "../schema"
 import { CREATE_TEACHER } from "../action"
@@ -94,7 +95,7 @@ export const TeacherForm = () => {
             permanentPost: "",
             permanentThana: "",
             permanentDistrict: "",
-            level: undefined,
+            level: [],
         },
     })
 
@@ -381,23 +382,18 @@ export const TeacherForm = () => {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Level</FormLabel>
-                                    <Select defaultValue={field.value} onValueChange={(value) => {
-                                        field.onChange(value)
-                                        trigger("level")
-                                    }}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select level" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {
-                                                Object.values(Level).map((v, i) => (
-                                                    <SelectItem value={v} key={i}>{formatString(v)}</SelectItem>
-                                                ))
-                                            }
-                                        </SelectContent>
-                                    </Select>
+                                    <FormControl>
+                                        <MultiSelect
+                                            options={Object.values(Level).map(item => ({ label: item, value: item }))}
+                                            onValueChange={field.onChange}
+                                            defaultValue={field.value}
+                                            placeholder="Select level"
+                                            variant="inverted"
+                                            animation={2}
+                                            maxCount={3}
+                                            disabled={isPending}
+                                        />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}

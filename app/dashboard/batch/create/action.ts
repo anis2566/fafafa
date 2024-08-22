@@ -31,6 +31,20 @@ export const CREATE_BATCH = async (values: BatchSchemaType) => {
     throw new Error("Batch already exists");
   }
 
+  const room = await db.room.findUnique({
+    where: {
+      id: data.roomId,
+    },
+  });
+
+  if (!room) {
+    throw new Error("Room not found");
+  }
+
+  if (room?.capacity < data.capacity) {
+    throw new Error("Batch capacity is bigger than room capacity");
+  }
+
   await db.batch.create({
     data: {
       ...data,

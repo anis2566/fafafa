@@ -1,6 +1,6 @@
 "use client"
 
-import { Class, Room } from "@prisma/client"
+import { Class, Level, Room } from "@prisma/client"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
@@ -66,6 +66,7 @@ export const CreateBatchForm = () => {
         resolver: zodResolver(BatchSchema),
         defaultValues: {
             name: undefined,
+            level: undefined,
             class: undefined,
             capacity: undefined,
             roomId: "",
@@ -119,6 +120,30 @@ export const CreateBatchForm = () => {
                                         <SelectContent>
                                             {
                                                 Object.values(Class).map((v, i) => (
+                                                    <SelectItem value={v} key={i}>{formatString(v)}</SelectItem>
+                                                ))
+                                            }
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="level"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Level</FormLabel>
+                                    <Select defaultValue={field.value} onValueChange={(value) => field.onChange(value)}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select level" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {
+                                                Object.values(Level).map((v, i) => (
                                                     <SelectItem value={v} key={i}>{formatString(v)}</SelectItem>
                                                 ))
                                             }

@@ -33,6 +33,27 @@ type AddStudent = {
 };
 
 export const ADD_STUDENT_TO_BATCH = async ({ ids, batchId }: AddStudent) => {
+  const batch = await db.batch.findUnique({
+    where: {
+      id: batchId,
+    },
+    include: {
+      students: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  if (!batch) {
+    throw new Error("Batch not found");
+  }
+
+  if (batch.capacity - batch.students.length < ids.length) {
+    throw new Error("Batch capacity is full");
+  }
+
   for (const id of ids) {
     await db.student.update({
       where: {
@@ -75,5 +96,29 @@ export const REMOVE_STUDENT_FROM_BATCH = async (id: string) => {
 
   return {
     success: "Student removed",
+  };
+};
+
+export const REMOVE_CLASS_FROM_BATCH = async (id: string) => {
+  const batchClass = await db.batchClass.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!batchClass) {
+    throw new Error("Class not found");
+  }
+
+  await db.batchClass.delete({
+    where: {
+      id,
+    },
+  });
+
+  revalidatePath(`/dashboard/batch/${batchClass.batchId}`);
+
+  return {
+    success: "Class removed",
   };
 };
