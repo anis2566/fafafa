@@ -4,6 +4,7 @@ import { PaymentMethod, PaymentStatus } from "@prisma/client";
 
 import { db } from "@/lib/prisma";
 import { MonthlyPaymentSchemaType } from "./schema";
+import { revalidatePath } from "next/cache";
 
 type PayWithCash = {
   values: MonthlyPaymentSchemaType;
@@ -34,9 +35,11 @@ export const PAY_WITH_CASH = async ({ values, studentId }: PayWithCash) => {
       status: PaymentStatus.Paid,
       method: PaymentMethod.Cash,
       amount: values.amount,
-      note: values.note
+      note: values.note,
     },
   });
+
+  revalidatePath("/dashboard/salary/monthly");
 
   return {
     success: "Payment successful",

@@ -28,6 +28,7 @@ export const PAY_WITH_CASH = async (id: string) => {
   await db.monthlyPayment.create({
     data: {
       amount: student.monthlyFee,
+      class: student.class,
       method: PaymentMethod.Cash,
       status: PaymentStatus.Paid,
       studentId: student.id,
@@ -40,6 +41,7 @@ export const PAY_WITH_CASH = async (id: string) => {
       data: {
         amount: student.monthlyFee,
         method: PaymentMethod.Cash,
+        class: student.class,
         status: PaymentStatus.NA,
         studentId: student.id,
         month: Object.values(Month)[i],

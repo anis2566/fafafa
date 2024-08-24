@@ -210,6 +210,7 @@ model Student {
   permanentPost       String
   permanentThana      String
   permanentDistrict   String
+  isPresent           Boolean     @default(true)
 
   admissionFee        Int
   monthlyFee          Int
@@ -283,6 +284,7 @@ model MonthlyPayment {
   id            String          @id @default(cuid())
   amount        Int
   month         Month
+  class         Class
   method        PaymentMethod?
   status        PaymentStatus   @default(Unpaid)
   note          String?         @db.Text
@@ -419,4 +421,18 @@ model BatchClass {
   updatedAt DateTime @updatedAt
 
   @@unique([id, teacherId, subjectId])
+}
+
+
+model Expense {
+  id            String          @id @default(cuid())
+  title         String
+  amount        Int
+  carriedBy     String
+  note          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id])
 }

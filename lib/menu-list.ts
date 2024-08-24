@@ -35,6 +35,7 @@ import {
   School,
   BookOpen,
   UserRoundPen,
+  Coins,
 } from "lucide-react";
 
 type Submenu = {
@@ -119,6 +120,31 @@ export function getMenuList(pathname: string): Group[] {
           active: pathname.includes("/dashboard/stat/salary"),
           icon: HandCoins,
           submenus: [],
+        },
+      ],
+    },
+    {
+      groupLabel: "Expense",
+      menus: [
+        {
+          href: "",
+          label: "Expense",
+          active: pathname.includes("/dashboard/expense"),
+          icon: Coins,
+          submenus: [
+            {
+              href: "/dashboard/expense/create",
+              label: "Create",
+              active: pathname === "/dashboard/expense/create",
+              icon: PlusCircle,
+            },
+            {
+              href: "/dashboard/expense",
+              label: "List",
+              active: pathname === "/dashboard/expense",
+              icon: List,
+            },
+          ],
         },
       ],
     },

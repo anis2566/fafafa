@@ -81,6 +81,7 @@ export const PaymentForm = ({ student }: Props) => {
         resolver: zodResolver(MonthlyPaymentSchema),
         defaultValues: {
             month: undefined,
+            class: student.class,
             amount: student.monthlyFee,
             method: undefined,
             note: ""

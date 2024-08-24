@@ -2,21 +2,16 @@
 
 import * as React from "react"
 import { Label, Pie, PieChart } from "recharts"
-import { Class } from "@prisma/client"
+import { Day } from "@prisma/client"
 import { HandCoins } from "lucide-react"
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const chartConfig = {
 } satisfies ChartConfig
@@ -26,21 +21,21 @@ const colors = [
 ];
 
 
-const classColorMap: Record<Class, string> = Object.values(Class).reduce((acc, className, index) => {
-  acc[className] = colors[index % colors.length];
+const dayColorMap: Record<Day, string> = Object.values(Day).reduce((acc, dayName, index) => {
+  acc[dayName] = colors[index % colors.length];
   return acc;
-}, {} as Record<Class, string>);
+}, {} as Record<Day, string>);
 
 interface Props {
-  data: { class: Class, amount: number }[]
+  data: { day: Day, amount: number }[]
 }
 
-export function DailyIncomeChart({ data }: Props) {
+export function WeeklyIncomeChart({ data }: Props) {
   const chartData = React.useMemo(() => {
     return data.map(item => ({
-      browser: item.class,
+      browser: item.day,
       visitors: item.amount,
-      fill: classColorMap[item.class] // Use the color from the map
+      fill: dayColorMap[item.day] // Use the color from the map
     }))
   }, [data])
 
@@ -51,7 +46,7 @@ export function DailyIncomeChart({ data }: Props) {
   return (
     <Card className="flex flex-col p-0">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
-        <CardTitle className="text-md font-medium">Today Salary</CardTitle>
+        <CardTitle className="text-md font-medium">Weekly Salary</CardTitle>
         <HandCoins className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent className="p-0">

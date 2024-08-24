@@ -6,17 +6,12 @@ import { Class } from "@prisma/client"
 import { HandCoins } from "lucide-react"
 
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const chartConfig = {
 } satisfies ChartConfig
@@ -35,7 +30,8 @@ interface Props {
   data: { class: Class, amount: number }[]
 }
 
-export function DailyIncomeChart({ data }: Props) {
+
+export function MonthlyIncomeChart({ data }: Props) {
   const chartData = React.useMemo(() => {
     return data.map(item => ({
       browser: item.class,
@@ -51,7 +47,7 @@ export function DailyIncomeChart({ data }: Props) {
   return (
     <Card className="flex flex-col p-0">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-0">
-        <CardTitle className="text-md font-medium">Today Salary</CardTitle>
+        <CardTitle className="text-md font-medium">Monthly Salary</CardTitle>
         <HandCoins className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent className="p-0">
