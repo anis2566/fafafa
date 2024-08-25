@@ -102,13 +102,13 @@ const Dashboard = async () => {
         }
     });
 
-    const todayExpense = await db.expense.groupBy({
-        by: ["title"],
-        where: todayFilter,
-        _sum: {
-            amount: true
-        }
-    })
+    // const todayExpense = await db.expense.groupBy({
+    //     by: ["title"],
+    //     where: todayFilter,
+    //     _sum: {
+    //         amount: true
+    //     }
+    // })
 
 
     return (
@@ -119,7 +119,7 @@ const Dashboard = async () => {
                         <DailyIncomeChart data={todaySalary.map(item => ({ class: item.class, amount: item._sum.amount ?? 0 }))} />
                         <WeeklyIncomeChart data={weeklySalaryData} />
                         <MonthlyIncomeChart data={monthlySalary.map(item => ({ class: item.class, amount: item._sum.amount ?? 0 }))} />
-                        <DailyExpenseChart data={todayExpense.map(item => ({ title: item.title, amount: item._sum.amount ?? 0 }))} />
+                        {/* <DailyExpenseChart data={todayExpense.map(item => ({ title: item.title, amount: item._sum.amount ?? 0 }))} /> */}
                     </div>
                 </div>
             </div>

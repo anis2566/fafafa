@@ -35,7 +35,7 @@ export const ExpenseList = ({ expenses }: Props) => {
                 <TableRow>
                     <TableHead>Title</TableHead>
                     <TableHead>Amount</TableHead>
-                    <TableHead>Reference</TableHead>
+                    <TableHead>Month</TableHead>
                     <TableHead>Edited</TableHead>
                     <TableHead>Action</TableHead>
                 </TableRow>
@@ -44,9 +44,9 @@ export const ExpenseList = ({ expenses }: Props) => {
                 {
                     expenses.map((expense) => (
                         <TableRow key={expense.id}>
-                            <TableCell className="py-3">{expense.title.substring(0, 70)}</TableCell>
+                            <TableCell className="py-3">{expense.type}</TableCell>
                             <TableCell className="py-3">{expense.amount}</TableCell>
-                            <TableCell className="py-3">{expense.carriedBy}</TableCell>
+                            <TableCell className="py-3">{expense.month}</TableCell>
                             <TableCell className="py-3">
                                 <HoverCard>
                                     <HoverCardTrigger asChild>

@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { useMutation } from "@tanstack/react-query"
+import { Expenses, Month } from "@prisma/client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -18,9 +19,11 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 import { ExpenseSchema } from "../schema"
 import { CREATE_EXPENSE } from "../action"
+import { formatString } from "@/lib/utils"
 
 
 export const CreateExpenseForm = () => {
@@ -46,9 +49,9 @@ export const CreateExpenseForm = () => {
     const form = useForm<z.infer<typeof ExpenseSchema>>({
         resolver: zodResolver(ExpenseSchema),
         defaultValues: {
-            title: "",
+            type: undefined,
             amount: undefined,
-            carriedBy: "",
+            month: undefined,
             note: ""
         },
     })
@@ -71,13 +74,24 @@ export const CreateExpenseForm = () => {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <FormField
                             control={form.control}
-                            name="title"
+                            name="type"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Title</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Enter expense title..." {...field} disabled={isPending} />
-                                    </FormControl>
+                                    <FormLabel>Type</FormLabel>
+                                    <Select onValueChange={field.onChange} disabled={isPending}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select type" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {
+                                                Object.values(Expenses).map((v, i) => (
+                                                    <SelectItem value={v} key={i}>{formatString(v)}</SelectItem>
+                                                ))
+                                            }
+                                        </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -97,13 +111,24 @@ export const CreateExpenseForm = () => {
                         />
                         <FormField
                             control={form.control}
-                            name="carriedBy"
+                            name="month"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Reference</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Enter expense ref..." {...field} disabled={isPending} />
-                                    </FormControl>
+                                    <FormLabel>Month</FormLabel>
+                                    <Select onValueChange={field.onChange} disabled={isPending}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select month" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {
+                                                Object.values(Month).map((v, i) => (
+                                                    <SelectItem value={v} key={i}>{v}</SelectItem>
+                                                ))
+                                            }
+                                        </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}

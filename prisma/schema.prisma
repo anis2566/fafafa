@@ -124,10 +124,24 @@ enum RoomStatus {
   Deactive
 }
 
+enum HouseStatus {
+  Active
+  Deactive
+}
+
 enum Level {
   Primary
   Seconday
   HigherSecondary
+}
+
+enum Expenses {
+  HouseRent
+  Marketing
+  FoodCost
+  PhoneCost
+  ComputerAndPaper
+  OthersCost
 }
 
 model User {
@@ -330,6 +344,19 @@ model Room {
 }
 
 
+model House {
+  id            String          @id @default(cuid())
+  name          String
+  roomCount     Int
+  status        HouseStatus      @default(Deactive) 
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id])
+}
+
+
 model Batch {
   id            String          @id @default(cuid())
   name          String
@@ -426,9 +453,10 @@ model BatchClass {
 
 model Expense {
   id            String          @id @default(cuid())
-  title         String
+  type          Expenses
   amount        Int
-  carriedBy     String
+  month         Month
+  session       Int
   note          String?
 
   createdAt DateTime @default(now())

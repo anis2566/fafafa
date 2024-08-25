@@ -36,6 +36,10 @@ import {
   BookOpen,
   UserRoundPen,
   Coins,
+  Package,
+  House,
+  TrendingUp,
+  Warehouse,
 } from "lucide-react";
 
 type Submenu = {
@@ -112,14 +116,59 @@ export function getMenuList(pathname: string): Group[] {
       ],
     },
     {
-      groupLabel: "Statistics",
+      groupLabel: "Reports",
       menus: [
         {
-          href: "/dashboard/stat/salary",
-          label: "Salary",
-          active: pathname.includes("/dashboard/stat/salary"),
+          href: "",
+          label: "Income",
+          active: pathname.includes("/dashboard/report/income"),
           icon: HandCoins,
-          submenus: [],
+          submenus: [
+            {
+              href: "/dashboard/report/income/salary",
+              label: "Salary",
+              active: pathname === "/dashboard/report/income/salary",
+              icon: CalendarDays,
+            },
+            {
+              href: "/dashboard/report/income",
+              label: "Overview",
+              active: pathname === "/dashboard/report/income",
+              icon: TrendingUp,
+            },
+          ],
+        },
+        {
+          href: "",
+          label: "Expense",
+          active: pathname.includes("/dashboard/report/expense"),
+          icon: Coins,
+          submenus: [
+            {
+              href: "/dashboard/report/expense/teacher",
+              label: "Teacher Bill",
+              active: pathname === "/dashboard/report/expense/teacher",
+              icon: UserRoundPen,
+            },
+            {
+              href: "/dashboard/report/expense/house-rent",
+              label: "House Rent",
+              active: pathname === "/dashboard/report/expense/house-rent",
+              icon: House,
+            },
+            {
+              href: "/dashboard/report/expense/others",
+              label: "Others",
+              active: pathname === "/dashboard/report/expense/others",
+              icon: Package,
+            },
+            {
+              href: "/dashboard/report/expense",
+              label: "Overview",
+              active: pathname === "/dashboard/report/expense",
+              icon: TrendingUp,
+            },
+          ],
         },
       ],
     },
@@ -174,13 +223,33 @@ export function getMenuList(pathname: string): Group[] {
       ],
     },
     {
-      groupLabel: "Room Management",
+      groupLabel: "Room & House Management",
       menus: [
+        {
+          href: "",
+          label: "House",
+          active: pathname.includes("/dashboard/house"),
+          icon: School,
+          submenus: [
+            {
+              href: "/dashboard/house/create",
+              label: "Create",
+              active: pathname === "/dashboard/house/create",
+              icon: PlusCircle,
+            },
+            {
+              href: "/dashboard/house",
+              label: "List",
+              active: pathname === "/dashboard/house",
+              icon: List,
+            },
+          ],
+        },
         {
           href: "",
           label: "Room",
           active: pathname.includes("/dashboard/room"),
-          icon: School,
+          icon: Warehouse,
           submenus: [
             {
               href: "/dashboard/room/create",

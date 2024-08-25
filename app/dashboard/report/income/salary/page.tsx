@@ -10,15 +10,15 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
-
-import { ContentLayout } from "../../_components/content-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { ContentLayout } from "@/app/dashboard/_components/content-layout";
 import { db } from "@/lib/prisma";
-import { SalaryList } from "./_components/salary-list";
 import { Header } from "./_components/header";
+import { SalaryList } from "./_components/salary-list";
 
 export const metadata: Metadata = {
-    title: "BEC | Salary Stat",
+    title: "BEC | Salary Report",
     description: "Basic Education Care",
 };
 
@@ -29,7 +29,7 @@ interface Props {
     }
 }
 
-const SalaryStat = async ({ searchParams }: Props) => {
+const SalaryIncome = async ({ searchParams }: Props) => {
     const { session, className } = searchParams;
     const formatedSession = session ? parseInt(session) : new Date().getFullYear()
 
@@ -52,7 +52,7 @@ const SalaryStat = async ({ searchParams }: Props) => {
     })
 
     return (
-        <ContentLayout title="Stat">
+        <ContentLayout title="Report">
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
@@ -62,14 +62,20 @@ const SalaryStat = async ({ searchParams }: Props) => {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>Salary Stat</BreadcrumbPage>
+                        <BreadcrumbLink asChild>
+                            <Link href="/dashboard/report/income">Income</Link>
+                        </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                        <BreadcrumbPage>Salary</BreadcrumbPage>
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
 
             <Card className="mt-4">
                 <CardHeader>
-                    <CardTitle>Salary Stat</CardTitle>
+                    <CardTitle>Salary Report</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <Header />
@@ -80,4 +86,4 @@ const SalaryStat = async ({ searchParams }: Props) => {
     )
 }
 
-export default SalaryStat
+export default SalaryIncome

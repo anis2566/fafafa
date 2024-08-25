@@ -13,7 +13,6 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { cn, formatString } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
     HoverCard,
@@ -21,6 +20,8 @@ import {
     HoverCardTrigger,
 } from "@/components/ui/hover-card"
 import { Button } from "@/components/ui/button";
+
+import { cn, formatString } from "@/lib/utils";
 
 export interface PaymentProps {
     payments: {
@@ -141,11 +142,11 @@ export const SalaryList = ({ payments }: PaymentProps) => {
                                         );
                                     })
                                 }
-                                <TableCell className="py-3">
+                                <TableCell className="py-3 italic">
                                     {item.payments.filter(item => item.status === PaymentStatus.Unpaid).length} Months
                                 </TableCell>
-                                <TableCell className="py-3">
-                                    {item.payments.filter(item => item.status === PaymentStatus.Paid).reduce((acc, curr) => acc + curr.amount,0)}
+                                <TableCell className="py-3 font-semibold">
+                                    {item.payments.filter(item => item.status === PaymentStatus.Paid).reduce((acc, curr) => acc + curr.amount, 0)}
                                 </TableCell>
                             </TableRow>
                         ))
@@ -160,14 +161,14 @@ export const SalaryList = ({ payments }: PaymentProps) => {
                         {
                             Object.values(Month).map((month, i) => {
                                 return (
-                                    <TableHead key={i} className="text-center">
+                                    <TableCell key={i} className="text-center font-semibold">
                                         {
                                             payments.reduce((total, student) => {
-                                                const amount = student.payments.filter(item => item.month === month && item.status === PaymentStatus.Paid).reduce((acc, cur) => acc + cur.amount,0)
+                                                const amount = student.payments.filter(item => item.month === month && item.status === PaymentStatus.Paid).reduce((acc, cur) => acc + cur.amount, 0)
                                                 return total + amount
                                             }, 0)
                                         }
-                                    </TableHead>
+                                    </TableCell>
                                 )
                             }
                             )

@@ -15,6 +15,7 @@ export const CREATE_EXPENSE = async (values: ExpenseSchemaType) => {
   await db.expense.create({
     data: {
       ...data,
+      session: new Date().getFullYear(),
     },
   });
 

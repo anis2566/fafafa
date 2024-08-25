@@ -1,9 +1,18 @@
+import { Expenses, Month } from "@prisma/client";
 import { z } from "zod";
 
 export const ExpenseSchema = z.object({
-  title: z.string().min(1, { message: "required" }),
+  type: z
+    .nativeEnum(Expenses)
+    .refine((val) => Object.values(Expenses).includes(val), {
+      message: "required",
+    }),
+  month: z
+    .nativeEnum(Month)
+    .refine((val) => Object.values(Month).includes(val), {
+      message: "required",
+    }),
   amount: z.number().min(1, { message: "required" }),
-  carriedBy: z.string().min(1, { message: "required" }),
   note: z.string().optional(),
 });
 

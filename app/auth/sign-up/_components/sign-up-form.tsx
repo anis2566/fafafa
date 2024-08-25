@@ -53,9 +53,6 @@ export const SignUpForm = () => {
     })
 
     function onSubmit(values: z.infer<typeof SignUpSchema>) {
-        toast.loading("Registering...", {
-            id: "register"
-        })
         signUp(values)
     }
 

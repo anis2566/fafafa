@@ -6,10 +6,13 @@ import { Class } from "@prisma/client"
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import { useState } from "react"
 
 
 
 export const Header = () => {
+    const [value, setValue] = useState<Class>(Class.Two)
+    const [sesseionValue, setSessionValue] = useState(new Date().getFullYear().toString())
 
     const pathname = usePathname()
     const router = useRouter()
@@ -45,7 +48,10 @@ export const Header = () => {
         <div className="space-y-2 shadow-sm shadow-primary px-2 py-3">
             <div className="flex items-center justify-between gap-x-3">
                 <div className="flex items-center gap-x-3">
-                    <Select defaultValue="2024" onValueChange={(value) => handleSessionChange(value)}>
+                    <Select value={sesseionValue} onValueChange={(value) => {
+                        handleSessionChange(value)
+                        setSessionValue(value)
+                    }}>
                         <SelectTrigger className="w-[130px]">
                             <SelectValue placeholder="Session" />
                         </SelectTrigger>
@@ -57,7 +63,10 @@ export const Header = () => {
                             }
                         </SelectContent>
                     </Select>
-                    <Select defaultValue={Class.Two} onValueChange={(value) => handleClassChange(value as Class)}>
+                    <Select value={value} onValueChange={(value) => {
+                        handleClassChange(value as Class)
+                        setValue(value as Class)
+                    }}>
                         <SelectTrigger className="w-[130px]">
                             <SelectValue placeholder="Class" />
                         </SelectTrigger>
@@ -74,6 +83,8 @@ export const Header = () => {
                         className="hidden md:flex text-rose-500"
                         onClick={() => {
                             router.push(pathname)
+                            setValue(Class.Two)
+                            setSessionValue(new Date().getFullYear().toString())
                         }}
                     >
                         Reset
