@@ -7,7 +7,7 @@ export const HouseSchema = z.object({
     .refine((val) => Object.values(HouseStatus).includes(val), {
       message: "required",
     }),
-  name: z.number().min(1, { message: "required" }),
+  name: z.string().min(1, { message: "required" }),
   roomCount: z.number().min(1, { message: "required" }),
 });
 

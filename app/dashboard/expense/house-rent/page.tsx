@@ -9,18 +9,18 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
-import { ContentLayout } from "../../_components/content-layout";
-import { CreateHouseForm } from "./_components/create-house-form";
 
+import { ContentLayout } from "../../_components/content-layout";
+import { HouseRentForm } from "./_components/house-rent-form";
 
 export const metadata: Metadata = {
-    title: "BEC | Create House",
+    title: "BEC | Expense | House Rent",
     description: "Basic Education Care",
 };
 
-const CreateHouse = () => {
+const HouseRent = () => {
     return (
-        <ContentLayout title="Room">
+        <ContentLayout title="Expense">
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
@@ -31,19 +31,19 @@ const CreateHouse = () => {
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link href="/dashboard/house">House</Link>
+                            <Link href="/dashboard/expense">Expense</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>Create</BreadcrumbPage>
+                        <BreadcrumbPage>House Rent</BreadcrumbPage>
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
 
-            <CreateHouseForm />
+            <HouseRentForm />
         </ContentLayout>
     )
 }
 
-export default CreateHouse
+export default HouseRent

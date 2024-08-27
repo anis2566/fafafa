@@ -8,6 +8,7 @@ export const RoomSchema = z.object({
       message: "required",
     }),
   name: z.number().min(1, { message: "required" }),
+  houseId: z.string().min(1, { message: "required" }),
   capacity: z.number().min(1, { message: "required" }),
   availableTime: z
     .array(z.string().min(1))

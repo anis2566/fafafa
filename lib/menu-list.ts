@@ -182,10 +182,22 @@ export function getMenuList(pathname: string): Group[] {
           icon: Coins,
           submenus: [
             {
-              href: "/dashboard/expense/create",
-              label: "Create",
-              active: pathname === "/dashboard/expense/create",
-              icon: PlusCircle,
+              href: "/dashboard/expense/utility",
+              label: "Utility",
+              active: pathname === "/dashboard/expense/utility",
+              icon: Package,
+            },
+            {
+              href: "/dashboard/expense/teacher-bill",
+              label: "Teacher Bill",
+              active: pathname === "/dashboard/expense/teacher-bill",
+              icon: UserRoundPen,
+            },
+            {
+              href: "/dashboard/expense/house-rent",
+              label: "House Rent",
+              active: pathname === "/dashboard/expense/house-rent",
+              icon: School,
             },
             {
               href: "/dashboard/expense",

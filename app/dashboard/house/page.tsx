@@ -13,36 +13,38 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 import { ContentLayout } from "../_components/content-layout";
 import { db } from "@/lib/prisma";
-import { RoomList } from "./_components/room-list";
-import { Header } from "./_components/header";
 import { CustomPagination } from "@/components/custom-pagination";
+import { HouseList } from "./_components/house-list";
+import { Header } from "./_components/header";
 
 export const metadata: Metadata = {
-    title: "BEC | Room",
+    title: "BEC | House",
     description: "Basic Education Care",
 };
 
 interface Props {
     searchParams: {
-        room: string;
+        name: string;
         page: string;
         perPage: string;
     }
 }
 
-const Room = async ({ searchParams }: Props) => {
-    const { room, page, perPage } = searchParams;
+const House = async ({ searchParams }: Props) => {
+    const { name, page, perPage } = searchParams;
     const itemsPerPage = parseInt(perPage) || 5;
     const currentPage = parseInt(page) || 1;
-    const formatedRoom = room ? parseInt(room) : undefined
 
-    const rooms = await db.room.findMany({
+    const houses = await db.house.findMany({
         where: {
-            ...(formatedRoom && { name: formatedRoom })
+            ...(name && { name: { contains: name, mode: "insensitive" } })
         },
         include: {
-            batches: true,
-            house: true
+            rooms: {
+                select: {
+                    id: true
+                }
+            }
         },
         orderBy: {
             createdAt: "desc"
@@ -51,13 +53,13 @@ const Room = async ({ searchParams }: Props) => {
         take: itemsPerPage,
     })
 
-    const totalRoom = await db.room.count({
+    const totalHouse = await db.house.count({
         where: {
-            ...(formatedRoom && { name: formatedRoom })
+            ...(name && { name: { contains: name, mode: "insensitive" } })
         },
     })
 
-    const totalPage = Math.ceil(totalRoom / itemsPerPage)
+    const totalPage = Math.ceil(totalHouse / itemsPerPage)
 
     return (
         <ContentLayout title="Room">
@@ -77,14 +79,14 @@ const Room = async ({ searchParams }: Props) => {
 
             <Card className="mt-4">
                 <CardHeader>
-                    <CardTitle>Room List</CardTitle>
+                    <CardTitle>House List</CardTitle>
                     <CardDescription>
-                        A collection of room.
+                        A collection of house.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <Header />
-                    <RoomList rooms={rooms} />
+                    <HouseList houses={houses} />
                     <CustomPagination totalPage={totalPage} />
                 </CardContent>
             </Card>
@@ -92,4 +94,4 @@ const Room = async ({ searchParams }: Props) => {
     )
 }
 
-export default Room
+export default House

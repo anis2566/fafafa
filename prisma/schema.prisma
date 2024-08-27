@@ -136,7 +136,6 @@ enum Level {
 }
 
 enum Expenses {
-  HouseRent
   Marketing
   FoodCost
   PhoneCost
@@ -283,6 +282,7 @@ model AdmissionPayment {
   amount        Int
   method        PaymentMethod
   status        PaymentStatus   @default(Unpaid)
+  session       Int
 
   studentId     String @unique
   student       Student     @relation(fields: [studentId], references: [id])
@@ -297,6 +297,7 @@ model AdmissionPayment {
 model MonthlyPayment {
   id            String          @id @default(cuid())
   amount        Int
+  session       Int
   month         Month
   class         Class
   method        PaymentMethod?
@@ -327,6 +328,25 @@ model TeacherPayment {
   @@unique([id, teacherId])
 }
 
+model HousePayment {
+  id            String          @id @default(cuid())
+  houseName     String
+  session       Int
+  month         Month
+  amount        Int
+  method        PaymentMethod?
+  note          String?         @db.Text
+
+  houseId     String
+  house       House     @relation(fields: [houseId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, houseId, month])
+}
+
+
 model Room {
   id            String          @id @default(cuid())
   name          Int
@@ -335,7 +355,10 @@ model Room {
   availableTime String[]        @default([])
   bookTime      String[]        @default([])
 
+  houseId       String
+  house         House           @relation(fields: [houseId], references: [id], onDelete: Cascade)
   batches       Batch[]
+
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -349,6 +372,9 @@ model House {
   name          String
   roomCount     Int
   status        HouseStatus      @default(Deactive) 
+
+  rooms         Room[]
+  payments      HousePayment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -396,6 +422,7 @@ model Subject {
 
 model Teacher {
   id            String          @id @default(cuid())
+  session       Int
   teacherId     Int
   name          String
   fName         String

@@ -26,6 +26,7 @@ export const CREATE_TEACHER = async (values: TeacherSchemaType) => {
   const newTeacher = await db.teacher.create({
     data: {
       ...data,
+      session: new Date().getFullYear(),
       teacherId: counter.count + 1,
     },
   });

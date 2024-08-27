@@ -1,4 +1,4 @@
-import { Batch, Room } from "@prisma/client"
+import { Batch, House, Room } from "@prisma/client"
 
 import {
     Table,
@@ -18,7 +18,8 @@ import { Badge } from "@/components/ui/badge"
 import { Action } from "./action"
 
 interface RoomWithBatch extends Room {
-    batches: Batch[]
+    batches: Batch[];
+    house: House;
 }
 
 interface Props {
@@ -32,6 +33,7 @@ export const RoomList = ({ rooms }: Props) => {
                 <TableRow>
                     <TableHead>Room Name</TableHead>
                     <TableHead>Capacity</TableHead>
+                    <TableHead>House</TableHead>
                     <TableHead>Available Times</TableHead>
                     <TableHead>Book Times</TableHead>
                     <TableHead>Batch</TableHead>
@@ -44,6 +46,7 @@ export const RoomList = ({ rooms }: Props) => {
                         <TableRow key={room.id}>
                             <TableCell className="py-1">{room.name}</TableCell>
                             <TableCell className="py-1">{room.capacity}</TableCell>
+                            <TableCell className="py-1">{room.house.name}</TableCell>
                             <TableCell className="py-1">
                                 <TableCell key={index} className="text-center">
                                     <HoverCard>

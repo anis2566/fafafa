@@ -1,7 +1,7 @@
 "use client"
 
 import { RoomStatus } from "@prisma/client"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -27,7 +27,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 
-import { CREATE_ROOM } from "../action"
+import { CREATE_ROOM, GET_HOUSES } from "../action"
 import { RoomSchema } from "../schema"
 import { MultiSelect } from "@/components/ui/multi-select"
 import { availableTime } from "@/constant"
@@ -35,6 +35,14 @@ import { availableTime } from "@/constant"
 export const CreateRoomForm = () => {
 
     const router = useRouter()
+
+    const { data: houses } = useQuery({
+        queryKey: ["get-houses-for-room"],
+        queryFn: async () => {
+            const res = await GET_HOUSES()
+            return res.houses
+        }
+    })
 
     const { mutate: createRoom, isPending } = useMutation({
         mutationFn: CREATE_ROOM,
@@ -56,6 +64,7 @@ export const CreateRoomForm = () => {
         resolver: zodResolver(RoomSchema),
         defaultValues: {
             name: undefined,
+            houseId: "",
             capacity: undefined,
             status: undefined,
             availableTime: []
@@ -100,6 +109,30 @@ export const CreateRoomForm = () => {
                                     <FormControl>
                                         <Input placeholder="Enter room capacity..." {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} type="number" disabled={isPending} />
                                     </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="houseId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>House</FormLabel>
+                                    <Select onValueChange={field.onChange} disabled={isPending}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select house" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {
+                                                houses?.map((v, i) => (
+                                                    <SelectItem value={v.id} key={i}>{v.name}</SelectItem>
+                                                ))
+                                            }
+                                        </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}

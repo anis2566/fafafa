@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/lib/prisma";
-import { ExpenseSchema, ExpenseSchemaType } from "../../create/schema";
+import { ExpenseSchema, ExpenseSchemaType } from "../../utility/schema";
 
 type UpdateRoom = {
   id: string;

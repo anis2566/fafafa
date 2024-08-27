@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import {
     Breadcrumb,
@@ -9,18 +10,33 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
-import { ContentLayout } from "../../_components/content-layout";
-import { CreateHouseForm } from "./_components/create-house-form";
 
+import { db } from "@/lib/prisma";
+import { ContentLayout } from "@/app/dashboard/_components/content-layout";
+import { EditHouseForm } from "./_components/edit-house-form";
 
 export const metadata: Metadata = {
-    title: "BEC | Create House",
+    title: "BEC | Edit House",
     description: "Basic Education Care",
 };
 
-const CreateHouse = () => {
+interface Props {
+    params: {
+        id: string;
+    }
+}
+
+const EditHouse = async ({ params: { id } }: Props) => {
+    const house = await db.house.findUnique({
+        where: {
+            id
+        }
+    })
+
+    if (!house) redirect("/dashboard")
+
     return (
-        <ContentLayout title="Room">
+        <ContentLayout title="House">
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
@@ -36,14 +52,14 @@ const CreateHouse = () => {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>Create</BreadcrumbPage>
+                        <BreadcrumbPage>Edit</BreadcrumbPage>
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
 
-            <CreateHouseForm />
+            <EditHouseForm house={house} />
         </ContentLayout>
     )
 }
 
-export default CreateHouse
+export default EditHouse

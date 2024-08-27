@@ -1,6 +1,6 @@
 "use client"
 
-import { HouseStatus } from "@prisma/client"
+import { House, HouseStatus } from "@prisma/client"
 import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
@@ -27,25 +27,29 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 
-import { HouseSchema } from "../schema"
-import { CREATE_HOUSE } from "../action"
+import { HouseSchema } from "../../../create/schema"
+import { UPDATE_HOUSE } from "../action"
 
-export const CreateHouseForm = () => {
+interface Props {
+    house: House
+}
+
+export const EditHouseForm = ({ house }: Props) => {
 
     const router = useRouter()
 
-    const { mutate: createHouse, isPending } = useMutation({
-        mutationFn: CREATE_HOUSE,
+    const { mutate: updateHouse, isPending } = useMutation({
+        mutationFn: UPDATE_HOUSE,
         onSuccess: (data) => {
             form.reset()
             toast.success(data.success, {
-                id: "create-house"
+                id: "update-house"
             });
             router.push("/dashboard/house")
         },
         onError: (error) => {
             toast.error(error.message, {
-                id: "create-house"
+                id: "update-house"
             });
         }
     })
@@ -53,24 +57,24 @@ export const CreateHouseForm = () => {
     const form = useForm<z.infer<typeof HouseSchema>>({
         resolver: zodResolver(HouseSchema),
         defaultValues: {
-            name: undefined,
-            roomCount: undefined,
-            status: undefined,
+            name: house.name || undefined,
+            roomCount: house.roomCount || undefined,
+            status: house.status || undefined,
         },
     })
 
     function onSubmit(values: z.infer<typeof HouseSchema>) {
-        toast.loading("House creating...", {
-            id: "create-house"
+        toast.loading("House updating...", {
+            id: "update-house"
         });
-        createHouse(values)
+        updateHouse({ id: house.id, values })
     }
 
     return (
         <Card className="mt-4">
             <CardHeader>
-                <CardTitle>House Form</CardTitle>
-                <CardDescription>Fill up house information.</CardDescription>
+                <CardTitle>Edit House Form</CardTitle>
+                <CardDescription>Customize house information.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
@@ -107,7 +111,7 @@ export const CreateHouseForm = () => {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Status</FormLabel>
-                                    <Select onValueChange={field.onChange} disabled={isPending}>
+                                    <Select value={field.value} onValueChange={field.onChange} disabled={isPending}>
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select status" />
@@ -125,7 +129,7 @@ export const CreateHouseForm = () => {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" disabled={isPending}>Submit</Button>
+                        <Button type="submit" disabled={isPending}>Update</Button>
                     </form>
                 </Form>
             </CardContent>

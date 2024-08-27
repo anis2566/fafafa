@@ -30,6 +30,9 @@ import { RemoveClassModal } from "@/app/dashboard/batch/[id]/_components/remove-
 // TEACHER PAYMENT
 import { AddTeacherPaymentModal } from "@/app/dashboard/teacher/[id]/_components/add-payment-modal"
 
+// HOUSE
+import { DeleteHouseModal } from "@/app/dashboard/house/_components/delete-modal"
+
 export const ModalProvider = () => {
     return (
         <>
@@ -50,6 +53,9 @@ export const ModalProvider = () => {
             {/* ROOM */}
             <DeleteRoomModal />
 
+            {/* HOUSE */}
+            <DeleteHouseModal />
+
             {/* STUDENT */}
             <AddStudentModal />
             <RemoveStudentModal />
@@ -64,6 +70,7 @@ export const ModalProvider = () => {
 
             {/* TEACHER PAYMENT */}
             <AddTeacherPaymentModal />
+
         </>
     )
 }
