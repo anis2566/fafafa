@@ -38,16 +38,19 @@ export async function POST(request: Request) {
             amount: student.admissionFee,
             method: PaymentMethod.Cash,
             status: PaymentStatus.Paid,
+            session: new Date().getFullYear(),
           },
         });
 
         await db.monthlyPayment.create({
           data: {
             amount: student.monthlyFee,
+            session: new Date().getFullYear(),
             method: PaymentMethod.Cash,
             status: PaymentStatus.Paid,
             studentId: student.id,
             month: Object.values(Month)[currentMonthIndex],
+            class: student.class, // Add this line
           },
         });
 
@@ -55,10 +58,12 @@ export async function POST(request: Request) {
           await db.monthlyPayment.create({
             data: {
               amount: student.monthlyFee,
+              session: new Date().getFullYear(),
               method: PaymentMethod.Cash,
               status: PaymentStatus.NA,
               studentId: student.id,
               month: Object.values(Month)[i],
+              class: student.class, // Add this line
             },
           });
         }
