@@ -74,6 +74,13 @@ enum PaymentStatus {
   NA
 }
 
+enum TransactionStatus {
+  Pending
+  Processing
+  Approve
+  Reject
+}
+
 enum PaymentMethod {
   Cash
   MobileBanking
@@ -283,6 +290,7 @@ model AdmissionPayment {
   method        PaymentMethod
   status        PaymentStatus   @default(Unpaid)
   session       Int
+  month         Month
 
   studentId     String @unique
   student       Student     @relation(fields: [studentId], references: [id])
@@ -316,10 +324,32 @@ model MonthlyPayment {
 
 model TeacherPayment {
   id            String          @id @default(cuid())
+  teacherName   String
   amount        Int
-  level         Level
+  session       Int
+  classUnit     Int
+  incentive     Int?
+  deduction     Int?
+  deductionUnit Int?
+  month         Month
+  status        TransactionStatus   @default(Pending)
+  note          String?
 
   teacherId     String
+  teacher       Teacher     @relation(fields: [teacherId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, teacherId, month])
+}
+
+
+model TeacherFee {
+  id            String          @id @default(cuid())
+  perClass        Int
+
+  teacherId     String          @unique
   teacher       Teacher          @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
@@ -448,6 +478,7 @@ model Teacher {
   level         Level[]
 
   classes       BatchClass[]
+  fee           TeacherFee?
   payments      TeacherPayment[]
 
   status         Status    @default(Active)

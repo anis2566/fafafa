@@ -13,10 +13,10 @@ import {
 
 import { ContentLayout } from "@/app/dashboard/_components/content-layout";
 import { db } from "@/lib/prisma";
-import { EditExpenseForm } from "./_components/edit-expense-form";
+import { EditHouseRentForm } from "./_components/edit-house-rent-form";
 
 export const metadata: Metadata = {
-    title: "BEC | Edit Expense",
+    title: "BEC | Expense | House Rent | Edit",
     description: "Basic Education Care",
 };
 
@@ -26,14 +26,14 @@ interface Props {
     }
 }
 
-const EditExpense = async ({ params: { id } }: Props) => {
-    const expense = await db.expense.findUnique({
+const EditHouseRentPayment = async ({ params: { id } }: Props) => {
+    const payment = await db.housePayment.findUnique({
         where: {
             id
         }
     })
 
-    if (!expense) redirect("/dashboard")
+    if (!payment) redirect("/dashboard")
 
     return (
         <ContentLayout title="Expense">
@@ -47,7 +47,7 @@ const EditExpense = async ({ params: { id } }: Props) => {
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link href="/dashboard/expense">Expense</Link>
+                            <Link href="/dashboard/expense/house-rent">House Rent</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
@@ -57,9 +57,9 @@ const EditExpense = async ({ params: { id } }: Props) => {
                 </BreadcrumbList>
             </Breadcrumb>
 
-            <EditExpenseForm expense={expense} />
+            <EditHouseRentForm payment={payment} />
         </ContentLayout>
     )
 }
 
-export default EditExpense
+export default EditHouseRentPayment

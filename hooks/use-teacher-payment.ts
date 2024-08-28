@@ -1,4 +1,4 @@
-import { AdmissionFee } from "@prisma/client";
+import { AdmissionFee, TeacherFee } from "@prisma/client";
 import { create } from "zustand";
 
 interface TeacherPaymentStat {
@@ -15,23 +15,21 @@ export const useTeacherPayment = create<TeacherPaymentStat>()((set) => ({
   onClose: () => set({ open: false, id: "" }),
 }));
 
-// interface UpdateAdmissionFeeState {
-//   open: boolean;
-//   fee: AdmissionFee | null;
-//   id: string;
-//   onOpen: (fee: AdmissionFee, id: string) => void;
-//   onClose: () => void;
-// }
+interface UpdateState {
+  open: boolean;
+  fee: TeacherFee | null;
+  id: string;
+  onOpen: (fee: TeacherFee, id: string) => void;
+  onClose: () => void;
+}
 
-// export const useAdmissionFeeUpdate = create<UpdateAdmissionFeeState>()(
-//   (set) => ({
-//     open: false,
-//     fee: null,
-//     id: "",
-//     onOpen: (fee, id) => set({ open: true, fee, id }),
-//     onClose: () => set({ open: false }),
-//   })
-// );
+export const useTeacherPaymentUpdate = create<UpdateState>()((set) => ({
+  open: false,
+  fee: null,
+  id: "",
+  onOpen: (fee, id) => set({ open: true, fee, id }),
+  onClose: () => set({ open: false }),
+}));
 
 // interface DeleteAdmissionFeeState {
 //   open: boolean;

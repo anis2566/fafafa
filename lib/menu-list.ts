@@ -40,6 +40,7 @@ import {
   House,
   TrendingUp,
   Warehouse,
+  Wallet,
 } from "lucide-react";
 
 type Submenu = {
@@ -119,6 +120,13 @@ export function getMenuList(pathname: string): Group[] {
       groupLabel: "Reports",
       menus: [
         {
+          href: "/dashboard/report/daily",
+          label: "Daily Report",
+          active: pathname.includes("/dashboard/report/daily"),
+          icon: CalendarDays,
+          submenus: [],
+        },
+        {
           href: "",
           label: "Income",
           active: pathname.includes("/dashboard/report/income"),
@@ -157,9 +165,9 @@ export function getMenuList(pathname: string): Group[] {
               icon: House,
             },
             {
-              href: "/dashboard/report/expense/others",
-              label: "Others",
-              active: pathname === "/dashboard/report/expense/others",
+              href: "/dashboard/report/expense/utility",
+              label: "Utility",
+              active: pathname === "/dashboard/report/expense/utility",
               icon: Package,
             },
             {
@@ -170,6 +178,13 @@ export function getMenuList(pathname: string): Group[] {
             },
           ],
         },
+        {
+          href: "/dashboard/report",
+          label: "Final",
+          active: pathname.includes("/dashboard/report"),
+          icon: Wallet,
+          submenus: [],
+        },
       ],
     },
     {
@@ -177,32 +192,60 @@ export function getMenuList(pathname: string): Group[] {
       menus: [
         {
           href: "",
-          label: "Expense",
-          active: pathname.includes("/dashboard/expense"),
-          icon: Coins,
+          label: "Teacher Bill",
+          active: pathname.includes("/dashboard/expense/teacher"),
+          icon: UserRoundPen,
           submenus: [
             {
-              href: "/dashboard/expense/utility",
-              label: "Utility",
-              active: pathname === "/dashboard/expense/utility",
-              icon: Package,
+              href: "/dashboard/expense/teacher/create",
+              label: "Create",
+              active: pathname === "/dashboard/expense/teacher/create",
+              icon: PlusCircle,
             },
             {
-              href: "/dashboard/expense/teacher-bill",
-              label: "Teacher Bill",
-              active: pathname === "/dashboard/expense/teacher-bill",
-              icon: UserRoundPen,
+              href: "/dashboard/expense/teacher",
+              label: "List",
+              active: pathname === "/dashboard/expense/teacher",
+              icon: List,
+            },
+          ],
+        },
+        {
+          href: "",
+          label: "House Rent",
+          active: pathname.includes("/dashboard/expense/house-rent"),
+          icon: School,
+          submenus: [
+            {
+              href: "/dashboard/expense/house-rent/create",
+              label: "Create",
+              active: pathname === "/dashboard/expense/house-rent/create",
+              icon: PlusCircle,
             },
             {
               href: "/dashboard/expense/house-rent",
-              label: "House Rent",
+              label: "List",
               active: pathname === "/dashboard/expense/house-rent",
-              icon: School,
+              icon: List,
+            },
+          ],
+        },
+        {
+          href: "",
+          label: "Utility",
+          active: pathname.includes("/dashboard/expense/utility"),
+          icon: Package,
+          submenus: [
+            {
+              href: "/dashboard/expense/utility/create",
+              label: "Create",
+              active: pathname === "/dashboard/expense/utility/create",
+              icon: PlusCircle,
             },
             {
-              href: "/dashboard/expense",
+              href: "/dashboard/expense/utility",
               label: "List",
-              active: pathname === "/dashboard/expense",
+              active: pathname === "/dashboard/expense/utility",
               icon: List,
             },
           ],

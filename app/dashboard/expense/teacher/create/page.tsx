@@ -10,20 +10,16 @@ import {
     BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
 
-import { ContentLayout } from "../_components/content-layout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExpenseList } from "./_components/expense-list";
-import { db } from "@/lib/prisma";
+import { ContentLayout } from "@/app/dashboard/_components/content-layout";
+import { TeacherBillForm } from "./_components/teacher-bill-form";
 
 export const metadata: Metadata = {
-    title: "BEC | Expense",
+    title: "BEC | Expense | Teacher Bill",
     description: "Basic Education Care",
 };
 
-
-const Expense = async () => {
-    const expenses = await db.expense.findMany()
-
+const CreateTeacherBill = () => {
+    
     return (
         <ContentLayout title="Expense">
             <Breadcrumb>
@@ -35,22 +31,20 @@ const Expense = async () => {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>Expense</BreadcrumbPage>
+                        <BreadcrumbLink asChild>
+                            <Link href="/dashboard/expense/teacher">Teacher Bill</Link>
+                        </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                        <BreadcrumbPage>Create</BreadcrumbPage>
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
 
-            <Card className="mt-4">
-                <CardHeader>
-                    <CardTitle>Expense List</CardTitle>
-                    <CardDescription>A collection of expense.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <ExpenseList expenses={expenses} />
-                </CardContent>
-            </Card>
+            <TeacherBillForm />
         </ContentLayout>
     )
 }
 
-export default Expense
+export default CreateTeacherBill

@@ -34,6 +34,7 @@ export async function POST(request: Request) {
 
         await db.admissionPayment.create({
           data: {
+            month: Object.values(Month)[new Date().getMonth()],
             studentId: student.id,
             amount: student.admissionFee,
             method: PaymentMethod.Cash,

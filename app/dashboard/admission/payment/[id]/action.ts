@@ -20,6 +20,7 @@ export const PAY_WITH_CASH = async (id: string) => {
     data: {
       studentId: student.id,
       session: new Date().getFullYear(),
+      month: Object.values(Month)[new Date().getMonth()],
       amount: student.admissionFee,
       method: PaymentMethod.Cash,
       status: PaymentStatus.Paid,
@@ -53,6 +54,6 @@ export const PAY_WITH_CASH = async (id: string) => {
   }
 
   return {
-    success: "Payment successful"
-  }
+    success: "Payment successful",
+  };
 };

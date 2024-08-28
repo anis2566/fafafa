@@ -1,12 +1,12 @@
 "use client"
 
+import { Month, PaymentMethod } from "@prisma/client"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { useMutation } from "@tanstack/react-query"
-import { Expenses, Month } from "@prisma/client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -19,92 +19,94 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
-import { ExpenseSchema } from "../schema"
-import { CREATE_EXPENSE } from "../action"
+import { GET_HOUSES } from "@/app/dashboard/room/create/action"
 import { formatString } from "@/lib/utils"
+import { CREATE_HOUSE_PAYMENT } from "../action"
+import { HousePaymentSchema } from "../schema"
 
-
-export const CreateExpenseForm = () => {
+export const HouseRentForm = () => {
 
     const router = useRouter()
 
-    const { mutate: createExpense, isPending } = useMutation({
-        mutationFn: CREATE_EXPENSE,
+    const { data: houses } = useQuery({
+        queryKey: ["get-houses-for-room"],
+        queryFn: async () => {
+            const res = await GET_HOUSES()
+            return res.houses
+        }
+    })
+
+    const { mutate: createPayment, isPending } = useMutation({
+        mutationFn: CREATE_HOUSE_PAYMENT,
         onSuccess: (data) => {
             form.reset()
             toast.success(data.success, {
-                id: "create-expense"
+                id: "create-payment"
             });
-            router.push("/dashboard/expense")
+            router.push("/dashboard/expense/house-rent")
         },
         onError: (error) => {
             toast.error(error.message, {
-                id: "create-expense"
+                id: "create-payment"
             });
         }
     })
 
-    const form = useForm<z.infer<typeof ExpenseSchema>>({
-        resolver: zodResolver(ExpenseSchema),
+    const form = useForm<z.infer<typeof HousePaymentSchema>>({
+        resolver: zodResolver(HousePaymentSchema),
         defaultValues: {
-            type: undefined,
-            amount: undefined,
             month: undefined,
-            note: ""
+            amount: undefined,
+            method: undefined,
+            note: "",
+            houseId: ""
         },
     })
 
-    function onSubmit(values: z.infer<typeof ExpenseSchema>) {
-        toast.loading("Expense creating...", {
-            id: "create-expense"
+    function onSubmit(values: z.infer<typeof HousePaymentSchema>) {
+        toast.loading("Payment creating...", {
+            id: "create-payment"
         });
-        createExpense(values)
+        createPayment(values)
     }
 
     return (
         <Card className="mt-4">
             <CardHeader>
-                <CardTitle>Expense Form</CardTitle>
-                <CardDescription>Fill up expense information.</CardDescription>
+                <CardTitle>Payment Form</CardTitle>
+                <CardDescription>Fill up house payment information.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         <FormField
                             control={form.control}
-                            name="type"
+                            name="houseId"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Type</FormLabel>
+                                    <FormLabel>House</FormLabel>
                                     <Select onValueChange={field.onChange} disabled={isPending}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select type" />
+                                                <SelectValue placeholder="Select house" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
                                             {
-                                                Object.values(Expenses).map((v, i) => (
-                                                    <SelectItem value={v} key={i}>{formatString(v)}</SelectItem>
+                                                houses?.map((v, i) => (
+                                                    <SelectItem value={v.id} key={i}>{v.name}</SelectItem>
                                                 ))
                                             }
                                         </SelectContent>
                                     </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="amount"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Amount</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Enter amount..." {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} type="number" disabled={isPending} />
-                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -125,6 +127,43 @@ export const CreateExpenseForm = () => {
                                             {
                                                 Object.values(Month).map((v, i) => (
                                                     <SelectItem value={v} key={i}>{v}</SelectItem>
+                                                ))
+                                            }
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="amount"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Amount</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Enter amount..." {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} disabled={isPending} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="method"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Method</FormLabel>
+                                    <Select onValueChange={field.onChange} disabled={isPending}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select method" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {
+                                                Object.values(PaymentMethod).map((v, i) => (
+                                                    <SelectItem value={v} key={i}>{formatString(v)}</SelectItem>
                                                 ))
                                             }
                                         </SelectContent>

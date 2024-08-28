@@ -32,6 +32,7 @@ import { AddTeacherPaymentModal } from "@/app/dashboard/teacher/[id]/_components
 
 // HOUSE
 import { DeleteHouseModal } from "@/app/dashboard/house/_components/delete-modal"
+import { UpdateTeacherPaymentModal } from "@/app/dashboard/teacher/[id]/_components/edit-payment-modal"
 
 export const ModalProvider = () => {
     return (
@@ -70,6 +71,7 @@ export const ModalProvider = () => {
 
             {/* TEACHER PAYMENT */}
             <AddTeacherPaymentModal />
+            <UpdateTeacherPaymentModal />
 
         </>
     )

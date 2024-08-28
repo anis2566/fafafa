@@ -6,6 +6,7 @@ import { toast } from "sonner"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { useEffect } from "react"
 
 import {
     Dialog,
@@ -23,27 +24,27 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 
-import { ADD_TEACHER_PAYMENT } from "../action"
-import { useTeacherPayment } from "@/hooks/use-teacher-payment"
+import { UPDATE_TEACHER_PAYMENT } from "../action"
+import { useTeacherPaymentUpdate } from "@/hooks/use-teacher-payment"
 import { TeacherFeeSchema } from "../schema"
 
 
-export const AddTeacherPaymentModal = () => {
-    const { open, onClose, id } = useTeacherPayment()
+export const UpdateTeacherPaymentModal = () => {
+    const { open, onClose, id, fee } = useTeacherPaymentUpdate()
 
 
-    const { mutate: addPayment, isPending } = useMutation({
-        mutationFn: ADD_TEACHER_PAYMENT,
+    const { mutate: updatePayment, isPending } = useMutation({
+        mutationFn: UPDATE_TEACHER_PAYMENT,
         onSuccess: (data) => {
             form.reset()
             onClose()
             toast.success(data?.success, {
-                id: "add-payment"
+                id: "update-payment"
             })
         },
         onError: (error) => {
             toast.error(error.message, {
-                id: "add-payment"
+                id: "update-payment"
             })
         }
     })
@@ -55,18 +56,24 @@ export const AddTeacherPaymentModal = () => {
         },
     })
 
-    function onSubmit(values: z.infer<typeof TeacherFeeSchema>) {
-        toast.loading("Fee adding...", {
-            id: "add-payment"
+    useEffect(() => {
+        form.reset({
+            perClass: fee?.perClass
         });
-        addPayment({ teacherId: id, values })
+    }, [fee, form]);
+
+    function onSubmit(values: z.infer<typeof TeacherFeeSchema>) {
+        toast.loading("Payment updating...", {
+            id: "update-payment"
+        });
+        updatePayment({ id, values })
     }
 
     return (
         <Dialog open={open && !!id} onOpenChange={!isPending ? onClose : () => { }}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Add Payment</DialogTitle>
+                    <DialogTitle>Update Payment</DialogTitle>
                 </DialogHeader>
 
                 <Form {...form}>
@@ -84,7 +91,7 @@ export const AddTeacherPaymentModal = () => {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" disabled={isPending}>Submit</Button>
+                        <Button type="submit" disabled={isPending}>Update</Button>
                     </form>
                 </Form>
             </DialogContent>

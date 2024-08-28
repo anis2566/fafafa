@@ -1,6 +1,6 @@
 "use client"
 
-import { Month, PaymentMethod } from "@prisma/client"
+import { HousePayment, Month, PaymentMethod } from "@prisma/client"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button"
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -26,13 +27,18 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 
-import { HousePaymentSchema } from "../schema"
 import { GET_HOUSES } from "@/app/dashboard/room/create/action"
 import { formatString } from "@/lib/utils"
-import { CREATE_HOUSE_PAYMENT } from "../action"
+import { HousePaymentSchema } from "../../../create/schema"
+import { UPDATE_HOUSE_PAYMENT } from "../action"
 
-export const HouseRentForm = () => {
+interface Props {
+    payment: HousePayment;
+}
+
+export const EditHouseRentForm = ({ payment }: Props) => {
 
     const router = useRouter()
 
@@ -44,18 +50,18 @@ export const HouseRentForm = () => {
         }
     })
 
-    const { mutate: createPayment, isPending } = useMutation({
-        mutationFn: CREATE_HOUSE_PAYMENT,
+    const { mutate: updatePayment, isPending } = useMutation({
+        mutationFn: UPDATE_HOUSE_PAYMENT,
         onSuccess: (data) => {
             form.reset()
             toast.success(data.success, {
-                id: "create-payment"
+                id: "update-payment"
             });
-            router.push("/dashboard/report/expense/house-rent")
+            router.push("/dashboard/expense/house-rent")
         },
         onError: (error) => {
             toast.error(error.message, {
-                id: "create-payment"
+                id: "update-payment"
             });
         }
     })
@@ -63,25 +69,29 @@ export const HouseRentForm = () => {
     const form = useForm<z.infer<typeof HousePaymentSchema>>({
         resolver: zodResolver(HousePaymentSchema),
         defaultValues: {
-            month: undefined,
-            amount: undefined,
-            method: undefined,
-            note: "",
-            houseId: ""
+            month: payment.month || undefined,
+            amount: payment.amount || undefined,
+            method: payment.method || undefined,
+            note: payment.note || "",
+            houseId: payment.houseId || ""
         },
     })
 
     function onSubmit(values: z.infer<typeof HousePaymentSchema>) {
-        toast.loading("Payment creating...", {
-            id: "create-payment"
-        });
-        createPayment(values)
+        if (!form.watch("note")) {
+            toast.error("Fill up edit note")
+        } else {
+            toast.loading("Payment updating...", {
+                id: "update-payment"
+            });
+            updatePayment({ id: payment.id, values })
+        }
     }
 
     return (
         <Card className="mt-4">
             <CardHeader>
-                <CardTitle>House Payment Form</CardTitle>
+                <CardTitle>Edit Payment Form</CardTitle>
                 <CardDescription>Fill up house payment information.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -93,7 +103,7 @@ export const HouseRentForm = () => {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>House</FormLabel>
-                                    <Select onValueChange={field.onChange} disabled={isPending}>
+                                    <Select value={field.value} onValueChange={field.onChange} disabled={isPending}>
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select house" />
@@ -117,7 +127,7 @@ export const HouseRentForm = () => {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Month</FormLabel>
-                                    <Select onValueChange={field.onChange} disabled={isPending}>
+                                    <Select value={field.value} onValueChange={field.onChange} disabled={isPending}>
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select month" />
@@ -154,7 +164,7 @@ export const HouseRentForm = () => {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Method</FormLabel>
-                                    <Select onValueChange={field.onChange} disabled={isPending}>
+                                    <Select value={field.value} onValueChange={field.onChange} disabled={isPending}>
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select method" />
@@ -168,6 +178,25 @@ export const HouseRentForm = () => {
                                             }
                                         </SelectContent>
                                     </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="note"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Note</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            className="resize-none"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Describe edit reason.
+                                    </FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}

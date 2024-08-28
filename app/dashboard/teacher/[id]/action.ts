@@ -3,7 +3,7 @@
 import { db } from "@/lib/prisma";
 import { Class } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { TeacherPaymentSchema, TeacherPaymentSchemaType } from "./schema";
+import { TeacherFeeSchema, TeacherFeeSchemaType } from "./schema";
 
 export const GET_SUBJECTS_FOR_TEACHER = async (className: Class) => {
   const subjects = await db.subject.findMany({
@@ -19,31 +19,30 @@ export const GET_SUBJECTS_FOR_TEACHER = async (className: Class) => {
 
 type AddTeacherSubject = {
   teacherId: string;
-  values: TeacherPaymentSchemaType;
+  values: TeacherFeeSchemaType;
 };
 
 export const ADD_TEACHER_PAYMENT = async ({
   teacherId,
   values,
 }: AddTeacherSubject) => {
-  const { data, success } = TeacherPaymentSchema.safeParse(values);
+  const { data, success } = TeacherFeeSchema.safeParse(values);
 
   if (!success) {
     throw new Error("Invalid input value");
   }
 
-  const payment = await db.teacherPayment.findFirst({
+  const fee = await db.teacherFee.findFirst({
     where: {
       teacherId,
-      level: data.level,
     },
   });
 
-  if (payment) {
-    throw new Error("Payment already exists");
+  if (fee) {
+    throw new Error("Fee already exists");
   }
 
-  await db.teacherPayment.create({
+  await db.teacherFee.create({
     data: {
       teacherId,
       ...data,
@@ -53,6 +52,44 @@ export const ADD_TEACHER_PAYMENT = async ({
   revalidatePath(`/dashboard/teacher/${teacherId}`);
 
   return {
-    success: "Payment added",
+    success: "Fee added",
+  };
+};
+
+type UpdatePayment = {
+  id: string;
+  values: TeacherFeeSchemaType;
+};
+
+export const UPDATE_TEACHER_PAYMENT = async ({ id, values }: UpdatePayment) => {
+  const { data, success } = TeacherFeeSchema.safeParse(values);
+
+  if (!success) {
+    throw new Error("Invalid input value");
+  }
+
+  const fee = await db.teacherFee.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!fee) {
+    throw new Error("Fee not found");
+  }
+
+  await db.teacherFee.update({
+    where: {
+      id,
+    },
+    data: {
+      ...data,
+    },
+  });
+
+  revalidatePath(`/dashbaord/teacher/${fee.teacherId}`);
+
+  return {
+    success: "Fee updated",
   };
 };

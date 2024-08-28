@@ -1,6 +1,7 @@
-import { Expense } from "@prisma/client"
+import { HousePayment } from "@prisma/client"
 import { Edit, EllipsisVertical } from "lucide-react"
 import Link from "next/link"
+import { format } from "date-fns"
 
 import {
     Table,
@@ -24,34 +25,40 @@ import {
     HoverCardTrigger,
 } from "@/components/ui/hover-card"
 
+import { formatString } from "@/lib/utils"
+
 interface Props {
-    expenses: Expense[]
+    payments: HousePayment[]
 }
 
-export const ExpenseList = ({ expenses }: Props) => {
+export const PaymentList = ({ payments }: Props) => {
     return (
         <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Amount</TableHead>
+                    <TableHead>Name</TableHead>
                     <TableHead>Month</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Method</TableHead>
+                    <TableHead>Paid At</TableHead>
                     <TableHead>Edited</TableHead>
                     <TableHead>Action</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
                 {
-                    expenses.map((expense) => (
-                        <TableRow key={expense.id}>
-                            <TableCell className="py-3">{expense.type}</TableCell>
-                            <TableCell className="py-3">{expense.amount}</TableCell>
-                            <TableCell className="py-3">{expense.month}</TableCell>
+                    payments.map((payment) => (
+                        <TableRow key={payment.id}>
+                            <TableCell className="py-3">{payment.houseName}</TableCell>
+                            <TableCell className="py-3">{payment.month}</TableCell>
+                            <TableCell className="py-3">{payment.amount}</TableCell>
+                            <TableCell className="py-3">{formatString(payment.method || "")}</TableCell>
+                            <TableCell className="py-3">{format(payment.createdAt, "dd MMM yyyy")}</TableCell>
                             <TableCell className="py-3">
                                 <HoverCard>
                                     <HoverCardTrigger asChild>
                                         {
-                                            expense.note ? (
+                                            payment.note ? (
                                                 <Badge className="bg-yellow-600">
                                                     YES
                                                 </Badge>
@@ -61,7 +68,7 @@ export const ExpenseList = ({ expenses }: Props) => {
                                         }
                                     </HoverCardTrigger>
                                     <HoverCardContent className="w-60">
-                                        <p>{expense.note}</p>
+                                        <p>{payment.note}</p>
                                     </HoverCardContent>
                                 </HoverCard>
                             </TableCell>
@@ -75,7 +82,7 @@ export const ExpenseList = ({ expenses }: Props) => {
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuItem asChild>
-                                            <Link href={`/dashboard/expense/edit/${expense.id}`} className="flex items-center gap-x-3">
+                                            <Link href={`/dashboard/expense/house-rent/edit/${payment.id}`} className="flex items-center gap-x-3">
                                                 <Edit className="w-5 h-5" />
                                                 Update
                                             </Link>

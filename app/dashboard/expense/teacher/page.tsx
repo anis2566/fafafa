@@ -13,13 +13,13 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { ContentLayout } from "../../_components/content-layout";
-import { PaymentList } from "./_components/payment-list";
 import { db } from "@/lib/prisma";
-import { Header } from "./_components/header";
 import { CustomPagination } from "@/components/custom-pagination";
+import { PaymentList } from "./_components/payment-list";
+import { Header } from "./_components/header";
 
 export const metadata: Metadata = {
-    title: "BEC | Expense | House Rent",
+    title: "BEC | Expense | Teacher Bill",
     description: "Basic Education Care",
 };
 
@@ -28,19 +28,31 @@ interface Props {
         month: Month;
         page: string;
         perPage: string;
-        search: string;
+        id: string;
     }
 }
 
 const HouseRent = async ({ searchParams }: Props) => {
-    const { month, search, page, perPage } = searchParams;
+    const { month, id, page, perPage } = searchParams;
     const itemsPerPage = parseInt(perPage) || 5;
     const currentPage = parseInt(page) || 1;
+    const formatedId = id ? parseInt(id) : undefined
 
-    const payments = await db.housePayment.findMany({
+    const payments = await db.teacherPayment.findMany({
         where: {
             ...(month && { month }),
-            ...(search && { houseName: { contains: search, mode: "insensitive" } })
+            ...(formatedId && {
+                teacher: {
+                    teacherId: formatedId
+                }
+            })
+        },
+        include: {
+            teacher: {
+                include: {
+                    fee: true
+                }
+            }
         },
         orderBy: {
             createdAt: "desc"
@@ -49,10 +61,14 @@ const HouseRent = async ({ searchParams }: Props) => {
         take: itemsPerPage,
     })
 
-    const totalPayment = await db.housePayment.count({
+    const totalPayment = await db.teacherPayment.count({
         where: {
             ...(month && { month }),
-            ...(search && { houseName: { contains: search, mode: "insensitive" } })
+            ...(formatedId && {
+                teacher: {
+                    teacherId: formatedId
+                }
+            })
         },
     })
 
@@ -69,15 +85,15 @@ const HouseRent = async ({ searchParams }: Props) => {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>House Rent</BreadcrumbPage>
+                        <BreadcrumbPage>Teacher Bill</BreadcrumbPage>
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
 
             <Card className="mt-4">
                 <CardHeader>
-                    <CardTitle>House Rent</CardTitle>
-                    <CardDescription>A collection of house rent.</CardDescription>
+                    <CardTitle>Teacher Bill</CardTitle>
+                    <CardDescription>A collection of teacher bill.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <Header />

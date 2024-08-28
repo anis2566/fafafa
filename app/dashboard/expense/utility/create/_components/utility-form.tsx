@@ -6,47 +6,42 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { useMutation } from "@tanstack/react-query"
-import { Expense, Expenses, Month } from "@prisma/client"
+import { Expenses, Month } from "@prisma/client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 import { formatString } from "@/lib/utils"
-import { ExpenseSchema } from "../../../utility/schema"
-import { UPDATE_EXPENSE } from "../action"
+import { CREATE_EXPENSE } from "../action"
+import { ExpenseSchema } from "../../schema"
 
-interface Props {
-    expense: Expense;
-}
 
-export const EditExpenseForm = ({ expense }: Props) => {
+export const CreateUtilityFrom = () => {
 
     const router = useRouter()
 
-    const { mutate: updateExpense, isPending } = useMutation({
-        mutationFn: UPDATE_EXPENSE,
+    const { mutate: createExpense, isPending } = useMutation({
+        mutationFn: CREATE_EXPENSE,
         onSuccess: (data) => {
             form.reset()
             toast.success(data.success, {
-                id: "update-expense"
+                id: "create-expense"
             });
-            router.push("/dashboard/expense")
+            router.push("/dashboard/expense/utility")
         },
         onError: (error) => {
             toast.error(error.message, {
-                id: "update-expense"
+                id: "create-expense"
             });
         }
     })
@@ -54,29 +49,25 @@ export const EditExpenseForm = ({ expense }: Props) => {
     const form = useForm<z.infer<typeof ExpenseSchema>>({
         resolver: zodResolver(ExpenseSchema),
         defaultValues: {
-            type: expense.type || undefined,
-            amount: expense.amount || undefined,
-            month: expense.month || undefined,
-            note: expense.note || ""
+            type: undefined,
+            amount: undefined,
+            month: undefined,
+            note: ""
         },
     })
 
     function onSubmit(values: z.infer<typeof ExpenseSchema>) {
-        if (!form.watch("note")) {
-            toast.error("Please write down note")
-        } else {
-            toast.loading("Expense updating...", {
-                id: "update-expense"
-            });
-            updateExpense({ id: expense.id, values })
-        }
+        toast.loading("Expense creating...", {
+            id: "create-expense"
+        });
+        createExpense(values)
     }
 
     return (
         <Card className="mt-4">
             <CardHeader>
-                <CardTitle>Edit Expense Form</CardTitle>
-                <CardDescription>Customize expense information.</CardDescription>
+                <CardTitle>Utility Form</CardTitle>
+                <CardDescription>Fill up utility information.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
@@ -87,7 +78,7 @@ export const EditExpenseForm = ({ expense }: Props) => {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Type</FormLabel>
-                                    <Select value={field.value} onValueChange={field.onChange} disabled={isPending}>
+                                    <Select onValueChange={field.onChange} disabled={isPending}>
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select type" />
@@ -124,7 +115,7 @@ export const EditExpenseForm = ({ expense }: Props) => {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Month</FormLabel>
-                                    <Select value={field.value} onValueChange={field.onChange} disabled={isPending}>
+                                    <Select onValueChange={field.onChange} disabled={isPending}>
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select month" />
@@ -142,26 +133,7 @@ export const EditExpenseForm = ({ expense }: Props) => {
                                 </FormItem>
                             )}
                         />
-                        <FormField
-                            control={form.control}
-                            name="note"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Note</FormLabel>
-                                    <FormControl>
-                                        <Textarea
-                                            className="resize-none"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormDescription>
-                                        Describe edit reason.
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <Button type="submit" disabled={isPending}>Update</Button>
+                        <Button type="submit" disabled={isPending}>Submit</Button>
                     </form>
                 </Form>
             </CardContent>

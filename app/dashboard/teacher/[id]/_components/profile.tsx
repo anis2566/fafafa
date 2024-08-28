@@ -1,14 +1,17 @@
-import { Teacher, TeacherPayment } from "@prisma/client"
+"use client"
+
+import { Teacher, TeacherFee } from "@prisma/client"
 import { format } from "date-fns";
-import { Antenna, Building, Building2, CalendarDays, Flag, HandCoins, House, Mailbox, PersonStanding, Phone, University, User, Users } from "lucide-react";
+import { Antenna, Building, Building2, CalendarDays, Edit, Flag, HandCoins, House, Mailbox, PersonStanding, Phone, University, User, Users } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { ListBox } from "@/components/list-box";
-import { formatString } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useTeacherPaymentUpdate } from "@/hooks/use-teacher-payment";
 
 interface TeacherWithPayment extends Teacher {
-    payments: TeacherPayment[]
+    fee: TeacherFee | null
 }
 
 interface Props {
@@ -16,6 +19,7 @@ interface Props {
 }
 
 export const Profile = ({ teacher }: Props) => {
+    const {onOpen} = useTeacherPaymentUpdate()
     return (
         <div className="grid md:grid-cols-2 gap-6">
             <Card>
@@ -85,12 +89,13 @@ export const Profile = ({ teacher }: Props) => {
                     <CardHeader>
                         <CardTitle>Salary</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        {
-                            teacher.payments.map(item => (
-                                <ListBox key={item.id} icon={HandCoins} title={formatString(item.level)} description={item.amount.toString()} />
-                            ))
-                        }
+                    <CardContent className="flex justify-between">
+                        <ListBox icon={HandCoins} title="Per Class" description={teacher.fee?.perClass.toString()} />
+                        {teacher.fee && (
+                            <Button size="sm" onClick={() => onOpen(teacher.fee!, teacher?.fee?.id || "")}>
+                                <Edit />
+                            </Button>
+                        )}
                     </CardContent>
                 </Card>
             </div>

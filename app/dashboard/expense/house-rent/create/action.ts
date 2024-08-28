@@ -42,7 +42,7 @@ export const CREATE_HOUSE_PAYMENT = async (values: HousePaymentSchemaType) => {
     },
   });
 
-  revalidatePath("/dashbaord/report/expense/house-rent");
+  revalidatePath("/dashbaord/expense/house-rent");
 
   return {
     success: "Payment successful",

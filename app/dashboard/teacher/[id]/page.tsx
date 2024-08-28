@@ -22,7 +22,7 @@ import { ClassList } from "./_components/class-list";
 import { Profile } from "./_components/profile";
 
 export const metadata: Metadata = {
-    title: "BEC | Teacher Profile",
+    title: "BEC | Teacher | Profile",
     description: "Basic Education Care",
 };
 
@@ -44,7 +44,7 @@ const TeacherDetails = async ({ params: { id } }: Props) => {
                     subject: true,
                 }
             },
-            payments: true
+            fee: true
         }
     })
 
