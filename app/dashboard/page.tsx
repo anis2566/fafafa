@@ -7,6 +7,12 @@ import { WeeklyIncomeChart } from "./_components/charts/weekly-income-chart";
 import { MonthlyIncomeChart } from "./_components/charts/monthly-income-chart";
 import { DailyExpenseChart } from "./_components/charts/daily-expense-chart";
 import { DailyIncomeChart } from "./_components/charts/daily-income-chart";
+import { AdmissionChart } from "./_components/charts/admission-chart";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { formatString } from "@/lib/utils";
+import { format } from "date-fns";
 
 export const metadata: Metadata = {
     title: "BEC | Dashboard",
@@ -30,7 +36,10 @@ const Dashboard = async () => {
     const todaySalary = await db.monthlyPayment.groupBy({
         by: ["class"],
         where: {
-            ...todayFilter,
+            updatedAt: {
+                gte: today,
+                lt: tomorrow,
+            },
             status: PaymentStatus.Paid
         },
         _sum: {
@@ -48,7 +57,7 @@ const Dashboard = async () => {
     weekEnd.setHours(23, 59, 59, 999); // Set to the end of the day
 
     const weekFilter = {
-        createdAt: {
+        updatedAt: {
             gte: weekStart,
             lt: weekEnd,
         },
@@ -85,7 +94,7 @@ const Dashboard = async () => {
     monthEnd.setHours(23, 59, 59, 999); // Set to the end of the day
 
     const monthFilter = {
-        createdAt: {
+        updatedAt: {
             gte: monthStart,
             lt: monthEnd,
         },
@@ -102,25 +111,88 @@ const Dashboard = async () => {
         }
     });
 
-    // const todayExpense = await db.expense.groupBy({
-    //     by: ["title"],
-    //     where: todayFilter,
-    //     _sum: {
-    //         amount: true
-    //     }
-    // })
+    const todayExpense = await db.expense.groupBy({
+        by: ["type"],
+        where: todayFilter,
+        _sum: {
+            amount: true
+        }
+    })
 
+
+    const students = await db.student.groupBy({
+        by: ["createdAt"],
+        where: {
+            OR: [
+                {
+                    ...monthFilter
+                },
+            ]
+        },
+        _count: {
+            _all: true
+        }
+    })
+
+    // Initialize an array with all dates of the current month up to today
+    const daysInMonth = today.getDate();
+    const studentsByDay = Array.from({ length: daysInMonth }, (_, i) => {
+        const date = new Date(today.getFullYear(), today.getMonth(), i + 1).toLocaleDateString('en-US');
+        return { date, count: 0 };
+    });
+
+    // Fill in the student counts
+    students.forEach(item => {
+        const date = item.createdAt.toLocaleDateString('en-US');
+        const day = studentsByDay.find(d => d.date === date);
+        if (day) {
+            day.count = item._count._all ?? 0;
+        }
+    });
+
+    const recentStudent = await db.student.findMany({
+        orderBy: {
+            createdAt: "desc"
+        },
+        take: 3
+    })
 
     return (
         <ContentLayout title="Dashboard">
             <div className="space-y-8">
-                <div className="space-y-4">
-                    <div className="grid md:grid-cols-4 gap-6">
-                        <DailyIncomeChart data={todaySalary.map(item => ({ class: item.class, amount: item._sum.amount ?? 0 }))} />
-                        <WeeklyIncomeChart data={weeklySalaryData} />
-                        <MonthlyIncomeChart data={monthlySalary.map(item => ({ class: item.class, amount: item._sum.amount ?? 0 }))} />
-                        {/* <DailyExpenseChart data={todayExpense.map(item => ({ title: item.title, amount: item._sum.amount ?? 0 }))} /> */}
-                    </div>
+                <div className="grid md:grid-cols-4 gap-6">
+                    <DailyIncomeChart data={todaySalary.map(item => ({ class: item.class, amount: item._sum.amount ?? 0 }))} />
+                    <WeeklyIncomeChart data={weeklySalaryData} />
+                    <MonthlyIncomeChart data={monthlySalary.map(item => ({ class: item.class, amount: item._sum.amount ?? 0 }))} />
+                    <DailyExpenseChart data={todayExpense.map(item => ({ title: item.type, amount: item._sum.amount ?? 0 }))} />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                    <AdmissionChart data={studentsByDay} />
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Recent Admission</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {
+                                recentStudent.map(student => (
+                                    <div className="flex items-center justify-between border border-primary/40 p-2 rounded-md" key={student.id}>
+                                        <div className="flex items-center gap-x-3">
+                                            <Avatar>
+                                                <AvatarImage src={student.imageUrl} />
+                                                <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <p>{student.name}</p>
+                                                <Badge>{formatString(student.class)}</Badge>
+                                            </div>
+                                        </div>
+                                        <p className="text-sm text-muted-foreground">{format(student.createdAt, "dd MMM yyyy")}</p>
+                                    </div>
+                                ))
+                            }
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         </ContentLayout>

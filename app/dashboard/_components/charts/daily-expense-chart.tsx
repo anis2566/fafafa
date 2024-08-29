@@ -16,6 +16,8 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart"
+import { Expenses } from "@prisma/client"
+import { formatString } from "@/lib/utils"
 
 const chartConfig = {
 } satisfies ChartConfig
@@ -25,7 +27,7 @@ const colors = [
 ];
 
 interface Props {
-    data: { title: string, amount: number }[]
+    data: { title: Expenses, amount: number }[]
 }
 
 export function DailyExpenseChart({ data }: Props) {
@@ -36,7 +38,7 @@ export function DailyExpenseChart({ data }: Props) {
         });
 
         return data.map(item => ({
-            browser: item.title,
+            browser: formatString(item.title),
             visitors: item.amount,
             fill: titleColorMap[item.title] // Use the color from the map
         }));

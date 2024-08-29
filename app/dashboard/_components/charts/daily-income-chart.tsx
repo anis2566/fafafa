@@ -18,6 +18,8 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart"
 
+import { formatString } from "@/lib/utils"
+
 const chartConfig = {
 } satisfies ChartConfig
 
@@ -38,7 +40,7 @@ interface Props {
 export function DailyIncomeChart({ data }: Props) {
   const chartData = React.useMemo(() => {
     return data.map(item => ({
-      browser: item.class,
+      browser: formatString(item.class),
       visitors: item.amount,
       fill: classColorMap[item.class] // Use the color from the map
     }))

@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { MonthlyPayment, PaymentMethod, Student } from "@prisma/client"
+import { Month, MonthlyPayment, PaymentMethod, Student } from "@prisma/client"
 import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useState } from "react"
@@ -20,9 +20,6 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { MonthlyPaymentSchema } from "../schema"
-
-
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -35,6 +32,7 @@ import { Textarea } from "@/components/ui/textarea"
 
 import { PAY_WITH_CASH } from "../action"
 import { PAY_WITH_MBL } from "@/services/payment-service"
+import { MonthlyPaymentSchema } from "../schema"
 
 
 interface StudentWithPayment extends Student {
@@ -43,9 +41,10 @@ interface StudentWithPayment extends Student {
 
 interface Props {
     student: StudentWithPayment;
+    unpaidMonth: Month[]
 }
 
-export const PaymentForm = ({ student }: Props) => {
+export const PaymentForm = ({ student, unpaidMonth }: Props) => {
     const [enableEdit, setEnableEdit] = useState<boolean>(false)
 
     const router = useRouter()
@@ -53,9 +52,10 @@ export const PaymentForm = ({ student }: Props) => {
     const { mutate: payWithCash, isPending } = useMutation({
         mutationFn: PAY_WITH_CASH,
         onSuccess: (data) => {
-            toast.success("Success", {
+            toast.success(data.success, {
                 id: "payment"
             })
+            window.open(`http://localhost:3000/dashboard/invoice/fee/monthly/${data.id}`, "_blank");
             router.push("/dashboard/salary/monthly")
         },
         onError: (error) => {
@@ -83,7 +83,7 @@ export const PaymentForm = ({ student }: Props) => {
             month: undefined,
             class: student.class,
             amount: student.monthlyFee,
-            method: undefined,
+            method: PaymentMethod.Cash,
             note: ""
         },
     })
@@ -120,7 +120,7 @@ export const PaymentForm = ({ student }: Props) => {
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {Object.values(student.payments.map(item => item.month)).map((v) => (
+                                            {unpaidMonth.map((v) => (
                                                 <SelectItem key={v} value={v}>
                                                     {v}
                                                 </SelectItem>
@@ -160,7 +160,7 @@ export const PaymentForm = ({ student }: Props) => {
                                     <FormControl>
                                         <RadioGroup
                                             onValueChange={field.onChange}
-                                            defaultValue={field.value}
+                                            defaultValue={PaymentMethod.Cash}
                                             className="flex flex-col space-y-1"
                                             disabled={isPending || isLoading}
                                         >
@@ -174,7 +174,7 @@ export const PaymentForm = ({ student }: Props) => {
                                             </FormItem>
                                             <FormItem className="flex items-center space-x-3 space-y-0">
                                                 <FormControl>
-                                                    <RadioGroupItem value={PaymentMethod.MobileBanking} />
+                                                    <RadioGroupItem value={PaymentMethod.MobileBanking} disabled />
                                                 </FormControl>
                                                 <FormLabel className="font-normal">
                                                     Mobile Banking

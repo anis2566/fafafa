@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Metadata } from "next";
-import { Month, PaymentStatus, TransactionStatus } from "@prisma/client";
+import { PaymentStatus, TransactionStatus } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -10,9 +10,7 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
-import { ContentLayout } from "../../_components/content-layout";
-import { db } from "@/lib/prisma";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
     Table,
     TableBody,
@@ -22,6 +20,9 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+
+import { ContentLayout } from "../../_components/content-layout";
+import { db } from "@/lib/prisma";
 
 export const metadata: Metadata = {
     title: "BEC | Report | Daily",
@@ -42,92 +43,119 @@ const DailyReport = async () => {
         },
     };
 
-    const totalSalary = await db.monthlyPayment.groupBy({
-        by: ["month",],
+    const todaySalary = await db.monthlyPayment.aggregate({
         where: {
-            status: PaymentStatus.Paid,
-            ...todayFilter
+            updatedAt: {
+                gte: today,
+                lt: tomorrow,
+            },
+            status: PaymentStatus.Paid
         },
         _sum: {
             amount: true
+        },
+        _count: {
+            _all: true
         }
     })
 
-    const totalAdmissionFee = await db.admissionPayment.groupBy({
-        by: ["month"],
+    const todayِAdmission = await db.admissionPayment.aggregate({
         where: {
-            status: PaymentStatus.Paid,
-            ...todayFilter
+            OR: [
+                {
+                    ...todayFilter,
+                    status: PaymentStatus.Paid
+                },
+                {
+                    updatedAt: {
+                        gte: today,
+                        lt: tomorrow,
+                    },
+                    status: PaymentStatus.Paid
+                }
+            ]
         },
         _sum: {
             amount: true
+        },
+        _count: {
+            _all: true
         }
     })
 
-
-    const totalTeacherBill = await db.teacherPayment.groupBy({
-        by: ["month"],
+    const todayِHouseRent = await db.housePayment.aggregate({
         where: {
-            status: TransactionStatus.Approve,
-            ...todayFilter
+            OR: [
+                {
+                    ...todayFilter,
+                },
+                {
+                    updatedAt: {
+                        gte: today,
+                        lt: tomorrow,
+                    },
+                }
+            ]
         },
         _sum: {
             amount: true
+        },
+        _count: {
+            _all: true
         }
     })
 
-    const totalHouseRent = await db.housePayment.groupBy({
-        by: ["month"],
-        where: todayFilter,
+    const todayِUtility = await db.expense.groupBy({
+        by: ["type"],
+        where: {
+            OR: [
+                {
+                    ...todayFilter,
+                },
+                {
+                    updatedAt: {
+                        gte: today,
+                        lt: tomorrow,
+                    },
+                }
+            ]
+        },
         _sum: {
             amount: true
+        },
+        _count: {
+            _all: true
         }
     })
 
-    const totalUtilityBill = await db.expense.groupBy({
-        by: ["month"],
-        where: todayFilter,
+    const todayِTeacherBill = await db.teacherPayment.aggregate({
+        where: {
+            OR: [
+                {
+                    ...todayFilter,
+                    status: TransactionStatus.Approve
+                },
+                {
+                    updatedAt: {
+                        gte: today,
+                        lt: tomorrow,
+                    },
+                    status: TransactionStatus.Approve
+                }
+            ]
+        },
         _sum: {
             amount: true
+        },
+        _count: {
+            _all: true
         }
     })
 
-    // Combine the data income
-    const combinedDataIncome = Object.values(Month).map(month => {
-        const salaryBill = totalSalary.find(item => item.month === month)?._sum.amount || 0;
-        const admissionBill = totalAdmissionFee.find(item => item.month === month)?._sum.amount || 0;
-        return {
-            month,
-            total: salaryBill + admissionBill
-        };
-    });
-
-    const totalIncome = combinedDataIncome.reduce((acc, curr) => acc + curr.total, 0)
-
-    // Combine the data expense
-    const combinedDataExpense = Object.values(Month).map(month => {
-        const teacherBill = totalTeacherBill.find(item => item.month === month)?._sum.amount || 0;
-        const houseRent = totalHouseRent.find(item => item.month === month)?._sum.amount || 0;
-        const utilityBill = totalUtilityBill.find(item => item.month === month)?._sum.amount || 0;
-        return {
-            month,
-            total: teacherBill + houseRent + utilityBill
-        };
-    });
-    const totalExpense = combinedDataExpense.reduce((acc, curr) => acc + curr.total, 0)
-
-
-    // Calculate profit
-    const combinedDataProfit = Object.values(Month).map(month => {
-        const income = combinedDataIncome.find(item => item.month === month)?.total || 0;
-        const expense = combinedDataExpense.find(item => item.month === month)?.total || 0;
-        return {
-            month,
-            total: income - expense
-        };
-    });
-
-    console.log(totalSalary)
+    const totalIncome = (todaySalary._sum.amount ?? 0) + (todayِAdmission._sum.amount ?? 0);
+    const totalExpenses = (todayِHouseRent._sum.amount ?? 0) +
+        (todayِTeacherBill._sum.amount ?? 0) +
+        todayِUtility.reduce((acc, item) => acc + (item._sum.amount ?? 0), 0);
 
     return (
         <ContentLayout title="Report">
@@ -145,7 +173,121 @@ const DailyReport = async () => {
                 </BreadcrumbList>
             </Breadcrumb>
 
+            <div className="mt-4 space-y-8">
+                <Card>
+                    <CardHeader className="pb-0">
+                        <CardTitle>Income Report</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Type</TableHead>
+                                    <TableHead>Unit</TableHead>
+                                    <TableHead>Total</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell>Total Salary</TableCell>
+                                    <TableCell>{todaySalary._count._all}</TableCell>
+                                    <TableCell>{todaySalary._sum.amount}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Total Admission Fee</TableCell>
+                                    <TableCell>{todayِAdmission._count._all}</TableCell>
+                                    <TableCell>{todayِAdmission._sum.amount ?? 0}</TableCell>
+                                </TableRow>
+                            </TableBody>
+                            <TableFooter>
+                                <TableRow>
+                                    <TableCell></TableCell>
+                                    <TableCell className="text-md font-semibold">Sub Total</TableCell>
+                                    <TableCell>{(todaySalary._sum.amount ?? 0) + (todayِAdmission._sum.amount ?? 0)}</TableCell>
+                                </TableRow>
+                            </TableFooter>
+                        </Table>
+                    </CardContent>
+                </Card>
 
+                <Card>
+                    <CardHeader className="pb-0">
+                        <CardTitle>Expense Report</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Type</TableHead>
+                                    <TableHead>Unit</TableHead>
+                                    <TableHead>Total</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell>House Rent Payment</TableCell>
+                                    <TableCell>{todayِHouseRent._count._all}</TableCell>
+                                    <TableCell>{todayِHouseRent._sum.amount ?? 0}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Teacher Bill</TableCell>
+                                    <TableCell>{todayِTeacherBill._count._all}</TableCell>
+                                    <TableCell>{todayِTeacherBill._sum.amount ?? 0}</TableCell>
+                                </TableRow>
+                                {
+                                    todayِUtility.map((item, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell>{item.type}</TableCell>
+                                            <TableCell>{item._count._all ?? 0}</TableCell>
+                                            <TableCell>{item._sum.amount}</TableCell>
+                                        </TableRow>
+                                    ))
+                                }
+
+                            </TableBody>
+                            <TableFooter>
+                                <TableRow>
+                                    <TableCell></TableCell>
+                                    <TableCell className="text-md font-semibold">Sub Total</TableCell>
+                                    <TableCell>{totalExpenses}</TableCell>
+                                </TableRow>
+                            </TableFooter>
+                        </Table>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader className="pb-0">
+                        <CardTitle>Overview</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Type</TableHead>
+                                    <TableHead>Total</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell>Totoal Income</TableCell>
+                                    <TableCell>{totalIncome}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Total Expense</TableCell>
+                                    <TableCell>{totalExpenses}</TableCell>
+                                </TableRow>
+                            </TableBody>
+                            <TableFooter>
+                                <TableRow>
+                                    <TableCell className="text-md font-semibold">Balance</TableCell>
+                                    <TableCell>{totalIncome - totalExpenses}</TableCell>
+                                </TableRow>
+                            </TableFooter>
+                        </Table>
+                    </CardContent>
+                </Card>
+            </div>
         </ContentLayout>
     )
 }

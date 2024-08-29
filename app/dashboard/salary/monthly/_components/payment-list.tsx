@@ -111,6 +111,9 @@ export const PaymentList = ({ payments }: PaymentProps) => {
                                                                             </Link>
                                                                         </Button>
                                                                     </div>
+                                                                    <Button asChild variant="gooeyLeft">
+                                                                        <Link href={`/dashboard/invoice/fee/monthly/${payment.id}`} target="_blank">Download Invoice</Link>
+                                                                    </Button>
                                                                 </div>
                                                             )
                                                         }

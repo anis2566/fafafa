@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Image from "next/image";
-import { PaymentStatus } from "@prisma/client";
+import { Month, PaymentStatus } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -12,11 +12,11 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
-import { ContentLayout } from "@/app/dashboard/_components/content-layout";
-
-import { db } from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+
+import { ContentLayout } from "@/app/dashboard/_components/content-layout";
+import { db } from "@/lib/prisma";
 import { PaymentForm } from "./_components/payment-from";
 
 export const metadata: Metadata = {
@@ -36,15 +36,20 @@ const Payment = async ({ params: { id } }: Props) => {
             id
         },
         include: {
-            payments: {
-                where: {
-                    status: PaymentStatus.Unpaid
-                }
-            }
+            payments: true
         }
     })
 
     if (!student) redirect("/dashboard")
+
+    const currentMonths = Object.values(Month).slice(0, new Date().getMonth() + 1)
+
+    const unPaidMonth = currentMonths.filter(month =>
+        !student.payments.some(payment =>
+            payment.month === month &&
+            (payment.status === PaymentStatus.NA || payment.status === PaymentStatus.Paid)
+        )
+    )
 
     return (
         <ContentLayout title="Payment">
@@ -85,15 +90,15 @@ const Payment = async ({ params: { id } }: Props) => {
                         </div>
                         <div className="flex items-center gap-x-3">
                             <h1 className="text-lg font-semibold">Payment Due:</h1>
-                            {student.payments.map(payment => (
-                                <Badge className="bg-rose-500" key={payment.id}>{payment.month}</Badge>
+                            {unPaidMonth.map((month, index) => (
+                                <Badge className="bg-rose-500" key={index}>{month}</Badge>
                             ))}
                         </div>
                         <h1>Monthly Fee: <span className="text-xl font-semibold text-primary">{student.monthlyFee}</span></h1>
                     </CardContent>
                 </Card>
 
-                <PaymentForm student={student} />
+                <PaymentForm student={student} unpaidMonth={unPaidMonth} />
             </div>
         </ContentLayout>
     )

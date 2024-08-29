@@ -1,6 +1,6 @@
 "use server";
 
-import { PaymentMethod, PaymentStatus } from "@prisma/client";
+import { PaymentStatus } from "@prisma/client";
 
 import { db } from "@/lib/prisma";
 import { MonthlyPaymentSchemaType } from "./schema";
@@ -12,36 +12,45 @@ type PayWithCash = {
 };
 
 export const PAY_WITH_CASH = async ({ values, studentId }: PayWithCash) => {
-  const dueMonth = await db.monthlyPayment.findFirst({
+  const existPayment = await db.monthlyPayment.findFirst({
     where: {
       studentId,
-      status: PaymentStatus.Unpaid,
       month: values.month,
     },
-    include: {
-      student: true,
-    },
   });
 
-  if (!dueMonth) {
-    throw new Error("Invalid month");
+  if (existPayment) {
+    const updatedPayment = await db.monthlyPayment.update({
+      where: {
+        id: existPayment.id,
+      },
+      data: {
+        ...values,
+        status: PaymentStatus.Paid,
+      },
+    });
+
+    revalidatePath("/dashboard/salary/monthly");
+
+    return {
+      success: "Payment successful",
+      id: updatedPayment.id,
+    };
+  } else {
+    const newPayment = await db.monthlyPayment.create({
+      data: {
+        ...values,
+        session: new Date().getFullYear(),
+        studentId,
+        status: PaymentStatus.Paid,
+      },
+    });
+
+    revalidatePath("/dashboard/salary/monthly");
+
+    return {
+      success: "Payment successful",
+      id: newPayment.id,
+    };
   }
-
-  await db.monthlyPayment.update({
-    where: {
-      id: dueMonth.id,
-    },
-    data: {
-      status: PaymentStatus.Paid,
-      method: PaymentMethod.Cash,
-      amount: values.amount,
-      note: values.note,
-    },
-  });
-
-  revalidatePath("/dashboard/salary/monthly");
-
-  return {
-    success: "Payment successful",
-  };
 };
