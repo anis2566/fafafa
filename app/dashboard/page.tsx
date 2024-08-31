@@ -173,7 +173,7 @@ const Dashboard = async () => {
                         <CardHeader>
                             <CardTitle>Recent Admission</CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="space-y-3">
                             {
                                 recentStudent.map(student => (
                                     <div className="flex items-center justify-between border border-primary/40 p-2 rounded-md" key={student.id}>

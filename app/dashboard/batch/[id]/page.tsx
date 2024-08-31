@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { BookOpen, Building, Clock, PlusCircle } from "lucide-react";
+import { PaymentStatus } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -45,7 +46,11 @@ const BatchDetails = async ({ params: { id } }: Props) => {
             room: true,
             students: {
                 include: {
-                    payments: true
+                    payments: {
+                        where: {
+                            status: PaymentStatus.Unpaid
+                        }
+                    }
                 }
             },
             classes: {

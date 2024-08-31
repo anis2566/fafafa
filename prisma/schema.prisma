@@ -116,6 +116,8 @@ enum Role {
   Teacher
   Management
   Accountant
+  Marketer
+  OfficeAssistant
   HR
   Admin
 }
@@ -150,6 +152,12 @@ enum Expenses {
   OthersCost
 }
 
+enum AttendenceStatus {
+  P
+  A
+  NA
+}
+
 model User {
   id            String          @id @default(cuid())
   name          String?
@@ -161,6 +169,7 @@ model User {
   status        Status          @default(Pending)
 
   accounts      Account[]
+  references    Student[]
  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -237,9 +246,12 @@ model Student {
 
   batchId             String?
   batch               Batch?     @relation(fields: [batchId], references: [id])
+  referenceId         String?
+  reference           User?      @relation(fields: [referenceId], references: [id])
 
   admissionPayment   AdmissionPayment?
   payments           MonthlyPayment[]
+  attendences        Attendence[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -426,6 +438,7 @@ model Batch {
 
   students      Student[]
   classes       BatchClass[]
+  attendences   Attendence[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -521,4 +534,26 @@ model Expense {
   updatedAt DateTime @updatedAt
 
   @@unique([id])
+}
+
+
+model Attendence {
+  id            String          @id @default(cuid())
+  session       Int
+  month         Month
+  day           Int
+  class         Class
+  status        AttendenceStatus  @default(NA)
+  absentReason  String?
+  inactiveReaseon String?
+
+  studentId     String
+  student       Student         @relation(fields: [studentId], references: [id])
+  batchId       String
+  batch         Batch           @relation(fields: [batchId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, studentId, batchId])
 }

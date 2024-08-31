@@ -41,6 +41,7 @@ import {
   TrendingUp,
   Warehouse,
   Wallet,
+  CalendarClock,
 } from "lucide-react";
 
 type Submenu = {
@@ -74,6 +75,31 @@ export function getMenuList(pathname: string): Group[] {
           active: pathname === "/dashboard",
           icon: LayoutGrid,
           submenus: [],
+        },
+      ],
+    },
+    {
+      groupLabel: "Attendence",
+      menus: [
+        {
+          href: "/dashboard/attendence/student",
+          label: "Student",
+          active: pathname.includes("/dashboard/attendence/student"),
+          icon: CalendarClock,
+          submenus: [
+            {
+              href: "/dashboard/attendence/student/create",
+              label: "Create",
+              active: pathname === "/dashboard/attendence/student/create",
+              icon: PlusCircle,
+            },
+            {
+              href: "/dashboard/attendence/student",
+              label: "Attendence",
+              active: pathname === "/dashboard/attendence/student",
+              icon: CalendarDays,
+            },
+          ],
         },
       ],
     },
