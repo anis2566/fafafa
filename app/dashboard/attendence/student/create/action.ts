@@ -1,6 +1,6 @@
 "use server";
 
-import { Class, Month } from "@prisma/client";
+import { Class, Month, PaymentStatus } from "@prisma/client";
 
 import { db } from "@/lib/prisma";
 import {
@@ -62,7 +62,7 @@ export const CREATE_ATTENDENCE = async (values: AttendenceSchemaType) => {
   const attendence = await db.attendence.findFirst({
     where: {
       batchId: data.batchId,
-      month: Object.values(Month)[new Date().getMinutes()],
+      month: Object.values(Month)[new Date().getMonth()],
     },
   });
 
@@ -88,6 +88,30 @@ export const CREATE_ATTENDENCE = async (values: AttendenceSchemaType) => {
         },
       });
     }
+  }
+
+  const currentMonthIndex = new Date().getMonth();
+
+  for (const studentId of students) {
+    const student = await db.student.findUnique({
+      where: { id: studentId },
+      select: { monthlyFee: true, class: true, id: true },
+    });
+
+    if (!student) {
+      throw new Error(`Student with ID ${studentId} not found`);
+    }
+
+    await db.monthlyPayment.create({
+      data: {
+        amount: student.monthlyFee,
+        session: new Date().getFullYear(),
+        class: student.class,
+        status: PaymentStatus.Unpaid,
+        studentId: student.id,
+        month: Object.values(Month)[currentMonthIndex],
+      },
+    });
   }
 
   return {

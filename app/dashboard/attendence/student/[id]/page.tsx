@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Metadata } from "next";
+import { Month, PaymentStatus } from "@prisma/client";
+import { redirect } from "next/navigation";
 
 import {
     Breadcrumb,
@@ -9,12 +11,12 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { ContentLayout } from "@/app/dashboard/_components/content-layout";
 import { db } from "@/lib/prisma";
-import { redirect } from "next/navigation";
 import { AttendenceList } from "./_components/attendence-list";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Month, PaymentStatus } from "@prisma/client";
+import { Header } from "./_components/header";
 
 export const metadata: Metadata = {
     title: "BEC | Attendence | Student | Batch",
@@ -24,10 +26,17 @@ export const metadata: Metadata = {
 interface Props {
     params: {
         id: string;
+    },
+    searchParams: {
+        id: string;
+        name: string;
     }
 }
 
-const AttendenceBatch = async ({ params: { id } }: Props) => {
+const AttendenceBatch = async ({ params: { id }, searchParams }: Props) => {
+    const { name } = searchParams;
+    const studentId = searchParams.id ? parseInt(searchParams.id) : undefined
+
     const batch = await db.batch.findUnique({
         where: {
             id
@@ -41,7 +50,10 @@ const AttendenceBatch = async ({ params: { id } }: Props) => {
 
     const students = await db.student.findMany({
         where: {
-            batchId: id
+            batchId: id,
+            isPresent: true,
+            ...(studentId && { studentId }),
+            ...(name && { name: { contains: name, mode: "insensitive" } })
         },
         select: {
             id: true,
@@ -69,8 +81,6 @@ const AttendenceBatch = async ({ params: { id } }: Props) => {
         }
     })
 
-    console.log(students)
-
     return (
         <ContentLayout title="Attendence">
             <Breadcrumb>
@@ -97,7 +107,8 @@ const AttendenceBatch = async ({ params: { id } }: Props) => {
                 <CardHeader>
                     <CardTitle>Attendences</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-6">
+                    <Header />
                     <AttendenceList students={students} batchId={id} />
                 </CardContent>
             </Card>

@@ -7,7 +7,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { useState } from "react"
-import { AttendenceCreateSchema } from "../schema"
+import { Class } from "@prisma/client"
+
 import { Button } from "@/components/ui/button"
 import {
     Form,
@@ -18,13 +19,9 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Class, Month } from "@prisma/client"
-import { formatString } from "@/lib/utils"
-import { CREATE_ATTENDENCE, GET_BATCH_BY_CLASS, GET_STUDENT_FOR_ATTENDENCE } from "../action"
 import {
     Collapsible,
     CollapsibleContent,
-    CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -38,6 +35,10 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox"
 
+import { formatString } from "@/lib/utils"
+import { CREATE_ATTENDENCE, GET_BATCH_BY_CLASS, GET_STUDENT_FOR_ATTENDENCE } from "../action"
+import { AttendenceCreateSchema } from "../schema"
+
 type Studnet = {
     id: string;
     name: string;
@@ -48,6 +49,8 @@ type Studnet = {
 export const AttendenceForm = () => {
     const [students, setStudents] = useState<Studnet[]>([])
     const [studentIds, setStudentIds] = useState<string[]>([])
+
+    const router = useRouter()
 
     const toggleStudent = (id: string) => {
         setStudentIds((prevIds) =>
@@ -78,6 +81,7 @@ export const AttendenceForm = () => {
             toast.success(data.success, {
                 id: "create-attendence"
             })
+            router.push("/dashboard/attendence/student")
         },
         onError: (error) => {
             toast.error(error.message, {

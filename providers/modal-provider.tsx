@@ -33,6 +33,9 @@ import { AddTeacherPaymentModal } from "@/app/dashboard/teacher/[id]/_components
 // HOUSE
 import { DeleteHouseModal } from "@/app/dashboard/house/_components/delete-modal"
 import { UpdateTeacherPaymentModal } from "@/app/dashboard/teacher/[id]/_components/edit-payment-modal"
+import { CallModal } from "@/app/dashboard/attendence/student/[id]/_components/call-modal"
+import { UpdateNumberModal } from "@/app/dashboard/attendence/student/[id]/_components/update-modal"
+import { StudentLeftModal } from "@/app/dashboard/attendence/student/[id]/_components/left-modal"
 
 export const ModalProvider = () => {
     return (
@@ -73,6 +76,9 @@ export const ModalProvider = () => {
             <AddTeacherPaymentModal />
             <UpdateTeacherPaymentModal />
 
+            <CallModal />
+            <UpdateNumberModal />
+            <StudentLeftModal />
         </>
     )
 }

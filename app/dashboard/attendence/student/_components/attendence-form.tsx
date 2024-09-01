@@ -7,7 +7,6 @@ import Link from "next/link"
 import { Class } from "@prisma/client"
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { adjustTime, formatString } from "@/lib/utils"
 import {
     Collapsible,
     CollapsibleContent,
@@ -23,6 +22,7 @@ import {
 } from "@/components/ui/table"
 
 import { GET_BATCH_BY_CLASS } from "../action"
+import { adjustTime, formatString } from "@/lib/utils"
 
 export const AttendenceForm = () => {
     const [className, setClassName] = useState<Class | null>(null)

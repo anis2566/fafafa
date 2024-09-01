@@ -156,6 +156,15 @@ enum AttendenceStatus {
   P
   A
   NA
+  H
+}
+
+enum AbsentReason {
+  Tommorow
+  SwitchOff
+  NoAnswer
+  Ill
+  Custom
 }
 
 model User {
@@ -240,6 +249,7 @@ model Student {
   permanentThana      String
   permanentDistrict   String
   isPresent           Boolean     @default(true)
+  leftReason          String?
 
   admissionFee        Int
   monthlyFee          Int
