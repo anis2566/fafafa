@@ -200,7 +200,7 @@ export const AttendenceList = ({ students, batchId }: Props) => {
 
                                         if (day?.day === editDay && editDay !== currentDay) {
                                             return (
-                                                <TableCell className={cn("bg-slate-200 text-accent-foreground text-center", isDayFriday && "bg-rose-300 text-white")}>
+                                                <TableCell key={i} className={cn("bg-slate-200 text-accent-foreground text-center", isDayFriday && "bg-rose-300 text-white")}>
                                                     <Checkbox
                                                         className="-ml-4"
                                                         checked={ids.includes(item.id)}
