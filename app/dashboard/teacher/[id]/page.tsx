@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Image from "next/image";
+import { Month, TransactionStatus } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -20,6 +21,10 @@ import { db } from "@/lib/prisma";
 import { AddPaymentButton } from "./_components/add-payment-button,";
 import { ClassList } from "./_components/class-list";
 import { Profile } from "./_components/profile";
+import { BankCard } from "../../_components/charts/bank-chart";
+import { AdvanceList } from "./_components/advance-list";
+import { Header } from "./_components/header";
+import { CustomPagination } from "@/components/custom-pagination";
 
 export const metadata: Metadata = {
     title: "BEC | Teacher | Profile",
@@ -29,13 +34,23 @@ export const metadata: Metadata = {
 interface Props {
     params: {
         id: string;
+    },
+    searchParams: {
+        month: Month,
+        session: string;
+        page: string;
+        perPage: string;
     }
 }
 
-const TeacherDetails = async ({ params: { id } }: Props) => {
+const TeacherDetails = async ({ params: { id }, searchParams: { session, month, page, perPage } }: Props) => {
+    const itemsPerPage = parseInt(perPage) || 5;
+    const currentPage = parseInt(page) || 1;
+    const formatedSession = session ? parseInt(session) : new Date().getFullYear()
+
     const teacher = await db.teacher.findUnique({
         where: {
-            id
+            id,
         },
         include: {
             classes: {
@@ -44,11 +59,46 @@ const TeacherDetails = async ({ params: { id } }: Props) => {
                     subject: true,
                 }
             },
-            fee: true
+            fee: true,
+            bank: true,
         }
     })
 
     if (!teacher) redirect("/dashboard")
+
+    const netBalance = (teacher.bank?.current ?? 0) - (teacher.bank?.advance ?? 0)
+
+    const pendingBalance = await db.teacherPayment.aggregate({
+        where: {
+            status: TransactionStatus.Pending
+        },
+        _sum: {
+            amount: true
+        }
+    })
+
+    const advances = await db.teacherAdvance.findMany({
+        where: {
+            teacherId: id,
+            session: formatedSession,
+            ...(month && { month })
+        },
+        orderBy: {
+            createdAt: "desc"
+        },
+        skip: (currentPage - 1) * itemsPerPage,
+        take: itemsPerPage,
+    })
+
+    const totalAdvance = await db.teacherAdvance.count({
+        where: {
+            teacherId: id,
+            session: formatedSession,
+            ...(month && { month })
+        },
+    })
+
+    const totalPage = Math.ceil(totalAdvance / itemsPerPage)
 
     return (
         <ContentLayout title="Teacher">
@@ -102,6 +152,7 @@ const TeacherDetails = async ({ params: { id } }: Props) => {
                 <Tabs defaultValue="class" className="w-full">
                     <TabsList className="flex justify-center mb-4">
                         <TabsTrigger value="class">Class</TabsTrigger>
+                        <TabsTrigger value="bank">Bank</TabsTrigger>
                         <TabsTrigger value="profile">Profile</TabsTrigger>
                     </TabsList>
                     <TabsContent value="class">
@@ -111,6 +162,24 @@ const TeacherDetails = async ({ params: { id } }: Props) => {
                             </CardHeader>
                             <CardContent>
                                 <ClassList classes={teacher.classes} />
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+                    <TabsContent value="bank" className="space-y-6">
+                        <div className="grid md:grid-cols-4 gap-6">
+                            <BankCard amount={netBalance} title="Net balance" />
+                            <BankCard amount={teacher.bank?.current ?? 0} title="Balance" />
+                            <BankCard amount={teacher.bank?.advance ?? 0} title="Advance" />
+                            <BankCard amount={pendingBalance._sum.amount ?? 0} title="Pending" />
+                        </div>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Advance History</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <Header />
+                                <AdvanceList advances={advances} />
+                                <CustomPagination totalPage={totalPage} />
                             </CardContent>
                         </Card>
                     </TabsContent>

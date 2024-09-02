@@ -356,6 +356,7 @@ model TeacherPayment {
   month         Month
   status        TransactionStatus   @default(Pending)
   note          String?
+  advance       Int                 @default(0)
 
   teacherId     String
   teacher       Teacher     @relation(fields: [teacherId], references: [id])
@@ -502,7 +503,9 @@ model Teacher {
 
   classes       BatchClass[]
   fee           TeacherFee?
+  bank          Bank?
   payments      TeacherPayment[]
+  advances      TeacherAdvance[]
 
   status         Status    @default(Active)
  
@@ -512,16 +515,49 @@ model Teacher {
   @@unique([id])
 }
 
+model Bank {
+  id            String          @id @default(cuid())
+  current       Int             @default(0)
+  advance       Int             @default(0)
+
+  teacherId     String          @unique
+  teacher       Teacher         @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, teacherId])
+}
+
+model TeacherAdvance {
+  id            String          @id @default(cuid())
+  session       Int
+  month         Month
+  amount        Int
+  status        TransactionStatus @default(Pending)
+
+  teacherId     String          
+  teacher       Teacher         @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, teacherId])
+}
 
 model BatchClass {
-  id            String          @id @default(cuid())
-  time          String[]
-  day           Day[]
+  id             String          @id @default(cuid())
+  times          String[]
+  time           String
+  days           Day[]
+  day            Day
 
   subjectId     String
   subject       Subject         @relation(fields: [subjectId], references: [id])
+  subjectName    String
   teacherId     String
   teacher       Teacher         @relation(fields: [teacherId], references: [id])
+  teacherName   String
   batchId       String
   batch         Batch           @relation(fields: [batchId], references: [id])
 

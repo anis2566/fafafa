@@ -53,10 +53,10 @@ export const ClassList = ({ classes }: Props) => {
                 {
                     classes.map(item => (
                         <TableRow key={item.id}>
-                            <TableCell>{adjustTime(item.time[0])} - {item.time[item.time.length - 1]}</TableCell>
+                            <TableCell>{adjustTime(item.times[0])} - {item.times[item.times.length - 1]}</TableCell>
                             <TableCell>
                                 {
-                                    item.day.map((day, i) => (
+                                    item.days.map((day, i) => (
                                         <p key={i}>{day}</p>
                                     ))
                                 }
@@ -76,10 +76,10 @@ export const ClassList = ({ classes }: Props) => {
                                                 item.teacher.classes.map(cls => (
                                                     <div className="grid grid-cols-4 gap-2 shadow-sm shadow-primary/40 mb-2" key={cls.id}>
                                                         <div>{cls.batch.name}</div>
-                                                        <div>{adjustTime(cls.time[0])} - {cls.time[item.time.length - 1]}</div>
+                                                        <div>{adjustTime(cls.times[0])} - {cls.times[item.times.length - 1]}</div>
                                                         <div>
                                                             {
-                                                                cls.day.map((v, i) => (
+                                                                cls.days.map((v, i) => (
                                                                     <div key={i}>{v}</div>
                                                                 ))
                                                             }

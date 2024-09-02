@@ -49,6 +49,7 @@ export const PaymentList = ({ payments }: Props) => {
                     <TableHead>Total</TableHead>
                     <TableHead>Deduction Unit</TableHead>
                     <TableHead>Deduction</TableHead>
+                    <TableHead>Advance</TableHead>
                     <TableHead>Incentive</TableHead>
                     <TableHead>Net Total</TableHead>
                     <TableHead>Status</TableHead>
@@ -68,6 +69,7 @@ export const PaymentList = ({ payments }: Props) => {
                             <TableCell className="py-3">{payment.classUnit * (payment.teacher.fee?.perClass ?? 0)}</TableCell>
                             <TableCell className="py-3">{payment.deductionUnit}</TableCell>
                             <TableCell className="py-3">{(payment.deductionUnit ?? 0) * (payment.teacher.fee?.perClass ?? 0)}</TableCell>
+                            <TableCell className="py-3">{payment.advance}</TableCell>
                             <TableCell className="py-3">{payment.incentive}</TableCell>
                             <TableCell className="py-3">{payment.amount}</TableCell>
                             <TableCell className="py-3">{payment.status}</TableCell>

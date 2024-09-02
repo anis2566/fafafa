@@ -42,6 +42,7 @@ import {
   Warehouse,
   Wallet,
   CalendarClock,
+  History,
 } from "lucide-react";
 
 type Submenu = {
@@ -273,6 +274,26 @@ export function getMenuList(pathname: string): Group[] {
               label: "List",
               active: pathname === "/dashboard/expense/utility",
               icon: List,
+            },
+          ],
+        },
+        {
+          href: "",
+          label: "Advance",
+          active: pathname.includes("/dashboard/expense/advance"),
+          icon: HandCoins,
+          submenus: [
+            {
+              href: "/dashboard/expense/advance/request",
+              label: "Request",
+              active: pathname === "/dashboard/expense/advance/request",
+              icon: Radio,
+            },
+            {
+              href: "/dashboard/expense/advance",
+              label: "History",
+              active: pathname === "/dashboard/expense/advance",
+              icon: History,
             },
           ],
         },

@@ -35,6 +35,7 @@ import { CREATE_TEACHER_PAYMENT, GET_TEACHERS } from "../action"
 export const TeacherBillForm = () => {
     const [fee, setFee] = useState<number>()
     const [open, setOpen] = useState<boolean>(false)
+    const [advance, setAdvance] = useState<number>(0)
 
     const { data: teachers } = useQuery({
         queryKey: ["get-teachers-for-bill"],
@@ -96,7 +97,8 @@ export const TeacherBillForm = () => {
                                             field.onChange(value)
                                             const teacher = teachers?.find(item => item.id === value)
                                             if (teacher) {
-                                                setFee(teacher.fee?.perClass)
+                                                setFee(teacher.fee?.perClass ?? 0)
+                                                setAdvance(teacher.bank?.advance ?? 0)
                                             }
                                         }} disabled={isPending}>
                                             <FormControl>
@@ -188,7 +190,7 @@ export const TeacherBillForm = () => {
                     </Form>
                 </CardContent>
             </Card>
-            <Card className="max-h-[270px]">
+            <Card className="max-h-[300px]">
                 <CardHeader>
                     <CardTitle>Bill Counter</CardTitle>
                 </CardHeader>
@@ -218,13 +220,19 @@ export const TeacherBillForm = () => {
                             )
                         }
                     </div>
+                    <div className="flex justify-between items-center gap-x-3">
+                        <p>Advance:</p>
+                        {
+                            advance
+                        }
+                    </div>
                     <Separator />
                     <div className="flex justify-between items-center gap-x-3">
                         <p>Total:</p>
                         {
                             fee && (
                                 <p>
-                                    {(form.watch("classUnit") || 0) * fee + (form.watch("incentive") || 0) - (form.watch("deductionUnit") || 0) * fee}
+                                    {(form.watch("classUnit") || 0) * fee + (form.watch("incentive") || 0) - ((form.watch("deductionUnit") || 0) * fee + advance) }
                                 </p>
                             )
                         }

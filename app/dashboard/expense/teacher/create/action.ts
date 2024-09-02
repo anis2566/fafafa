@@ -30,6 +30,7 @@ export const CREATE_TEACHER_PAYMENT = async (
     },
     include: {
       fee: true,
+      bank: true,
     },
   });
 
@@ -46,9 +47,24 @@ export const CREATE_TEACHER_PAYMENT = async (
     data: {
       teacherName: teacher.name,
       session: new Date().getFullYear(),
-      amount: total - deduction + (data?.incentive ?? 0),
+      amount:
+        total +
+        (data?.incentive ?? 0) -
+        (deduction + (teacher?.bank?.advance ?? 0)),
+      advance: teacher?.bank?.advance ?? 0,
       deduction,
       ...data,
+    },
+  });
+
+  await db.bank.update({
+    where: {
+      teacherId: teacher.id,
+    },
+    data: {
+      advance: {
+        decrement: teacher?.bank?.advance ?? 0,
+      },
     },
   });
 
@@ -63,6 +79,7 @@ export const GET_TEACHERS = async () => {
   const teachers = await db.teacher.findMany({
     include: {
       fee: true,
+      bank: true,
     },
     orderBy: {
       teacherId: "asc",

@@ -152,10 +152,35 @@ const DailyReport = async () => {
         }
     })
 
+    const todayِTeacherAdvance = await db.teacherAdvance.aggregate({
+        where: {
+            OR: [
+                {
+                    ...todayFilter,
+                    status: TransactionStatus.Approve
+                },
+                {
+                    updatedAt: {
+                        gte: today,
+                        lt: tomorrow,
+                    },
+                    status: TransactionStatus.Approve
+                }
+            ]
+        },
+        _sum: {
+            amount: true
+        },
+        _count: {
+            _all: true
+        }
+    })
+
     const totalIncome = (todaySalary._sum.amount ?? 0) + (todayِAdmission._sum.amount ?? 0);
     const totalExpenses = (todayِHouseRent._sum.amount ?? 0) +
         (todayِTeacherBill._sum.amount ?? 0) +
-        todayِUtility.reduce((acc, item) => acc + (item._sum.amount ?? 0), 0);
+        todayِUtility.reduce((acc, item) => acc + (item._sum.amount ?? 0), 0) + 
+        (todayِTeacherAdvance._sum.amount ?? 0)
 
     return (
         <ContentLayout title="Report">
@@ -225,14 +250,19 @@ const DailyReport = async () => {
                             </TableHeader>
                             <TableBody>
                                 <TableRow>
-                                    <TableCell>House Rent Payment</TableCell>
-                                    <TableCell>{todayِHouseRent._count._all}</TableCell>
-                                    <TableCell>{todayِHouseRent._sum.amount ?? 0}</TableCell>
+                                    <TableCell>Teacher Advance</TableCell>
+                                    <TableCell>{todayِTeacherAdvance._count._all}</TableCell>
+                                    <TableCell>{todayِTeacherAdvance._sum.amount ?? 0}</TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell>Teacher Bill</TableCell>
                                     <TableCell>{todayِTeacherBill._count._all}</TableCell>
                                     <TableCell>{todayِTeacherBill._sum.amount ?? 0}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>House Rent Payment</TableCell>
+                                    <TableCell>{todayِHouseRent._count._all}</TableCell>
+                                    <TableCell>{todayِHouseRent._sum.amount ?? 0}</TableCell>
                                 </TableRow>
                                 {
                                     todayِUtility.map((item, index) => (

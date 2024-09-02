@@ -32,6 +32,12 @@ export const CREATE_TEACHER = async (values: TeacherSchemaType) => {
   });
 
   if (newTeacher) {
+    await db.bank.create({
+      data: {
+        teacherId: newTeacher.id,
+      },
+    });
+
     await db.counter.update({
       where: {
         id: counter.id,

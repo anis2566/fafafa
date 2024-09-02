@@ -23,12 +23,12 @@ export const CREATE_BATCH_CLASS = async ({ id, values }: CreateBatchClass) => {
       batchId: id,
       AND: [
         {
-          day: {
+          days: {
             hasSome: values.day,
           },
         },
         {
-          time: {
+          times: {
             hasSome: values.time,
           },
         },
@@ -43,10 +43,10 @@ export const CREATE_BATCH_CLASS = async ({ id, values }: CreateBatchClass) => {
   const isTeacherTimeBook = await db.batchClass.findFirst({
     where: {
       teacherId: values.teacherId,
-      time: {
+      times: {
         hasSome: values.time,
       },
-      day: {
+      days: {
         hasSome: values.day,
       },
     },
@@ -56,14 +56,45 @@ export const CREATE_BATCH_CLASS = async ({ id, values }: CreateBatchClass) => {
     throw new Error("The teacher time is book");
   }
 
-  await db.batchClass.create({
-    data: {
-      batchId: id,
-      ...data,
+  const subject = await db.subject.findUnique({
+    where: {
+      id: data.subjectId
     },
-  });
+    select: {
+      name: true
+    }
+  })
 
-  revalidatePath(`/dashboard/batch/${id}`)
+  if(!subject) throw new Error("Subject not found")
+
+  const teacher = await db.teacher.findUnique({
+    where: {
+      id: data.teacherId
+    },
+    select: {
+      name: true
+    }
+  })
+
+  if(!teacher) throw new Error("Teacher not found")
+
+  for (const item of data.day) {
+    await db.batchClass.create({
+      data: {
+        batchId: id,
+        days: data.day,
+        times: data.time,
+        day: item,
+        time: `${data.time[0]}-${data.time[1]}`,
+        subjectId: data.subjectId,
+        teacherId: data.teacherId,
+        subjectName: subject.name,
+        teacherName: teacher.name
+      },
+    });
+  }
+
+  revalidatePath(`/dashboard/batch/${id}`);
 
   return {
     success: "Class created",
@@ -89,6 +120,7 @@ export const GET_TEACHER_BY_LEVEL = async (level: Level) => {
         has: level,
       },
     },
+    take: 3,
   });
 
   return { teachers };
