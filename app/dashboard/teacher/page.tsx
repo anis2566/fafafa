@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Metadata } from "next";
-import { Class, PaymentStatus } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -14,10 +13,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 import { ContentLayout } from "../_components/content-layout";
 import { db } from "@/lib/prisma";
-// import { StudentList } from "./_components/student-list";
-// import { Header } from "./_components/header";
 import { CustomPagination } from "@/components/custom-pagination";
 import { TeacherList } from "./_components/teacher-list";
+import { Header } from "./_components/header";
 
 export const metadata: Metadata = {
     title: "BEC | Teacher",
@@ -27,7 +25,6 @@ export const metadata: Metadata = {
 interface Props {
     searchParams: {
         session: string;
-        className: Class;
         id: string;
         name: string;
         page: string;
@@ -37,46 +34,34 @@ interface Props {
 
 
 const Teacher = async ({ searchParams }: Props) => {
-    // const { session, className, id, name, page, perPage } = searchParams;
-    // const itemsPerPage = parseInt(perPage) || 5;
-    // const currentPage = parseInt(page) || 1;
-    // const formatedSession = session ? parseInt(session) : new Date().getFullYear()
-    // const studentId = id ? parseInt(id) : undefined
+    const { session, id, name, page, perPage } = searchParams;
+    const itemsPerPage = parseInt(perPage) || 5;
+    const currentPage = parseInt(page) || 1;
+    const formatedSession = session ? parseInt(session) : new Date().getFullYear()
+    const teacherId = id ? parseInt(id) : undefined
 
     const teachers = await db.teacher.findMany({
         where: {
-            // session: formatedSession,
-            // ...(className && { class: className }),
-            // ...(studentId && { studentId }),
-            // ...(name && { name: { contains: name, mode: "insensitive" } }),
+            session: formatedSession,
+            ...(teacherId && { teacherId }),
+            ...(name && { name: { contains: name, mode: "insensitive" } }),
         },
-        // include: {
-        //     payments: {
-        //         where: {
-        //             status: PaymentStatus.Unpaid
-        //         },
-        //         select: {
-        //             id: true
-        //         }
-        //     }
-        // },
-        // orderBy: {
-        //     createdAt: "desc"
-        // },
-        // skip: (currentPage - 1) * itemsPerPage,
-        // take: itemsPerPage,
+        orderBy: {
+            createdAt: "desc"
+        },
+        skip: (currentPage - 1) * itemsPerPage,
+        take: itemsPerPage,
     })
 
-    // const totalStudent = await db.student.count({
-    //     where: {
-    //         session: formatedSession,
-    //         ...(className && { class: className }),
-    //         ...(studentId && { studentId }),
-    //         ...(name && { name: { contains: name, mode: "insensitive" } }),
-    //     }
-    // })
+    const totalTeacher = await db.teacher.count({
+        where: {
+            session: formatedSession,
+            ...(teacherId && { teacherId }),
+            ...(name && { name: { contains: name, mode: "insensitive" } }),
+        }
+    })
 
-    // const totalPage = Math.ceil(totalStudent / itemsPerPage)
+    const totalPage = Math.ceil(totalTeacher / itemsPerPage)
 
     return (
         <ContentLayout title="Teacher">
@@ -102,10 +87,9 @@ const Teacher = async ({ searchParams }: Props) => {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                    <Header />
                     <TeacherList teachers={teachers} />
-                    {/* <Header />
-                    <StudentList students={students} />
-                    <CustomPagination totalPage={totalPage} /> */}
+                    <CustomPagination totalPage={totalPage} />
                 </CardContent>
             </Card>
         </ContentLayout>

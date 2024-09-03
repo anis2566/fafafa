@@ -30,12 +30,15 @@ export function adjustTime(time: string): string {
   return `${hours}:${minutes.padStart(2, "0")} ${period}`;
 }
 
-
 export function getRandomColor() {
-  const letters = '0123456789ABCDEF';
-  let color = '#';
+  const letters = "0123456789ABCDEF";
+  let color = "#";
   for (let i = 0; i < 6; i++) {
     color += letters[Math.floor(Math.random() * 16)];
   }
   return color;
 }
+
+export const formatTime = (time: string, position: "start" | "end") => {
+  return time.split("-")[position === "start" ? 0 : 1];
+};

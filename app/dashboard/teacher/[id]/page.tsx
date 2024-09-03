@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Image from "next/image";
-import { Month, TransactionStatus } from "@prisma/client";
+import { Day, Month, TransactionStatus } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -12,24 +12,42 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { ContentLayout } from "../../_components/content-layout";
 import { db } from "@/lib/prisma";
 import { AddPaymentButton } from "./_components/add-payment-button,";
-import { ClassList } from "./_components/class-list";
 import { Profile } from "./_components/profile";
 import { BankCard } from "../../_components/charts/bank-chart";
 import { AdvanceList } from "./_components/advance-list";
 import { Header } from "./_components/header";
 import { CustomPagination } from "@/components/custom-pagination";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
     title: "BEC | Teacher | Profile",
     description: "Basic Education Care",
 };
+
+type ClassData = {
+    time: string;
+    day: string;
+    batchName: string;
+    subjectName: string;
+};
+
+type GroupedData = {
+    time: string;
+    classes: {
+        batchName: string;
+        subjectName: string;
+        day: string;
+    }[];
+};
+
 
 interface Props {
     params: {
@@ -65,6 +83,30 @@ const TeacherDetails = async ({ params: { id }, searchParams: { session, month, 
     })
 
     if (!teacher) redirect("/dashboard")
+
+    const classes = await db.batchClass.groupBy({
+        by: ["time", "day", "batchName", "subjectName"],
+        where: {
+            teacherId: id
+        },
+        orderBy: {
+            time: "asc"
+        }
+    })
+
+    const groupedData: GroupedData[] = Object.values(
+        classes.reduce((acc: { [key: string]: GroupedData }, curr: ClassData) => {
+            const { time, batchName, subjectName, day } = curr;
+            if (!acc[time]) {
+                acc[time] = {
+                    time: time,
+                    classes: [],
+                };
+            }
+            acc[time].classes.push({ day, batchName, subjectName });
+            return acc;
+        }, {})
+    );
 
     const netBalance = (teacher.bank?.current ?? 0) - (teacher.bank?.advance ?? 0)
 
@@ -159,9 +201,43 @@ const TeacherDetails = async ({ params: { id }, searchParams: { session, month, 
                         <Card>
                             <CardHeader>
                                 <CardTitle>Class List</CardTitle>
+                                <CardDescription>A collection of teacher class.</CardDescription>
                             </CardHeader>
-                            <CardContent>
-                                <ClassList classes={teacher.classes} />
+                            <CardContent className="space-y-4">
+                                <Table>
+                                    <TableHeader>
+                                        <TableHead>Time</TableHead>
+                                        {
+                                            Object.values(Day).map((v, i) => (
+                                                <TableHead key={i}>{v}</TableHead>
+                                            ))
+                                        }
+                                    </TableHeader>
+                                    <TableBody>
+                                        {
+                                            groupedData.map((item, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell>{item.time}</TableCell>
+                                                    {
+                                                        Object.values(Day).map((v, i) => {
+                                                            const isMatchDay = item.classes.find(item => item.day === v)
+                                                            return (
+                                                                <TableCell key={i} className={cn("bg-indigo-100/50", index % 2 === 0 ? "odd:bg-sky-100/50" : "even:bg-sky-100/50")}>
+                                                                    {isMatchDay ? (
+                                                                        <div>
+                                                                            <p className="text-lg font-semibold">{isMatchDay?.subjectName}</p>
+                                                                            <p>{isMatchDay?.batchName}</p>
+                                                                        </div>
+                                                                    ) : "-"}
+                                                                </TableCell>
+                                                            )
+                                                        })
+                                                    }
+                                                </TableRow>
+                                            ))
+                                        }
+                                    </TableBody>
+                                </Table>
                             </CardContent>
                         </Card>
                     </TabsContent>

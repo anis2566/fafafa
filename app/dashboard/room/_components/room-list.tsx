@@ -16,6 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 
 import { Action } from "./action"
+import { formatTime } from "@/lib/utils"
 
 interface RoomWithBatch extends Room {
     batches: Batch[];

@@ -442,6 +442,7 @@ model Batch {
   class         Class
   capacity      Int
   time          String[]
+  classTime          String[]
   level         Level
 
   roomId        String
@@ -547,9 +548,7 @@ model TeacherAdvance {
 
 model BatchClass {
   id             String          @id @default(cuid())
-  times          String[]
   time           String
-  days           Day[]
   day            Day
 
   subjectId     String
@@ -559,7 +558,8 @@ model BatchClass {
   teacher       Teacher         @relation(fields: [teacherId], references: [id])
   teacherName   String
   batchId       String
-  batch         Batch           @relation(fields: [batchId], references: [id])
+  batch         Batch           @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  batchName     String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

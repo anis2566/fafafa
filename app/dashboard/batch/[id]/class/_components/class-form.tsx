@@ -66,7 +66,7 @@ export const ClassForm = ({ batch }: Props) => {
     const form = useForm<z.infer<typeof BatchClassSchema>>({
         resolver: zodResolver(BatchClassSchema),
         defaultValues: {
-            time: [],
+            time: "",
             day: [],
             subjectId: "",
             teacherId: ""
@@ -94,18 +94,20 @@ export const ClassForm = ({ batch }: Props) => {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Time</FormLabel>
-                                    <FormControl>
-                                        <MultiSelect
-                                            options={batch.time.map(item => ({ label: item, value: item }))}
-                                            onValueChange={field.onChange}
-                                            defaultValue={field.value}
-                                            placeholder="Select time"
-                                            variant="inverted"
-                                            animation={2}
-                                            maxCount={3}
-                                            disabled={isPending}
-                                        />
-                                    </FormControl>
+                                    <Select onValueChange={(value) => field.onChange(value)} disabled={isPending}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select time" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {
+                                                batch.classTime.map((time, i) => (
+                                                    <SelectItem value={time} key={i}>{time}</SelectItem>
+                                                ))
+                                            }
+                                        </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}

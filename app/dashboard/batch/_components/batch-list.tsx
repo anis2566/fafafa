@@ -9,7 +9,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 
-import { adjustTime } from "@/lib/utils"
+import { adjustTime, formatTime } from "@/lib/utils"
 import { Action } from "./action"
 
 interface BatchWithRoomAndStudent extends Batch {
@@ -43,7 +43,7 @@ export const BatchList = ({ batches }: Props) => {
                             <TableCell className="py-3">{batch.name}</TableCell>
                             <TableCell className="py-3">{batch.class}</TableCell>
                             <TableCell className="py-3">{batch.capacity}</TableCell>
-                            <TableCell className="py-3">{adjustTime(batch.time[0])} - {batch.time[batch.time.length - 1]}</TableCell>
+                            <TableCell className="py-3">{formatTime(batch.time[0], "start")} - {formatTime(batch.time[batch.time.length - 1], "end")}</TableCell>
                             <TableCell className="py-3">{batch.room.name}</TableCell>
                             <TableCell className="py-3">{batch.students.length}</TableCell>
                             <TableCell className="py-3">

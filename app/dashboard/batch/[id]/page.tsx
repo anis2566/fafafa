@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { BookOpen, Building, Clock, PlusCircle } from "lucide-react";
-import { Day, PaymentStatus } from "@prisma/client";
+import { PaymentStatus } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -17,14 +17,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-import { adjustTime, cn } from "@/lib/utils";
+import { cn, formatTime } from "@/lib/utils";
 import { AddStudentButton } from "./_components/add-student-button";
 import { StudentList } from "./_components/student-list";
 import { db } from "@/lib/prisma";
-import { ClassList } from "./_components/class-list";
 import { TeacherList } from "./_components/teacher-list";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const metadata: Metadata = {
     title: "BEC | Batch Details",
@@ -33,7 +32,6 @@ export const metadata: Metadata = {
 
 type ClassData = {
     time: string;
-    times: string[]
     day: string;
     teacherName: string;
     subjectName: string;
@@ -43,7 +41,6 @@ type GroupedData = {
     day: string;
     classes: {
         time: string;
-        times: string[];
         teacherName: string;
         subjectName: string;
     }[];
@@ -73,21 +70,6 @@ const BatchDetails = async ({ params: { id } }: Props) => {
                     }
                 }
             },
-            classes: {
-                include: {
-                    teacher: {
-                        include: {
-                            classes: {
-                                include: {
-                                    batch: true,
-                                    subject: true
-                                }
-                            },
-                        }
-                    },
-                    subject: true
-                }
-            }
         }
     })
 
@@ -98,13 +80,13 @@ const BatchDetails = async ({ params: { id } }: Props) => {
             batchId: id,
         },
         include: {
-            subject: true,
             teacher: true
-        }
+        },
+        distinct: ['teacherId']
     })
 
     const classes = await db.batchClass.groupBy({
-        by: ["time", "day", "teacherName", "subjectName", "times"],
+        by: ["time", "day", "teacherName", "subjectName"],
         where: {
             batchId: id
         },
@@ -113,11 +95,9 @@ const BatchDetails = async ({ params: { id } }: Props) => {
         }
     })
 
-    console.log(classes)
-
     const groupedData: GroupedData[] = Object.values(
         classes.reduce((acc: { [key: string]: GroupedData }, curr: ClassData) => {
-            const { day, time, teacherName, subjectName, times } = curr;
+            const { day, time, teacherName, subjectName } = curr;
 
             if (!acc[day]) {
                 acc[day] = {
@@ -126,13 +106,11 @@ const BatchDetails = async ({ params: { id } }: Props) => {
                 };
             }
 
-            acc[day].classes.push({ time, teacherName, subjectName, times });
+            acc[day].classes.push({ time, teacherName, subjectName });
 
             return acc;
         }, {})
     );
-
-    console.log(groupedData);
 
     return (
         <ContentLayout title="Batch">
@@ -172,7 +150,7 @@ const BatchDetails = async ({ params: { id } }: Props) => {
                                 </Badge>
                                 <Badge className="flex items-center gap-x-1 max-w-fit" variant="outline">
                                     <Clock className="w-4 h-4" />
-                                    <p>{adjustTime(batch.time[0])} - {batch.time[batch.time.length - 1]}</p>
+                                    <p>{formatTime(batch.time[0], "start")} - {formatTime(batch.time[batch.time.length - 1], "end")}</p>
                                 </Badge>
                             </div>
                         </div>
@@ -188,7 +166,7 @@ const BatchDetails = async ({ params: { id } }: Props) => {
                     </CardContent>
                 </Card>
 
-                <Tabs defaultValue="class" className="w-full">
+                <Tabs defaultValue="students" className="w-full">
                     <TabsList className="flex justify-center mb-4">
                         <TabsTrigger value="students">Students</TabsTrigger>
                         <TabsTrigger value="class">Class</TabsTrigger>
@@ -216,7 +194,7 @@ const BatchDetails = async ({ params: { id } }: Props) => {
                                     <TableHeader>
                                         <TableHead>Day</TableHead>
                                         {
-                                            batch.time.map((time, i) => (
+                                            batch.classTime.map((time: string, i) => (
                                                 <TableHead key={i}>{time}</TableHead>
                                             ))
                                         }
@@ -227,8 +205,8 @@ const BatchDetails = async ({ params: { id } }: Props) => {
                                                 <TableRow key={index}>
                                                     <TableCell>{item.day}</TableCell>
                                                     {
-                                                        batch.time.map((v, i) => {
-                                                            const isMatchedTime = item.classes.find(item => item.times.includes(v))
+                                                        batch.classTime.map((v, i) => {
+                                                            const isMatchedTime = item.classes.find(item => item.time === v)
                                                             return (
                                                                 <TableCell key={i} className={cn("bg-indigo-100/50", index % 2 === 0 ? "odd:bg-sky-100/50" : "even:bg-sky-100/50")}>
                                                                     {isMatchedTime ? (
@@ -246,7 +224,6 @@ const BatchDetails = async ({ params: { id } }: Props) => {
                                         }
                                     </TableBody>
                                 </Table>
-                                {/* <ClassList classes={batch.classes} /> */}
                             </CardContent>
                         </Card>
                     </TabsContent>

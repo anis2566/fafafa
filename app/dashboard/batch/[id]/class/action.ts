@@ -18,78 +18,89 @@ export const CREATE_BATCH_CLASS = async ({ id, values }: CreateBatchClass) => {
     throw new Error("Invalid input value");
   }
 
-  const isBatchTimeBook = await db.batchClass.findFirst({
-    where: {
-      batchId: id,
-      AND: [
-        {
-          days: {
-            hasSome: values.day,
-          },
-        },
-        {
-          times: {
-            hasSome: values.time,
-          },
-        },
-      ],
-    },
-  });
+  const { day } = data;
 
-  if (isBatchTimeBook) {
-    throw new Error("The batch time is book");
+  for (const item of day) {
+    const isBatchTimeBook = await db.batchClass.findFirst({
+      where: {
+        batchId: id,
+        AND: [
+          {
+            day: item,
+          },
+          {
+            time: data.time,
+          },
+        ],
+      },
+    });
+
+    if (isBatchTimeBook) {
+      throw new Error(`The batch time is booked for day ${item}`);
+    }
   }
 
-  const isTeacherTimeBook = await db.batchClass.findFirst({
-    where: {
-      teacherId: values.teacherId,
-      times: {
-        hasSome: values.time,
+  for (const item of day) {
+    const isTeacherTimeBook = await db.batchClass.findFirst({
+      where: {
+        teacherId: data.teacherId,
+        AND: [
+          {
+            day: item,
+          },
+          {
+            time: data.time,
+          },
+        ],
       },
-      days: {
-        hasSome: values.day,
-      },
-    },
-  });
+    });
 
-  if (isTeacherTimeBook) {
-    throw new Error("The teacher time is book");
+    if (isTeacherTimeBook) {
+      throw new Error(`The teacher time is booked for day ${item}`);
+    }
   }
 
   const subject = await db.subject.findUnique({
     where: {
-      id: data.subjectId
+      id: data.subjectId,
     },
     select: {
-      name: true
-    }
-  })
+      name: true,
+    },
+  });
 
-  if(!subject) throw new Error("Subject not found")
+  if (!subject) throw new Error("Subject not found");
 
   const teacher = await db.teacher.findUnique({
     where: {
-      id: data.teacherId
+      id: data.teacherId,
     },
     select: {
-      name: true
-    }
-  })
+      name: true,
+    },
+  });
 
-  if(!teacher) throw new Error("Teacher not found")
+  if (!teacher) throw new Error("Teacher not found");
+
+  const batch = await db.batch.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!batch) throw new Error("Batch not found");
 
   for (const item of data.day) {
     await db.batchClass.create({
       data: {
         batchId: id,
-        days: data.day,
-        times: data.time,
         day: item,
-        time: `${data.time[0]}-${data.time[1]}`,
+        time: data.time,
         subjectId: data.subjectId,
         teacherId: data.teacherId,
         subjectName: subject.name,
-        teacherName: teacher.name
+        teacherName: teacher.name,
+        batchName: batch.name,
       },
     });
   }

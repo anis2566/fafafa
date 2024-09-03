@@ -15,6 +15,7 @@ export const BatchSchema = z.object({
   name: z.string().min(1, { message: "required" }),
   capacity: z.number().min(1, { message: "required" }),
   time: z.array(z.string().min(1)).min(1).nonempty("required"),
+  classTime: z.array(z.string().min(1)).min(1).nonempty("required"),
   roomId: z.string().min(1, { message: "required" }),
 });
 

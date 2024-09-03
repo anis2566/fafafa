@@ -1,10 +1,5 @@
 import { z } from "zod";
-import {
-  Nationality,
-  Religion,
-  Gender,
-  Level,
-} from "@prisma/client";
+import { Nationality, Religion, Gender, Level, Status } from "@prisma/client";
 
 const requiredString = z.string().trim().min(1, { message: "required" });
 
@@ -42,6 +37,7 @@ export const TeacherSchema = z.object({
   permanentThana: requiredString,
   permanentDistrict: requiredString,
   level: z.array(z.nativeEnum(Level)).min(1, { message: "required" }),
+  status: z.nativeEnum(Status).optional(),
 });
 
 export type TeacherSchemaType = z.infer<typeof TeacherSchema>;

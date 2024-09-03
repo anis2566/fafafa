@@ -1,4 +1,4 @@
-import { BatchClass, Subject, Teacher } from "@prisma/client";
+import { BatchClass, Teacher } from "@prisma/client";
 
 import {
     Table,
@@ -11,7 +11,6 @@ import {
 
 interface BatchClassWithTeacherAndSubject extends BatchClass {
     teacher: Teacher;
-    subject: Subject
 }
 
 interface Props {
@@ -26,7 +25,6 @@ export const TeacherList = ({ classes }: Props) => {
                 <TableRow>
                     <TableHead>ID</TableHead>
                     <TableHead>Name</TableHead>
-                    <TableHead>Subject</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -35,7 +33,6 @@ export const TeacherList = ({ classes }: Props) => {
                         <TableRow key={item.id}>
                             <TableCell>{item.teacher.teacherId}</TableCell>
                             <TableCell>{item.teacher.name}</TableCell>
-                            <TableCell>{item.subject.name}</TableCell>
                         </TableRow>
                     ))
                 }

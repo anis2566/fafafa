@@ -11,15 +11,14 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-import { useRoom } from "@/hooks/use-room";
-
+import { useBatch } from "@/hooks/use-batch";
 
 interface Props {
     id: string;
 }
 
 export const Action = ({ id }: Props) => {
-    const { onOpen } = useRoom()
+    const { onOpen } = useBatch()
 
     return (
         <DropdownMenu>

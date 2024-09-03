@@ -1,6 +1,6 @@
 "use client"
 
-import { Batch, Class, Room } from "@prisma/client"
+import { Batch, Class, Level, Room } from "@prisma/client"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
@@ -80,7 +80,9 @@ export const EditBatchForm = ({ batch }: Props) => {
             class: batch.class || undefined,
             capacity: batch.capacity || undefined,
             roomId: batch.roomId || "",
-            time: batch.time || []
+            time: batch.time || [],
+            classTime: batch.classTime || [],
+            level: batch.level || undefined
         },
     })
 
@@ -93,6 +95,8 @@ export const EditBatchForm = ({ batch }: Props) => {
 
     const existRoomOptions = room ? [...batch.time, ...room.availableTime.filter(time => !room.bookTime.includes(time))].map(item => ({ label: item, value: item })) : []
     const newRoomOptions = room ? room.availableTime.filter(time => !room.bookTime.includes(time)).map(item => ({ label: item, value: item })) : []
+
+    console.log(form.formState.errors)
 
     return (
         <Card className="mt-4">
@@ -131,6 +135,30 @@ export const EditBatchForm = ({ batch }: Props) => {
                                         <SelectContent>
                                             {
                                                 Object.values(Class).map((v, i) => (
+                                                    <SelectItem value={v} key={i}>{formatString(v)}</SelectItem>
+                                                ))
+                                            }
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="level"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Level</FormLabel>
+                                    <Select value={field.value} onValueChange={(value) => field.onChange(value)}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select level" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {
+                                                Object.values(Level).map((v, i) => (
                                                     <SelectItem value={v} key={i}>{formatString(v)}</SelectItem>
                                                 ))
                                             }

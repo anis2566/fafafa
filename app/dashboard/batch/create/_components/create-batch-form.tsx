@@ -28,6 +28,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { MultiSelect } from "@/components/ui/multi-select"
+import { Badge } from "@/components/ui/badge"
 
 import { BatchSchema } from "../schema"
 import { formatString } from "@/lib/utils"
@@ -35,6 +36,8 @@ import { CREATE_BATCH, GET_ROOMS } from "../action"
 
 export const CreateBatchForm = () => {
     const [room, setRoom] = useState<Room | null>()
+    const [classTime, setClassTime] = useState<string[]>([])
+    const [selectedTime, setSelectedTime] = useState<string[]>([])
 
     const router = useRouter()
 
@@ -44,7 +47,13 @@ export const CreateBatchForm = () => {
             const res = await GET_ROOMS()
             return res.rooms
         }
-    })
+    }) 
+
+    const handleAddClassTime = () => {
+        setClassTime(classTime.filter(time => !selectedTime.includes(time)))
+        setSelectedTime([])
+        form.setValue("classTime", [...form.watch("classTime"), `${selectedTime[0].split("-")[0]} - ${selectedTime[selectedTime.length - 1].split("-")[1]}`])
+    }
 
     const { mutate: createBatch, isPending } = useMutation({
         mutationFn: CREATE_BATCH,
@@ -70,7 +79,8 @@ export const CreateBatchForm = () => {
             class: undefined,
             capacity: undefined,
             roomId: "",
-            time: []
+            time: [],
+            classTime: []
         },
     })
 
@@ -204,7 +214,10 @@ export const CreateBatchForm = () => {
                                             <FormControl>
                                                 <MultiSelect
                                                     options={options?.map(item => ({ label: item, value: item }))}
-                                                    onValueChange={field.onChange}
+                                                    onValueChange={(value) => {
+                                                        field.onChange(value)
+                                                        setClassTime(value)
+                                                    }}
                                                     defaultValue={field.value}
                                                     placeholder="Select time"
                                                     variant="inverted"
@@ -219,6 +232,46 @@ export const CreateBatchForm = () => {
                                 />
                             )
                         }
+                        {
+                            room && options && (
+                                <FormField
+                                    control={form.control}
+                                    name="classTime"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Class Time</FormLabel>
+                                            <div className="flex items-center gap-x-3">
+                                                <MultiSelect
+                                                    options={classTime.map(item => ({ label: item, value: item }))}
+                                                    onValueChange={(value) => {
+                                                        setSelectedTime(value)
+                                                    }}
+                                                    defaultValue={selectedTime}
+                                                    placeholder="Select class time"
+                                                    variant="inverted"
+                                                    animation={2}
+                                                    maxCount={3}
+                                                    disabled={isPending}
+                                                    className="flex-1"
+                                                />
+                                                <Button type="button" onClick={() => handleAddClassTime()} disabled={selectedTime.length === 0}>Add</Button>
+                                            </div>
+                                            <div className="flex items-center gap-x-3 pt-1">
+                                                {
+                                                    form.watch("classTime").map((v, i) => (
+                                                        <Badge key={i}>
+                                                            {v}
+                                                        </Badge>
+                                                    ))
+                                                }
+                                            </div>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )
+                        }
+
                         <Button type="submit" disabled={isPending}>Submit</Button>
                     </form>
                 </Form>

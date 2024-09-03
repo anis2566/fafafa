@@ -36,6 +36,7 @@ import { UpdateTeacherPaymentModal } from "@/app/dashboard/teacher/[id]/_compone
 import { CallModal } from "@/app/dashboard/attendence/student/[id]/_components/call-modal"
 import { UpdateNumberModal } from "@/app/dashboard/attendence/student/[id]/_components/update-modal"
 import { StudentLeftModal } from "@/app/dashboard/attendence/student/[id]/_components/left-modal"
+import { DeleteBatchModal } from "@/app/dashboard/batch/_components/delete-modal"
 
 export const ModalProvider = () => {
     return (
@@ -79,6 +80,7 @@ export const ModalProvider = () => {
             <CallModal />
             <UpdateNumberModal />
             <StudentLeftModal />
+            <DeleteBatchModal />
         </>
     )
 }
