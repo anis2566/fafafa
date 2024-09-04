@@ -7,11 +7,6 @@ export const ExpenseSchema = z.object({
     .refine((val) => Object.values(Expenses).includes(val), {
       message: "required",
     }),
-  month: z
-    .nativeEnum(Month)
-    .refine((val) => Object.values(Month).includes(val), {
-      message: "required",
-    }),
   amount: z.number().min(1, { message: "required" }),
   note: z.string().optional(),
 });

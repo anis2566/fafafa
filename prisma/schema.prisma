@@ -81,6 +81,13 @@ enum TransactionStatus {
   Reject
 }
 
+enum TeacherPaymentStatus {
+  Pending
+  Approve
+  Reject
+  Dismiss
+}
+
 enum PaymentMethod {
   Cash
   MobileBanking
@@ -354,7 +361,7 @@ model TeacherPayment {
   deduction     Int?
   deductionUnit Int?
   month         Month
-  status        TransactionStatus   @default(Pending)
+  status        TeacherPaymentStatus   @default(Pending)
   note          String?
   advance       Int                 @default(0)
 
@@ -534,6 +541,7 @@ model TeacherAdvance {
   id            String          @id @default(cuid())
   session       Int
   month         Month
+  teacherName   String
   amount        Int
   status        TransactionStatus @default(Pending)
 

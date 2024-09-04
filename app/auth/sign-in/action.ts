@@ -11,10 +11,10 @@ import { db } from "@/lib/prisma";
 
 type SignInUser = {
   values: SignInSchemaType;
-  callback: string | null;
+  callbackUrl: string | null;
 };
 
-export const SIGN_IN_USER = async ({ values, callback }: SignInUser) => {
+export const SIGN_IN_USER = async ({ values, callbackUrl }: SignInUser) => {
   try {
     const user = await db.user.findUnique({
       where: {
@@ -46,9 +46,9 @@ export const SIGN_IN_USER = async ({ values, callback }: SignInUser) => {
       await signIn("credentials", {
         email: values.email,
         password: values.password,
-        redirectTo: callback ? callback : "/",
+        redirect: true,
+        redirectTo: callbackUrl ? callbackUrl : "/",
       });
-
       return { success: "Login successful", user };
     }
   } catch (error) {

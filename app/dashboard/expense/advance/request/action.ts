@@ -24,6 +24,14 @@ export const CREATE_ADVANCE = async (values: TeacherAdvanceSchemaType) => {
 
   if (!success) throw new Error("Invalid input value");
 
+  const teacher = await db.teacher.findUnique({
+    where: {
+      id: data.teacherId,
+    },
+  });
+
+  if (!teacher) throw new Error("Teacher not found");
+
   await db.$transaction(async (ctx) => {
     await db.teacherAdvance.create({
       data: {
@@ -31,6 +39,7 @@ export const CREATE_ADVANCE = async (values: TeacherAdvanceSchemaType) => {
         month: Object.values(Month)[new Date().getMonth()],
         ...data,
         status: TransactionStatus.Approve,
+        teacherName: teacher.name,
       },
     });
 
@@ -41,6 +50,9 @@ export const CREATE_ADVANCE = async (values: TeacherAdvanceSchemaType) => {
       data: {
         advance: {
           increment: data.amount,
+        },
+        current: {
+          decrement: data.amount,
         },
       },
     });

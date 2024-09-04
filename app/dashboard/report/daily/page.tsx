@@ -128,30 +128,6 @@ const DailyReport = async () => {
         }
     })
 
-    const todayِTeacherBill = await db.teacherPayment.aggregate({
-        where: {
-            OR: [
-                {
-                    ...todayFilter,
-                    status: TransactionStatus.Approve
-                },
-                {
-                    updatedAt: {
-                        gte: today,
-                        lt: tomorrow,
-                    },
-                    status: TransactionStatus.Approve
-                }
-            ]
-        },
-        _sum: {
-            amount: true
-        },
-        _count: {
-            _all: true
-        }
-    })
-
     const todayِTeacherAdvance = await db.teacherAdvance.aggregate({
         where: {
             OR: [
@@ -178,8 +154,7 @@ const DailyReport = async () => {
 
     const totalIncome = (todaySalary._sum.amount ?? 0) + (todayِAdmission._sum.amount ?? 0);
     const totalExpenses = (todayِHouseRent._sum.amount ?? 0) +
-        (todayِTeacherBill._sum.amount ?? 0) +
-        todayِUtility.reduce((acc, item) => acc + (item._sum.amount ?? 0), 0) + 
+        todayِUtility.reduce((acc, item) => acc + (item._sum.amount ?? 0), 0) +
         (todayِTeacherAdvance._sum.amount ?? 0)
 
     return (
@@ -201,7 +176,7 @@ const DailyReport = async () => {
             <div className="mt-4 space-y-8">
                 <Card>
                     <CardHeader className="pb-0">
-                        <CardTitle>Income Report</CardTitle>
+                        <CardTitle>Income</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <Table>
@@ -237,7 +212,7 @@ const DailyReport = async () => {
 
                 <Card>
                     <CardHeader className="pb-0">
-                        <CardTitle>Expense Report</CardTitle>
+                        <CardTitle>Expense</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <Table>
@@ -253,11 +228,6 @@ const DailyReport = async () => {
                                     <TableCell>Teacher Advance</TableCell>
                                     <TableCell>{todayِTeacherAdvance._count._all}</TableCell>
                                     <TableCell>{todayِTeacherAdvance._sum.amount ?? 0}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell>Teacher Bill</TableCell>
-                                    <TableCell>{todayِTeacherBill._count._all}</TableCell>
-                                    <TableCell>{todayِTeacherBill._sum.amount ?? 0}</TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell>House Rent Payment</TableCell>

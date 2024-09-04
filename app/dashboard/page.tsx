@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { Day, PaymentStatus } from "@prisma/client";
+import { Day, PaymentStatus, Expenses } from "@prisma/client";
 
 import { ContentLayout } from "./_components/content-layout"
 import { db } from "@/lib/prisma";
@@ -119,6 +119,15 @@ const Dashboard = async () => {
         }
     })
 
+    const formatedToadyExpense = todayExpense.map(item => ({ title: item.type as Expenses, amount: item._sum.amount ?? 0 }));
+
+    const todayAdvance = await db.teacherAdvance.aggregate({
+        _sum: {
+            amount: true
+        }
+    })
+
+    const expensaArray = [...formatedToadyExpense, { title: "Advance", amount: todayAdvance._sum.amount ?? 0 }];
 
     const students = await db.student.groupBy({
         by: ["createdAt"],
@@ -164,7 +173,7 @@ const Dashboard = async () => {
                     <DailyIncomeChart data={todaySalary.map(item => ({ class: item.class, amount: item._sum.amount ?? 0 }))} />
                     <WeeklyIncomeChart data={weeklySalaryData} />
                     <MonthlyIncomeChart data={monthlySalary.map(item => ({ class: item.class, amount: item._sum.amount ?? 0 }))} />
-                    <DailyExpenseChart data={todayExpense.map(item => ({ title: item.type, amount: item._sum.amount ?? 0 }))} />
+                    <DailyExpenseChart data={expensaArray} />
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-6">

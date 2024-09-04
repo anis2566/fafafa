@@ -7,6 +7,8 @@ export const SignUpSchema = z.object({
   email: requiredString.email({ message: "invalid email" }),
   password: requiredString.min(6, { message: "min 6 characters" }),
   image: requiredString,
+  teacherId: z.number().optional(),
+  phone: requiredString.optional()
 });
 
 export type SignUpSchemaType = z.infer<typeof SignUpSchema>;

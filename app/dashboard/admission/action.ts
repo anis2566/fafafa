@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { Class } from "@prisma/client";
+import { Class, Role } from "@prisma/client";
 import { StudentSchema, StudentSchemaType } from "./schema";
 
 export const CREATE_STUDENT = async (values: StudentSchemaType) => {
@@ -44,8 +44,8 @@ export const CREATE_STUDENT = async (values: StudentSchemaType) => {
 
   return {
     success: "Student created",
-    id: newStudent.id
-  }
+    id: newStudent.id,
+  };
 };
 
 export const GET_ADMISSION_FEE_BY_CLASS = async (className: Class) => {
@@ -74,4 +74,16 @@ export const GET_MONTHLY_FEE_BY_CLASS = async (className: Class) => {
   }
 
   return { monthlyFee };
+};
+
+export const GET_USERS = async () => {
+  const users = await db.user.findMany({
+    where: {
+      role: {
+        not: Role.Admin,
+      },
+    },
+  });
+
+  return { users };
 };

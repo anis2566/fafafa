@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button"
 import { StudentSchema, StudentSchemaType } from "../schema"
 import { cn, formatString } from "@/lib/utils"
 import { UploadButton } from "@/lib/uploadthing"
-import { CREATE_STUDENT, GET_ADMISSION_FEE_BY_CLASS, GET_MONTHLY_FEE_BY_CLASS } from "../action"
+import { CREATE_STUDENT, GET_ADMISSION_FEE_BY_CLASS, GET_MONTHLY_FEE_BY_CLASS, GET_USERS } from "../action"
 
 const steps = [
     {
@@ -51,8 +51,8 @@ const steps = [
     },
     {
         id: 5,
-        name: 'Fee',
-        fields: ["admissionFee", "monthlyFee"],
+        name: 'Fee && Ref',
+        fields: ["admissionFee", "monthlyFee", "referenceId"],
         Icon: DollarSign
     },
 ]
@@ -65,7 +65,7 @@ export const AdmissionForm = () => {
 
     const router = useRouter()
 
-    const {mutate: createStudent, isPending} = useMutation({
+    const { mutate: createStudent, isPending } = useMutation({
         mutationFn: CREATE_STUDENT,
         onSuccess: (data) => {
             toast.success(data?.success, {
@@ -109,7 +109,8 @@ export const AdmissionForm = () => {
             permanentThana: "",
             permanentDistrict: "",
             admissionFee: undefined,
-            monthlyFee: undefined
+            monthlyFee: undefined,
+            referenceId: ""
         },
     })
 
@@ -137,7 +138,7 @@ export const AdmissionForm = () => {
         queryKey: ["get-admission-fee-for-apply"],
         queryFn: async () => {
             const res = await GET_ADMISSION_FEE_BY_CLASS(form.getValues("class"))
-            if(res.admissionFee) {
+            if (res.admissionFee) {
                 form.setValue("admissionFee", res.admissionFee.amount)
             }
             return res.admissionFee
@@ -149,12 +150,20 @@ export const AdmissionForm = () => {
         queryKey: ["get-monthly-fee-for-apply"],
         queryFn: async () => {
             const res = await GET_MONTHLY_FEE_BY_CLASS(form.getValues("class"))
-            if(res.monthlyFee) {
+            if (res.monthlyFee) {
                 form.setValue("monthlyFee", res.monthlyFee.amount)
             }
             return res.monthlyFee
         },
         enabled: !!form.getValues("class")
+    })
+
+    const { data: users } = useQuery({
+        queryKey: ["get-user-for-ref"],
+        queryFn: async () => {
+            const res = await GET_USERS()
+            return res.users
+        },
     })
 
     return (
@@ -774,6 +783,33 @@ export const AdmissionForm = () => {
                                             </Button>
                                         </div>
                                     </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="referenceId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Reference</FormLabel>
+                                    <Select defaultValue={field.value} onValueChange={(value) => {
+                                        field.onChange(value)
+                                        trigger("referenceId")
+                                    }}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select reference" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {
+                                                users?.map((v, i) => (
+                                                    <SelectItem value={v.id} key={i}>{v.name}</SelectItem>
+                                                ))
+                                            }
+                                        </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}

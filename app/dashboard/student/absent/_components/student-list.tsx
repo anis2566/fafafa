@@ -1,6 +1,6 @@
 import { Student } from "@prisma/client"
+import { EllipsisVertical, Eye } from "lucide-react";
 import Link from "next/link";
-import { Edit, EllipsisVertical, Eye } from "lucide-react";
 
 import {
     Table,
@@ -11,6 +11,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { formatString } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,8 +20,12 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
-import { formatString } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import {
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+} from "@/components/ui/hover-card"
 
 interface StudentWithProp extends Student {
     payments: { id: string }[]
@@ -42,6 +47,7 @@ export const StudentList = ({ students }: Props) => {
                     <TableHead>F. Phone</TableHead>
                     <TableHead>M. Phone</TableHead>
                     <TableHead>Due</TableHead>
+                    <TableHead>Reason</TableHead>
                     <TableHead>Action</TableHead>
                 </TableRow>
             </TableHeader>
@@ -62,6 +68,18 @@ export const StudentList = ({ students }: Props) => {
                             <TableCell>{student.mPhone}</TableCell>
                             <TableCell>{student.payments.length > 0 ? `${student.payments.length} Months` : "Paid"}</TableCell>
                             <TableCell>
+                                <HoverCard>
+                                    <HoverCardTrigger asChild>
+                                        <Badge>
+                                            {student.leftReason?.substring(0, 15)}...
+                                        </Badge>
+                                    </HoverCardTrigger>
+                                    <HoverCardContent className="w-60">
+                                        {student.leftReason}
+                                    </HoverCardContent>
+                                </HoverCard>
+                            </TableCell>
+                            <TableCell>
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" className="h-8 w-8 p-0">
@@ -76,12 +94,7 @@ export const StudentList = ({ students }: Props) => {
                                                 View
                                             </Link>
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem asChild>
-                                            <Link href={`/dashboard/student/edit/${student.id}`} className="flex items-center gap-x-3">
-                                                <Edit className="w-5 h-5" />
-                                                Edit
-                                            </Link>
-                                        </DropdownMenuItem>
+
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </TableCell>

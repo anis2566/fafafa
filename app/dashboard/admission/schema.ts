@@ -63,6 +63,7 @@ export const StudentSchema = z.object({
   permanentDistrict: requiredString,
   admissionFee: z.number().min(1, { message: "required" }),
   monthlyFee: z.number().min(1, { message: "required" }),
+  referenceId: z.string().optional(),
 });
 
 export type StudentSchemaType = z.infer<typeof StudentSchema>;

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Metadata } from "next";
-import { Expenses, Month } from "@prisma/client";
+import { Expenses, Month, TeacherPaymentStatus } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -47,6 +47,11 @@ const ExpenseOverview = async () => {
 
     const teacherPayment = await db.teacherPayment.groupBy({
         by: ["month"],
+        where: {
+            status: {
+                not: TeacherPaymentStatus.Dismiss
+            }
+        },
         _sum: {
             amount: true
         }

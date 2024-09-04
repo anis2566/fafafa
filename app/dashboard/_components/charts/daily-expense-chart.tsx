@@ -16,7 +16,7 @@ import {
     ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart"
-import { Expenses } from "@prisma/client"
+
 import { formatString } from "@/lib/utils"
 
 const chartConfig = {
@@ -27,7 +27,7 @@ const colors = [
 ];
 
 interface Props {
-    data: { title: Expenses, amount: number }[]
+    data: { title: string, amount: number }[]
 }
 
 export function DailyExpenseChart({ data }: Props) {

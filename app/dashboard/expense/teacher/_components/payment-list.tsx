@@ -1,4 +1,4 @@
-import { Teacher, TeacherFee, TeacherPayment } from "@prisma/client"
+import { Teacher, TeacherFee, TeacherPayment, TeacherPaymentStatus } from "@prisma/client"
 import { Edit, EllipsisVertical } from "lucide-react"
 import Link from "next/link"
 
@@ -24,6 +24,8 @@ import {
     HoverCardTrigger,
 } from "@/components/ui/hover-card"
 
+import { cn } from "@/lib/utils"
+
 interface TeacherWithFee extends Teacher {
     fee: TeacherFee | null
 }
@@ -46,11 +48,10 @@ export const PaymentList = ({ payments }: Props) => {
                     <TableHead>Month</TableHead>
                     <TableHead>Per Class</TableHead>
                     <TableHead>Class Unit</TableHead>
-                    <TableHead>Total</TableHead>
+                    <TableHead>Incentive</TableHead>
                     <TableHead>Deduction Unit</TableHead>
                     <TableHead>Deduction</TableHead>
-                    <TableHead>Advance</TableHead>
-                    <TableHead>Incentive</TableHead>
+                    <TableHead>Advance Paid</TableHead>
                     <TableHead>Net Total</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Edited</TableHead>
@@ -66,13 +67,20 @@ export const PaymentList = ({ payments }: Props) => {
                             <TableCell className="py-3">{payment.month}</TableCell>
                             <TableCell className="py-3">{payment.teacher.fee?.perClass}</TableCell>
                             <TableCell className="py-3">{payment.classUnit}</TableCell>
-                            <TableCell className="py-3">{payment.classUnit * (payment.teacher.fee?.perClass ?? 0)}</TableCell>
-                            <TableCell className="py-3">{payment.deductionUnit}</TableCell>
-                            <TableCell className="py-3">{(payment.deductionUnit ?? 0) * (payment.teacher.fee?.perClass ?? 0)}</TableCell>
-                            <TableCell className="py-3">{payment.advance}</TableCell>
                             <TableCell className="py-3">{payment.incentive}</TableCell>
+                            <TableCell className="py-3">{payment.deductionUnit}</TableCell>
+                            <TableCell className="py-3">{payment.deduction}</TableCell>
+                            <TableCell className="py-3">{payment.advance}</TableCell>
                             <TableCell className="py-3">{payment.amount}</TableCell>
-                            <TableCell className="py-3">{payment.status}</TableCell>
+                            <TableCell className="py-3">
+                                <Badge className={cn(
+                                    "text-white",
+                                    payment.status === TeacherPaymentStatus.Pending && "bg-indigo-500",
+                                    payment.status === TeacherPaymentStatus.Dismiss && "bg-amber-500",
+                                    payment.status === TeacherPaymentStatus.Approve && "bg-green-500",
+                                    payment.status === TeacherPaymentStatus.Reject && "bg-rose-500",
+                                )}>{payment.status}</Badge>
+                            </TableCell>
                             <TableCell className="py-3">
                                 <HoverCard>
                                     <HoverCardTrigger asChild>

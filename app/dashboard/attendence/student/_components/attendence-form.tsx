@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/table"
 
 import { GET_BATCH_BY_CLASS } from "../action"
-import { adjustTime, formatString } from "@/lib/utils"
+import { formatString, formatTime } from "@/lib/utils"
 
 export const AttendenceForm = () => {
     const [className, setClassName] = useState<Class | null>(null)
@@ -82,7 +82,7 @@ export const AttendenceForm = () => {
                                             <TableRow key={index}>
                                                 <TableCell>{index + 1}</TableCell>
                                                 <TableCell>{batch.name}</TableCell>
-                                                <TableCell>{adjustTime(batch.time[0])} - {batch.time[batch.time.length - 1]}</TableCell>
+                                                <TableCell>{formatTime(batch.time[0], "start")} - {formatTime(batch.time[batch.time.length - 1], "end")}</TableCell>
                                                 <TableCell>
                                                     <Button asChild size="sm">
                                                         <Link href={`/dashboard/attendence/student/${batch.id}`}>Enter</Link>

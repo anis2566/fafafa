@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { useMutation } from "@tanstack/react-query"
-import { Expenses, Month } from "@prisma/client"
+import { Expenses } from "@prisma/client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -51,7 +51,6 @@ export const CreateUtilityFrom = () => {
         defaultValues: {
             type: undefined,
             amount: undefined,
-            month: undefined,
             note: ""
         },
     })
@@ -105,30 +104,6 @@ export const CreateUtilityFrom = () => {
                                     <FormControl>
                                         <Input placeholder="Enter amount..." {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} type="number" disabled={isPending} />
                                     </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="month"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Month</FormLabel>
-                                    <Select onValueChange={field.onChange} disabled={isPending}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select month" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {
-                                                Object.values(Month).map((v, i) => (
-                                                    <SelectItem value={v} key={i}>{v}</SelectItem>
-                                                ))
-                                            }
-                                        </SelectContent>
-                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}

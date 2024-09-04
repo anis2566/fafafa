@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 import { auth } from "./auth";
 
-const protectedRoutes = ["/dashboard"];
+const protectedRoutes = ["/dashboard", "/teacher"];
 
 export default async function middleware(request: NextRequest) {
   const session = await auth();
@@ -15,10 +15,12 @@ export default async function middleware(request: NextRequest) {
   if (!session && isProtected) {
     const signInUrl = new URL("/auth/sign-in", request.nextUrl);
 
-    signInUrl.searchParams.set("callback", request.nextUrl.pathname);
+    // Set the callback URL to redirect back after sign-in
+    signInUrl.searchParams.set("callbackUrl", request.nextUrl.href);
+
+    console.log("Redirecting to sign-in:", signInUrl.href); // Debug log
 
     return NextResponse.redirect(signInUrl);
-  } else {
   }
 
   return NextResponse.next();

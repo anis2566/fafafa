@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Metadata } from "next";
-import { Class, PaymentStatus } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -10,16 +9,16 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
+import { ContentLayout } from "../../_components/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
-import { ContentLayout } from "../_components/content-layout";
+import { Class, PaymentStatus } from "@prisma/client";
 import { db } from "@/lib/prisma";
-import { StudentList } from "./_components/student-list";
-import { Header } from "./_components/header";
 import { CustomPagination } from "@/components/custom-pagination";
+import { StudentList } from "./_components/student-list";
+import { Header } from "../_components/header";
 
 export const metadata: Metadata = {
-    title: "BEC | Student",
+    title: "BEC | Student | Absent",
     description: "Basic Education Care",
 };
 
@@ -35,7 +34,7 @@ interface Props {
 }
 
 
-const Student = async ({ searchParams }: Props) => {
+const AbsentStudents = async ({ searchParams }: Props) => {
     const { session, className, id, name, page, perPage } = searchParams;
     const itemsPerPage = parseInt(perPage) || 5;
     const currentPage = parseInt(page) || 1;
@@ -45,7 +44,7 @@ const Student = async ({ searchParams }: Props) => {
     const students = await db.student.findMany({
         where: {
             session: formatedSession,
-            // isPresent: true,
+            isPresent: false,
             ...(className && { class: className }),
             ...(studentId && { studentId }),
             ...(name && { name: { contains: name, mode: "insensitive" } }),
@@ -90,16 +89,22 @@ const Student = async ({ searchParams }: Props) => {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>Student</BreadcrumbPage>
+                        <BreadcrumbLink asChild>
+                            <Link href="/dashboard/student">Student</Link>
+                        </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                        <BreadcrumbPage>Absent</BreadcrumbPage>
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
 
             <Card className="mt-4">
                 <CardHeader>
-                    <CardTitle>Student List</CardTitle>
+                    <CardTitle>Absent List</CardTitle>
                     <CardDescription>
-                        A collection of student.
+                        A collection of absent student.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -112,4 +117,4 @@ const Student = async ({ searchParams }: Props) => {
     )
 }
 
-export default Student
+export default AbsentStudents

@@ -3,6 +3,7 @@
 import { db } from "@/lib/prisma";
 import { TeacherPaymentSchema, TeacherPaymentSchemaType } from "./schema";
 import { revalidatePath } from "next/cache";
+import { AdvanceStatus, TeacherPaymentStatus } from "@prisma/client";
 
 export const CREATE_TEACHER_PAYMENT = async (
   values: TeacherPaymentSchemaType
@@ -38,35 +39,76 @@ export const CREATE_TEACHER_PAYMENT = async (
     throw new Error("Teacher not found");
   }
 
-  const total = teacher.fee ? teacher.fee.perClass * data.classUnit : 0;
   const deduction = teacher.fee
     ? teacher.fee.perClass * (data.deductionUnit ?? 0)
     : 0;
 
-  await db.teacherPayment.create({
-    data: {
-      teacherName: teacher.name,
-      session: new Date().getFullYear(),
-      amount:
-        total +
-        (data?.incentive ?? 0) -
-        (deduction + (teacher?.bank?.advance ?? 0)),
-      advance: teacher?.bank?.advance ?? 0,
-      deduction,
-      ...data,
-    },
-  });
+  const total = teacher.fee
+    ? teacher.fee.perClass * data.classUnit + (data?.incentive ?? 0) - deduction
+    : 0 + (data?.incentive ?? 0) - deduction;
 
-  await db.bank.update({
-    where: {
-      teacherId: teacher.id,
-    },
-    data: {
-      advance: {
-        decrement: teacher?.bank?.advance ?? 0,
+  if ((teacher?.bank?.advance ?? 0) > 0) {
+    if (total <= (teacher?.bank?.advance ?? 0)) {
+      await db.bank.update({
+        where: {
+          teacherId: data.teacherId,
+        },
+        data: {
+          advance: {
+            decrement: total,
+          },
+          current: {
+            increment: total,
+          },
+        },
+      });
+
+      await db.teacherPayment.create({
+        data: {
+          teacherName: teacher.name,
+          session: new Date().getFullYear(),
+          amount: total,
+          advance: total,
+          deduction,
+          ...data,
+          status: TeacherPaymentStatus.Dismiss,
+        },
+      });
+    } else {
+      await db.bank.update({
+        where: {
+          teacherId: data.teacherId,
+        },
+        data: {
+          advance: 0,
+          current: {
+            increment: total,
+          },
+        },
+      });
+
+      await db.teacherPayment.create({
+        data: {
+          teacherName: teacher.name,
+          session: new Date().getFullYear(),
+          amount: total - (teacher.bank?.advance ?? 0),
+          deduction,
+          advance: teacher.bank?.advance ?? 0,
+          ...data,
+        },
+      });
+    }
+  } else {
+    await db.teacherPayment.create({
+      data: {
+        teacherName: teacher.name,
+        session: new Date().getFullYear(),
+        amount: total,
+        deduction,
+        ...data,
       },
-    },
-  });
+    });
+  }
 
   revalidatePath("/dashbaord/expense/teacher/create");
 

@@ -29,7 +29,7 @@ export const SignInForm = () => {
     const [showPassword, setShowPassword] = useState<boolean>(false)
 
     const searchParams = useSearchParams()
-    const callback = searchParams.get("callback")
+    const callbackUrl = searchParams.get("callbackUrl")
 
     const togglePassword = () => {
         setShowPassword(prev => !prev)
@@ -61,7 +61,7 @@ export const SignInForm = () => {
         toast.loading("Login...", {
             id: "sign-in-user"
         })
-        signInUser({ values, callback: callback ? callback : "/" })
+        signInUser({ values, callbackUrl: callbackUrl ? callbackUrl : "/" })
     }
 
     return (

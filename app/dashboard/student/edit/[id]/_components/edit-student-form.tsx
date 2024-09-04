@@ -10,7 +10,7 @@ import { Gender, Nationality, Religion, Class as PrismaClass, Shift, Group } fro
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { toast } from "sonner"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -23,6 +23,7 @@ import { formatString } from "@/lib/utils"
 import { UploadButton } from "@/lib/uploadthing"
 import { StudentSchema } from "@/app/dashboard/admission/schema"
 import { UPDATE_STUDENT } from "../action"
+import { GET_USERS } from "@/app/dashboard/admission/action"
 
 interface Props {
     student: Student;
@@ -32,6 +33,14 @@ export const EditStudentFrom = ({ student }: Props) => {
     const [dob, setDob] = useState<Date>(new Date())
 
     const router = useRouter()
+
+    const { data: users } = useQuery({
+        queryKey: ["get-user-for-ref"],
+        queryFn: async () => {
+            const res = await GET_USERS()
+            return res.users
+        },
+    })
 
     const { mutate: updateStudent, isPending } = useMutation({
         mutationFn: UPDATE_STUDENT,
@@ -77,7 +86,8 @@ export const EditStudentFrom = ({ student }: Props) => {
             permanentThana: student.permanentThana || "",
             permanentDistrict: student.permanentDistrict || "",
             admissionFee: student.admissionFee || undefined,
-            monthlyFee: student.monthlyFee || undefined
+            monthlyFee: student.monthlyFee || undefined,
+            referenceId: student.referenceId || ""
         },
     })
 
@@ -576,6 +586,30 @@ export const EditStudentFrom = ({ student }: Props) => {
                                 <FormControl>
                                     <Input {...field} value={field.value} type="number" disabled={isPending} />
                                 </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="referenceId"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Reference</FormLabel>
+                                <Select defaultValue={field.value} onValueChange={(value) => field.onChange(value)} disabled={isPending}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select reference" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {
+                                            users?.map((v, i) => (
+                                                <SelectItem value={v.id} key={i}>{v.name}</SelectItem>
+                                            ))
+                                        }
+                                    </SelectContent>
+                                </Select>
                                 <FormMessage />
                             </FormItem>
                         )}

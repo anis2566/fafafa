@@ -108,8 +108,6 @@ const TeacherDetails = async ({ params: { id }, searchParams: { session, month, 
         }, {})
     );
 
-    const netBalance = (teacher.bank?.current ?? 0) - (teacher.bank?.advance ?? 0)
-
     const pendingBalance = await db.teacherPayment.aggregate({
         where: {
             status: TransactionStatus.Pending
@@ -242,9 +240,8 @@ const TeacherDetails = async ({ params: { id }, searchParams: { session, month, 
                         </Card>
                     </TabsContent>
                     <TabsContent value="bank" className="space-y-6">
-                        <div className="grid md:grid-cols-4 gap-6">
-                            <BankCard amount={netBalance} title="Net balance" />
-                            <BankCard amount={teacher.bank?.current ?? 0} title="Balance" />
+                        <div className="grid md:grid-cols-3 gap-6">
+                            <BankCard amount={teacher.bank?.current ?? 0} title="Net Balance" />
                             <BankCard amount={teacher.bank?.advance ?? 0} title="Advance" />
                             <BankCard amount={pendingBalance._sum.amount ?? 0} title="Pending" />
                         </div>

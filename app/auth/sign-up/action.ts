@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import axios from "axios";
+import { Role } from "@prisma/client";
 
 import { db } from "@/lib/prisma";
 import { SignInSchemaType } from "../sign-in/schema";
@@ -24,12 +25,30 @@ export const SIGN_UP = async (values: SignInSchemaType) => {
     throw new Error("User already exists");
   }
 
+  let role: Role = Role.User;
+
+  if (data.teacherId && data.phone) {
+    const teacher = await db.teacher.findFirst({
+      where: {
+        teacherId: data.teacherId,
+        phone: data.phone,
+      },
+    });
+
+    if (teacher) {
+      role = Role.Teacher;
+    } else {
+      throw new Error("Invalid teacher information");
+    }
+  }
+
   const hashedPassword = saltAndHashPassword(data.password);
 
   const newUser = await db.user.create({
     data: {
       ...data,
       password: hashedPassword,
+      role,
     },
   });
 

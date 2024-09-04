@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { useSidebarToggle } from "@/hooks/use-sidebar-toggle";
 import { Sidebar } from "./sidebar";
 import { useSidebar } from "@/hooks/use-sidebar";
+import { useSession } from "next-auth/react";
 
 export function AdminLayout({
   children
@@ -11,8 +12,9 @@ export function AdminLayout({
   children: React.ReactNode;
 }) {
   const sidebar = useSidebar(useSidebarToggle, (state) => state);
-
+  const { data } = useSession()
   if (!sidebar) return null;
+  console.log(data)
 
   return (
     <>
