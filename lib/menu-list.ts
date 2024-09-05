@@ -1,3 +1,4 @@
+import { Status } from "@prisma/client";
 import {
   Users,
   Settings,
@@ -63,6 +64,21 @@ type Menu = {
 type Group = {
   groupLabel: string;
   menus: Menu[];
+};
+
+type MenuTeacher = {
+  href: string;
+  label: string;
+  active: boolean;
+  icon: any;
+  submenus: Submenu[];
+  status: Status;
+};
+
+type GroupTeacher = {
+  groupLabel: string;
+  menus: MenuTeacher[];
+  status: Status;
 };
 
 export function getMenuList(pathname: string): Group[] {
@@ -322,6 +338,13 @@ export function getMenuList(pathname: string): Group[] {
             },
           ],
         },
+        {
+          href: "/dashboard/teacher/request",
+          label: "Request",
+          active: pathname.includes("/dashboard/teacher/request"),
+          icon: Radio,
+          submenus: [],
+        },
       ],
     },
     {
@@ -449,89 +472,56 @@ export function getMenuList(pathname: string): Group[] {
   ];
 }
 
-export function getMenuListScout(pathname: string): Group[] {
+export function getMenuListTeacher(pathname: string): GroupTeacher[] {
   return [
     {
       groupLabel: "",
+      status: Status.Active,
       menus: [
         {
-          href: "/scout",
+          href: "/teacher",
           label: "Dashboard",
-          active: pathname === "/scout",
+          active: pathname === "/teacher",
           icon: LayoutGrid,
           submenus: [],
+          status: Status.Active,
         },
       ],
     },
     {
       groupLabel: "",
+      status: Status.Active,
       menus: [
         {
-          href: "",
-          label: "Event",
-          active: pathname.includes("/scout/event"),
-          icon: Calendar,
-          submenus: [
-            {
-              href: "/scout/event",
-              label: "List",
-              active: pathname === "/scout/event",
-              icon: List,
-            },
-            {
-              href: "/scout/event/app",
-              label: "Applications",
-              active: pathname === "/scout/event/app",
-              icon: File,
-            },
-          ],
+          href: "/teacher/class",
+          label: "Classes",
+          active: pathname.includes("/teacher/class"),
+          icon: BookOpen,
+          submenus: [],
+          status: Status.Active,
         },
         {
-          href: "",
-          label: "Training",
-          active: pathname.includes("/scout/training"),
-          icon: GitCompareArrows,
-          submenus: [
-            {
-              href: "/scout/training",
-              label: "List",
-              active: pathname === "/scout/training",
-              icon: List,
-            },
-            {
-              href: "/scout/training/app",
-              label: "Applications",
-              active: pathname === "/scout/training/app",
-              icon: File,
-            },
-          ],
+          href: "/teacher/payment",
+          label: "Payment",
+          active: pathname.includes("/teacher/payment"),
+          icon: HandCoins,
+          submenus: [],
+          status: Status.Active,
         },
+        // {
+        //   href: "",
+        //   label: "Unit",
+        //   active: pathname.includes("/scout/unit"),
+        //   icon: Layers3,
+        //   submenus: [],
+        // },
         {
-          href: "",
-          label: "Unit",
-          active: pathname.includes("/scout/unit"),
-          icon: Layers3,
-          submenus: [
-            {
-              href: "/scout/unit",
-              label: "Manage",
-              active: pathname === "/scout/unit",
-              icon: Settings,
-            },
-            {
-              href: "/scout/unit/request",
-              label: "Request",
-              active: pathname === "/scout/unit/request",
-              icon: Radio,
-            },
-          ],
-        },
-        {
-          href: "/scout/profile",
+          href: "/teacher/profile",
           label: "Profile",
-          active: pathname.includes("/scout/profile"),
+          active: pathname.includes("/teacher/profile"),
           icon: UserCog,
           submenus: [],
+          status: Status.Active,
         },
       ],
     },

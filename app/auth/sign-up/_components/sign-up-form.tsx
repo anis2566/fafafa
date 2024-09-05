@@ -14,15 +14,12 @@ import { Button } from "@/components/ui/button"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
-import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible"
 
 import { UploadButton } from "@/lib/uploadthing"
 import { SignUpSchema } from "../schema"
@@ -30,18 +27,9 @@ import { SIGN_UP } from "../action"
 
 export const SignUpForm = () => {
     const [showPassword, setShowPassword] = useState<boolean>(false)
-    const [isTeacher, setIsTeacher] = useState<boolean>(false)
 
     const togglePassword = () => {
         setShowPassword(prev => !prev)
-    }
-
-    const toggleTeacher = (checked: boolean) => {
-        if (!checked) {
-            form.setValue("teacherId", undefined)
-            form.setValue("phone", "")
-        }
-        setIsTeacher(checked)
     }
 
     const { mutate: signUp, isPending } = useMutation({
@@ -161,48 +149,6 @@ export const SignUpForm = () => {
                         </FormItem>
                     )}
                 />
-
-                <div className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                    <div className="space-y-0.5">
-                        <p>Apply as Teacher</p>
-                    </div>
-                    <Switch
-                        checked={isTeacher}
-                        onCheckedChange={(checked) => toggleTeacher(checked)}
-                    />
-                </div>
-
-                {/* <Collapsible open={isTeacher}>
-                    <CollapsibleContent className="space-y-4"> */}
-                        <FormField
-                            control={form.control}
-                            name="teacherId"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Teacher ID</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Enter your id" {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} type="number" disabled={isPending} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="phone"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Phone No</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Enter your id" {...field} type="text" disabled={isPending} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    {/* </CollapsibleContent>
-                </Collapsible> */}
-
 
                 <div className="flex justify-between items-center flex-wrap">
                     <Button type="submit" disabled={isPending}>Submit</Button>

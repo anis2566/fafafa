@@ -1,11 +1,33 @@
-import React from 'react'
+import Link from "next/link";
+import { Metadata } from "next";
 
-const Teacher = () => {
+import {
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbLink,
+    BreadcrumbList,
+} from "@/components/ui/breadcrumb";
+import { ContentLayout } from "./_components/content-layout";
+
+export const metadata: Metadata = {
+    title: "BEC | Dashboard",
+    description: "Basic Education Care",
+};
+
+const TeacherDashboard = () => {
     return (
-        <div>
-            Teacher
-        </div>
+        <ContentLayout title="Dashboard">
+            <Breadcrumb>
+                <BreadcrumbList>
+                    <BreadcrumbItem>
+                        <BreadcrumbLink asChild>
+                            <Link href="/dashboard">Dashboard</Link>
+                        </BreadcrumbLink>
+                    </BreadcrumbItem>
+                </BreadcrumbList>
+            </Breadcrumb>
+        </ContentLayout>
     )
 }
 
-export default Teacher
+export default TeacherDashboard

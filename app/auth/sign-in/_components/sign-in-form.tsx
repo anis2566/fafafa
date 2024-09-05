@@ -23,6 +23,8 @@ import { Input } from "@/components/ui/input"
 
 import { SignInSchema } from "../schema"
 import { SIGN_IN_USER } from "../action"
+import { useSession } from "next-auth/react"
+import { Role } from "@prisma/client"
 
 
 export const SignInForm = () => {
@@ -30,6 +32,7 @@ export const SignInForm = () => {
 
     const searchParams = useSearchParams()
     const callbackUrl = searchParams.get("callbackUrl")
+    const {update} = useSession()
 
     const togglePassword = () => {
         setShowPassword(prev => !prev)
@@ -37,10 +40,14 @@ export const SignInForm = () => {
 
     const { mutate: signInUser, isPending } = useMutation({
         mutationFn: SIGN_IN_USER,
-        onSuccess: (data) => {
+        onSuccess: (data) =>  {
             toast.success(data?.success, {
                 id: "sign-in-user"
             })
+            update({
+                role: Role.HR
+            })
+            console.log("trigerred")
         },
         onError: (error) => {
             toast.error(error.message, {

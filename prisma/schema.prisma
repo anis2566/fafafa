@@ -184,13 +184,28 @@ model User {
   role          Role            @default(User)
   status        Status          @default(Pending)
 
+  teacher       Teacher?
+  teacherRequest  TeacherRequest?
   accounts      Account[]
   references    Student[]
- 
+  sessions      Session[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([email, id])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role         Role             @default(User)
+  status       Status           @default(Pending)
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
  
 model Account {
@@ -509,9 +524,12 @@ model Teacher {
 
   level         Level[]
 
+  userId        String?     @unique
+  user          User?       @relation(fields: [userId], references: [id])
   classes       BatchClass[]
   fee           TeacherFee?
   bank          Bank?
+  teacherRequest  TeacherRequest?
   payments      TeacherPayment[]
   advances      TeacherAdvance[]
 
@@ -521,6 +539,21 @@ model Teacher {
   updatedAt DateTime @updatedAt
 
   @@unique([id])
+}
+
+model TeacherRequest {
+  id            String          @id @default(cuid())
+  status        Status          @default(Pending)
+
+  teacherId     String          @unique
+  teacher       Teacher         @relation(fields: [teacherId], references: [id])
+  userId        String          @unique
+  user          User            @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, teacherId])
 }
 
 model Bank {

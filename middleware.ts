@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 import { auth } from "./auth";
+import { Role } from "@prisma/client";
 
 const protectedRoutes = ["/dashboard", "/teacher"];
 
@@ -12,15 +13,25 @@ export default async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith(route)
   );
 
+  const isTeacherRoute = request.nextUrl.pathname.startsWith("/teacher");
+
+  const isTeacher = session?.user.role === Role.Teacher;
+
   if (!session && isProtected) {
     const signInUrl = new URL("/auth/sign-in", request.nextUrl);
+    signInUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
 
-    // Set the callback URL to redirect back after sign-in
-    signInUrl.searchParams.set("callbackUrl", request.nextUrl.href);
+    if (request.nextUrl.pathname !== "/auth/sign-in") {
+      return NextResponse.redirect(signInUrl);
+    }
+  }
 
-    console.log("Redirecting to sign-in:", signInUrl.href); // Debug log
+  if (isTeacherRoute && !isTeacher) {
+    const applyUrl = new URL("/teacher/apply", request.nextUrl);
 
-    return NextResponse.redirect(signInUrl);
+    if (request.nextUrl.pathname !== "/teacher/apply") {
+      return NextResponse.redirect(applyUrl);
+    }
   }
 
   return NextResponse.next();
