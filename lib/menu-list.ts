@@ -44,6 +44,8 @@ import {
   Wallet,
   CalendarClock,
   History,
+  LogOut,
+  FilePen,
 } from "lucide-react";
 
 type Submenu = {
@@ -345,6 +347,26 @@ export function getMenuList(pathname: string): Group[] {
           icon: Radio,
           submenus: [],
         },
+        {
+          href: "",
+          label: "Leave Management",
+          active: pathname.includes("/dashboard/teacher/leave"),
+          icon: LogOut,
+          submenus: [
+            {
+              href: "dashboard/teacher/leave/apply",
+              label: "Apply",
+              active: pathname === "dashboard/teacher/leave/apply",
+              icon: FilePen,
+            },
+            {
+              href: "dashboard/teacher/leave",
+              label: "History",
+              active: pathname === "dashboard/teacher/leave",
+              icon: History,
+            },
+          ],
+        },
       ],
     },
     {
@@ -501,6 +523,27 @@ export function getMenuListTeacher(pathname: string): GroupTeacher[] {
           status: Status.Active,
         },
         {
+          href: "",
+          label: "Leave",
+          active: pathname.includes("/teacher/leave"),
+          icon: LogOut,
+          submenus: [
+            {
+              href: "/teacher/leave/apply",
+              label: "Apply",
+              active: pathname === "/teacher/leave/apply",
+              icon: FilePen,
+            },
+            {
+              href: "/teacher/leave/history",
+              label: "History",
+              active: pathname === "/teacher/leave/history",
+              icon: History,
+            },
+          ],
+          status: Status.Active,
+        },
+        {
           href: "/teacher/payment",
           label: "Payment",
           active: pathname.includes("/teacher/payment"),
@@ -508,13 +551,6 @@ export function getMenuListTeacher(pathname: string): GroupTeacher[] {
           submenus: [],
           status: Status.Active,
         },
-        // {
-        //   href: "",
-        //   label: "Unit",
-        //   active: pathname.includes("/scout/unit"),
-        //   icon: Layers3,
-        //   submenus: [],
-        // },
         {
           href: "/teacher/profile",
           label: "Profile",

@@ -37,6 +37,8 @@ import { CallModal } from "@/app/dashboard/attendence/student/[id]/_components/c
 import { UpdateNumberModal } from "@/app/dashboard/attendence/student/[id]/_components/update-modal"
 import { StudentLeftModal } from "@/app/dashboard/attendence/student/[id]/_components/left-modal"
 import { DeleteBatchModal } from "@/app/dashboard/batch/_components/delete-modal"
+import { UpdateTeacherStatusModal } from "@/app/dashboard/teacher/request/_components/status-modal"
+import { DeleteTeacherRequestModal } from "@/app/dashboard/teacher/request/_components/delete-modal"
 
 export const ModalProvider = () => {
     return (
@@ -81,6 +83,8 @@ export const ModalProvider = () => {
             <UpdateNumberModal />
             <StudentLeftModal />
             <DeleteBatchModal />
+            <UpdateTeacherStatusModal />
+            <DeleteTeacherRequestModal />
         </>
     )
 }

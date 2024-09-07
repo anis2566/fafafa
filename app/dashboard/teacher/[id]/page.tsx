@@ -90,7 +90,7 @@ const TeacherDetails = async ({ params: { id }, searchParams: { session, month, 
             teacherId: id
         },
         orderBy: {
-            time: "asc"
+            day: "asc"
         }
     })
 

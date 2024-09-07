@@ -6,6 +6,8 @@ import { z } from "zod";
 
 import { auth } from "@/auth";
 import { db } from "@/lib/prisma";
+import { sendNotification } from "@/services/notification.service";
+import { GET_HR } from "@/services/user.service";
 
 const TeacherApplySchema = z.object({
   teacherId: z.number().min(1, { message: "required" }),
@@ -45,6 +47,20 @@ export const APPLY_TEACHER = async (values: TeacherApplySchemaType) => {
     },
     data: {
       role: Role.Teacher,
+    },
+  });
+
+  const { id } = await GET_HR();
+
+  await sendNotification({
+    trigger: "teacher-request",
+    actor: {
+      id: session.userId,
+      name: session.user.name || "",
+    },
+    recipients: [id],
+    data: {
+      redirectUrl: "/dashboard/teacher/request",
     },
   });
 

@@ -174,6 +174,13 @@ enum AbsentReason {
   Custom
 }
 
+enum LeaveStatus {
+  Pending
+  Approved
+  Rejected
+}
+
+
 model User {
   id            String          @id @default(cuid())
   name          String?
@@ -473,6 +480,7 @@ model Batch {
   students      Student[]
   classes       BatchClass[]
   attendences   Attendence[]
+  leaveClasses   LeaveClass[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -489,6 +497,7 @@ model Subject {
   group         Group?
 
   classes       BatchClass[]
+  leaveClasses  LeaveClass[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -532,6 +541,8 @@ model Teacher {
   teacherRequest  TeacherRequest?
   payments      TeacherPayment[]
   advances      TeacherAdvance[]
+  leaves        LeaveApp[]
+  leaveClasses  LeaveClass[]
 
   status         Status    @default(Active)
  
@@ -587,6 +598,25 @@ model TeacherAdvance {
   @@unique([id, teacherId])
 }
 
+
+model LeaveApp {
+  id            String          @id @default(cuid())
+  reason        String
+  days          Day[]
+  status        LeaveStatus     @default(Pending)
+  attachments   String[]
+
+  teacherId     String          
+  teacher       Teacher         @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  classes       LeaveClass[]
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@unique([id, teacherId])
+}
+
+
 model BatchClass {
   id             String          @id @default(cuid())
   time           String
@@ -598,6 +628,30 @@ model BatchClass {
   teacherId     String
   teacher       Teacher         @relation(fields: [teacherId], references: [id])
   teacherName   String
+  batchId       String
+  batch         Batch           @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  batchName     String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, teacherId, subjectId])
+}
+
+
+model LeaveClass {
+  id             String          @id @default(cuid())
+  time           String
+  day            Day
+
+  appId         String
+  app            LeaveApp        @relation(fields: [appId], references: [id], onDelete: Cascade)
+  subjectId     String
+  subject       Subject         @relation(fields: [subjectId], references: [id])
+  subjectName    String
+  teacherId     String?
+  teacher       Teacher?         @relation(fields: [teacherId], references: [id])
+  teacherName   String?
   batchId       String
   batch         Batch           @relation(fields: [batchId], references: [id], onDelete: Cascade)
   batchName     String

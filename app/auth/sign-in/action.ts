@@ -26,31 +26,38 @@ export const SIGN_IN_USER = async ({ values, callbackUrl }: SignInUser) => {
       throw new Error("Invalid credentials");
     }
 
-    if (!user.emailVerified) {
-      const apiUrl =
-        process.env.NODE_ENV === "production"
-          ? "https://www.apbnscouts.org/api/send-email"
-          : "http://localhost:3000/api/email/verify";
+    // if (!user.emailVerified) {
+    //   const apiUrl =
+    //     process.env.NODE_ENV === "production"
+    //       ? "https://www.apbnscouts.org/api/send-email"
+    //       : "http://localhost:3000/api/email/verify";
 
-      const { data } = await axios.post(apiUrl, {
-        email: user.email,
-        id: user.id,
-      });
+    //   const { data } = await axios.post(apiUrl, {
+    //     email: user.email,
+    //     id: user.id,
+    //   });
 
-      if (data?.success) {
-        redirect(`/auth/verify/${user.id}`);
-      } else {
-        throw new Error("Something went wrong! Try again!");
-      }
-    } else {
-      await signIn("credentials", {
-        email: values.email,
-        password: values.password,
-        redirect: true,
-        redirectTo: callbackUrl ? callbackUrl : "/",
-      });
-      return { success: "Login successful", user };
-    }
+    //   if (data?.success) {
+    //     redirect(`/auth/verify/${user.id}`);
+    //   } else {
+    //     throw new Error("Something went wrong! Try again!");
+    //   }
+    // } else {
+    //   await signIn("credentials", {
+    //     email: values.email,
+    //     password: values.password,
+    //     redirect: true,
+    //     redirectTo: callbackUrl ? callbackUrl : "/",
+    //   });
+    //   return { success: "Login successful", user };
+    // }
+    await signIn("credentials", {
+      email: values.email,
+      password: values.password,
+      redirect: true,
+      redirectTo: callbackUrl ? callbackUrl : "/",
+    });
+    return { success: "Login successful", user };
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;

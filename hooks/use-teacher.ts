@@ -14,3 +14,19 @@ export const useTeacherSubject = create<AddSubjectState>()((set) => ({
   onOpen: (id) => set({ open: true, id }),
   onClose: () => set({ open: false, id: "" }),
 }));
+
+
+export const useTeacherStatus = create<AddSubjectState>()((set) => ({
+  open: false,
+  id: "",
+  onOpen: (id) => set({ open: true, id }),
+  onClose: () => set({ open: false, id: "" }),
+}));
+
+
+export const useTeacherRequestDelete = create<AddSubjectState>()((set) => ({
+  open: false,
+  id: "",
+  onOpen: (id) => set({ open: true, id }),
+  onClose: () => set({ open: false, id: "" }),
+}));

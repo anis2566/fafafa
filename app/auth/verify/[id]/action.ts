@@ -1,11 +1,16 @@
 "use server";
 
+import { Knock } from "@knocklabs/node";
+
 import { db } from "@/lib/prisma";
+
+const knock = new Knock(process.env.NEXT_PUBLIC_KNOCK_API_KEY);
 
 type VerifyUser = {
   id: string;
   code: string;
 };
+
 export const VERIFY_USER = async ({ id, code }: VerifyUser) => {
   const token = await db.verificationToken.findFirst({
     where: {
@@ -34,6 +39,11 @@ export const VERIFY_USER = async ({ id, code }: VerifyUser) => {
     data: {
       emailVerified: new Date(),
     },
+  });
+
+  await knock.users.identify(user.id, {
+    name: user.name ?? "Guest",
+    avatar: user.image,
   });
 
   await db.verificationToken.delete({

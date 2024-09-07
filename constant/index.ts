@@ -24,3 +24,14 @@ export const availableTime = [
   "8:00 PM - 8:30 PM",
   "8:30 PM - 9:00 PM",
 ];
+
+
+export const dayOrder = {
+  Saturday: 1,
+  Sunday: 2,
+  Monday: 3,
+  Tuesday: 4,
+  Wednesday: 5,
+  Thursday: 6,
+  Friday: 7,
+};

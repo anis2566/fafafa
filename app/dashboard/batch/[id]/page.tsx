@@ -24,6 +24,7 @@ import { AddStudentButton } from "./_components/add-student-button";
 import { StudentList } from "./_components/student-list";
 import { db } from "@/lib/prisma";
 import { TeacherList } from "./_components/teacher-list";
+import { dayOrder } from "@/constant";
 
 export const metadata: Metadata = {
     title: "BEC | Batch Details",
@@ -96,7 +97,7 @@ const BatchDetails = async ({ params: { id } }: Props) => {
     })
 
     const groupedData: GroupedData[] = Object.values(
-        classes.reduce((acc: { [key: string]: GroupedData }, curr: ClassData) => {
+        classes.sort((a, b) => dayOrder[a.day] - dayOrder[b.day]).reduce((acc: { [key: string]: GroupedData }, curr: ClassData) => {
             const { day, time, teacherName, subjectName } = curr;
 
             if (!acc[day]) {
