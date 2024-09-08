@@ -1,7 +1,6 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { GET_TEACHER } from "@/services/user.service";
 import { Day, LeaveStatus } from "@prisma/client";
 import { LeaveAppSchema, LeaveAppSchemaType } from "./schema";
 
@@ -31,8 +30,12 @@ export const CREATE_LEAVE_APP = async (values: LeaveAppSchemaType) => {
   };
 };
 
-export const GET_CLASS_BY_DAYS = async (days: Day[]) => {
-  const { teacherId } = await GET_TEACHER();
+type GetClass = {
+  days: Day[];
+  teacherId: string;
+}
+
+export const GET_CLASS_BY_DAYS = async ({days, teacherId}:GetClass) => {
 
   const classes = await db.batchClass.findMany({
     where: {

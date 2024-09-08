@@ -110,7 +110,8 @@ const TeacherDetails = async ({ params: { id }, searchParams: { session, month, 
 
     const pendingBalance = await db.teacherPayment.aggregate({
         where: {
-            status: TransactionStatus.Pending
+            status: TransactionStatus.Pending,
+            teacherId: id
         },
         _sum: {
             amount: true

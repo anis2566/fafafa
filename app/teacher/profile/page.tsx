@@ -13,7 +13,7 @@ import {
 import { ContentLayout } from "../_components/content-layout";
 import { Card, CardContent } from "@/components/ui/card";
 
-import { ProfileForm } from "./_components/profile-form";
+import { ProfileForm } from "./_components/profile-form"; 
 import { GET_USER } from "@/services/user.service";
 
 export const metadata: Metadata = {
@@ -40,7 +40,7 @@ const Profile = async () => {
                 </BreadcrumbList>
             </Breadcrumb>
 
-            <div className="mt-8 space-y-8">
+            <div className="mt-4 space-y-8">
                 <Card>
                     <CardContent className="flex flex-col md:flex-row items-center gap-4 p-4 md:p-6">
                         <Image
@@ -61,9 +61,8 @@ const Profile = async () => {
                     </CardContent>
                 </Card>
 
+                <ProfileForm user={user} />
             </div>
-
-            <ProfileForm user={user} />
         </ContentLayout>
     )
 }

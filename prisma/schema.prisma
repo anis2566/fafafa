@@ -624,7 +624,7 @@ model BatchClass {
 
   subjectId     String
   subject       Subject         @relation(fields: [subjectId], references: [id])
-  subjectName    String
+  subjectName   String
   teacherId     String
   teacher       Teacher         @relation(fields: [teacherId], references: [id])
   teacherName   String
@@ -645,15 +645,15 @@ model LeaveClass {
   day            Day
 
   appId         String
-  app            LeaveApp        @relation(fields: [appId], references: [id], onDelete: Cascade)
+  app           LeaveApp        @relation(fields: [appId], references: [id], onDelete: Cascade)
   subjectId     String
   subject       Subject         @relation(fields: [subjectId], references: [id])
-  subjectName    String
+  subjectName   String
   teacherId     String?
-  teacher       Teacher?         @relation(fields: [teacherId], references: [id])
+  teacher       Teacher?        @relation(fields: [teacherId], references: [id])
   teacherName   String?
   batchId       String
-  batch         Batch           @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  batch         Batch           @relation(fields: [batchId], references: [id])
   batchName     String
 
   createdAt DateTime @default(now())

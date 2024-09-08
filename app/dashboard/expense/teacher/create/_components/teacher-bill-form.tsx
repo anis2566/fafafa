@@ -48,7 +48,7 @@ export const TeacherBillForm = () => {
     const { mutate: createPayment, isPending } = useMutation({
         mutationFn: CREATE_TEACHER_PAYMENT,
         onSuccess: (data) => {
-            // setOpen(true)
+            setOpen(true)
             toast.success(data.success, {
                 id: "create-payment"
             });

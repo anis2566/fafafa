@@ -3,7 +3,7 @@
 import { db } from "@/lib/prisma";
 import { TeacherPaymentSchema, TeacherPaymentSchemaType } from "./schema";
 import { revalidatePath } from "next/cache";
-import { AdvanceStatus, TeacherPaymentStatus } from "@prisma/client";
+import { TeacherPaymentStatus } from "@prisma/client";
 
 export const CREATE_TEACHER_PAYMENT = async (
   values: TeacherPaymentSchemaType

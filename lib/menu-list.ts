@@ -46,6 +46,8 @@ import {
   History,
   LogOut,
   FilePen,
+  Waypoints,
+  Landmark,
 } from "lucide-react";
 
 type Submenu = {
@@ -354,15 +356,15 @@ export function getMenuList(pathname: string): Group[] {
           icon: LogOut,
           submenus: [
             {
-              href: "dashboard/teacher/leave/apply",
+              href: "/dashboard/teacher/leave/apply",
               label: "Apply",
-              active: pathname === "dashboard/teacher/leave/apply",
+              active: pathname === "/dashboard/teacher/leave/apply",
               icon: FilePen,
             },
             {
-              href: "dashboard/teacher/leave",
+              href: "/dashboard/teacher/leave",
               label: "History",
-              active: pathname === "dashboard/teacher/leave",
+              active: pathname === "/dashboard/teacher/leave",
               icon: History,
             },
           ],
@@ -515,11 +517,24 @@ export function getMenuListTeacher(pathname: string): GroupTeacher[] {
       status: Status.Active,
       menus: [
         {
-          href: "/teacher/class",
-          label: "Classes",
+          href: "",
+          label: "Class",
           active: pathname.includes("/teacher/class"),
           icon: BookOpen,
-          submenus: [],
+          submenus: [
+            {
+              href: "/teacher/class",
+              label: "Regualr",
+              active: pathname === "/teacher/class",
+              icon: CalendarDays,
+            },
+            {
+              href: "/teacher/class/proxy",
+              label: "Proxy",
+              active: pathname === "/teacher/class/proxy",
+              icon: Waypoints,
+            },
+          ],
           status: Status.Active,
         },
         {
@@ -548,6 +563,14 @@ export function getMenuListTeacher(pathname: string): GroupTeacher[] {
           label: "Payment",
           active: pathname.includes("/teacher/payment"),
           icon: HandCoins,
+          submenus: [],
+          status: Status.Active,
+        },
+        {
+          href: "/teacher/account",
+          label: "Account",
+          active: pathname.includes("/teacher/account"),
+          icon: Landmark,
           submenus: [],
           status: Status.Active,
         },

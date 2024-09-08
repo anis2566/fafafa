@@ -13,13 +13,12 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { ContentLayout } from "../_components/content-layout";
-import { db } from "@/lib/prisma";
+import { ContentLayout } from "../../_components/content-layout";
 import { GET_TEACHER } from "@/services/user.service";
-import { cn } from "@/lib/utils";
+import { db } from "@/lib/prisma";
 
 export const metadata: Metadata = {
-    title: "BEC | Class",
+    title: "BEC | Class | Proxy",
     description: "Basic Education Care",
 };
 
@@ -39,10 +38,10 @@ type GroupedData = {
     }[];
 };
 
-const TeacherClass = async () => {
+const ProxyClass = async () => {
     const { teacherId } = await GET_TEACHER()
 
-    const classes = await db.batchClass.groupBy({
+    const classes = await db.leaveClass.groupBy({
         by: ["time", "day", "batchName", "subjectName"],
         where: {
             teacherId
@@ -66,7 +65,6 @@ const TeacherClass = async () => {
         }, {})
     );
 
-
     return (
         <ContentLayout title="Class">
             <Breadcrumb>
@@ -78,15 +76,21 @@ const TeacherClass = async () => {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>Class</BreadcrumbPage>
+                        <BreadcrumbLink asChild>
+                            <Link href="/dashboard/class">Class</Link>
+                        </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                        <BreadcrumbPage>Proxy</BreadcrumbPage>
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
 
             <Card className="mt-4">
                 <CardHeader>
-                    <CardTitle>Class List</CardTitle>
-                    <CardDescription>A collection of teacher class.</CardDescription>
+                    <CardTitle>Proxy List</CardTitle>
+                    <CardDescription>A collection of proxy class.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <Table>
@@ -107,7 +111,7 @@ const TeacherClass = async () => {
                                             Object.values(Day).map((v, i) => {
                                                 const isMatchDay = item.classes.find(item => item.day === v)
                                                 return (
-                                                    <TableCell key={i} className={cn("bg-indigo-100/50", index % 2 === 0 ? "odd:bg-sky-100/50" : "even:bg-sky-100/50")}>
+                                                    <TableCell key={i}>
                                                         {isMatchDay ? (
                                                             <div>
                                                                 <p className="text-lg font-semibold">{isMatchDay?.subjectName}</p>
@@ -129,4 +133,4 @@ const TeacherClass = async () => {
     )
 }
 
-export default TeacherClass
+export default ProxyClass

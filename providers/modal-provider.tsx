@@ -39,6 +39,9 @@ import { StudentLeftModal } from "@/app/dashboard/attendence/student/[id]/_compo
 import { DeleteBatchModal } from "@/app/dashboard/batch/_components/delete-modal"
 import { UpdateTeacherStatusModal } from "@/app/dashboard/teacher/request/_components/status-modal"
 import { DeleteTeacherRequestModal } from "@/app/dashboard/teacher/request/_components/delete-modal"
+import { AddLeaveClassModal } from "@/app/dashboard/teacher/leave/[id]/_components/add-leave-modal"
+import { UpdateLeaveClassModal } from "@/app/dashboard/teacher/leave/[id]/_components/update-teacher-modal"
+import { UpdateLeaveStatussModal } from "@/app/dashboard/teacher/leave/_components/status-modal"
 
 export const ModalProvider = () => {
     return (
@@ -85,6 +88,9 @@ export const ModalProvider = () => {
             <DeleteBatchModal />
             <UpdateTeacherStatusModal />
             <DeleteTeacherRequestModal />
+            <AddLeaveClassModal />
+            <UpdateLeaveClassModal />
+            <UpdateLeaveStatussModal />
         </>
     )
 }

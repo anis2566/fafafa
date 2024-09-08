@@ -5,8 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { toast } from "sonner"
-import { Status } from "@prisma/client"
 import { useMutation } from "@tanstack/react-query"
+import { LeaveStatus } from "@prisma/client"
 
 import {
     Dialog,
@@ -30,19 +30,19 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 
-import { useTeacherStatus } from "@/hooks/use-teacher"
-import { UPDATE_TEACHER_STATUS } from "../action"
+import { useLeaveClassStatus } from "@/hooks/use-leave-class"
+import { UPDATE_LEAVE_STATUS } from "../action"
 
 const formSchema = z.object({
     status: z
-        .nativeEnum(Status)
-        .refine((val) => Object.values(Status).includes(val), {
+        .nativeEnum(LeaveStatus)
+        .refine((val) => Object.values(LeaveStatus).includes(val), {
             message: "required",
         }),
 })
 
-export const UpdateTeacherStatusModal = () => {
-    const { open, onClose, id } = useTeacherStatus()
+export const UpdateLeaveStatussModal = () => {
+    const { open, onClose, id } = useLeaveClassStatus()
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -52,7 +52,7 @@ export const UpdateTeacherStatusModal = () => {
     })
 
     const { mutate: updateStatus, isPending } = useMutation({
-        mutationFn: UPDATE_TEACHER_STATUS,
+        mutationFn: UPDATE_LEAVE_STATUS,
         onSuccess: (data) => {
             onClose()
             form.reset()
@@ -78,7 +78,7 @@ export const UpdateTeacherStatusModal = () => {
         <Dialog open={open && !!id} onOpenChange={onClose}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Update Teacher Stuats</DialogTitle>
+                    <DialogTitle>Update Leave Stuats</DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -95,8 +95,8 @@ export const UpdateTeacherStatusModal = () => {
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {Object.values(Status).map((v) => (
-                                                <SelectItem key={v} value={v} disabled={v === Status.Pending}>
+                                            {Object.values(LeaveStatus).map((v) => (
+                                                <SelectItem key={v} value={v} disabled={v === LeaveStatus.Pending}>
                                                     {v}
                                                 </SelectItem>
                                             ))}
