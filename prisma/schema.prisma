@@ -180,6 +180,10 @@ enum LeaveStatus {
   Rejected
 }
 
+enum NoticeType {
+  Student
+  Teacher
+}
 
 model User {
   id            String          @id @default(cuid())
@@ -697,4 +701,16 @@ model Attendence {
   updatedAt DateTime @updatedAt
 
   @@unique([id, studentId, batchId])
+}
+
+
+model Notice {
+  id            String          @id @default(cuid())
+  type          NoticeType
+  text          String          @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id])
 }

@@ -1,32 +1,13 @@
 import { Status } from "@prisma/client";
 import {
   Users,
-  Settings,
   LayoutGrid,
-  FileSignature,
   LucideIcon,
-  Pen,
   List,
   Radio,
-  CircleCheck,
-  BadgeX,
-  BadgePercent,
-  CircleDollarSign,
   Layers3,
-  Medal,
-  RefreshCcwDot,
-  Ban,
-  File,
   CalendarDays,
-  Calendar,
   UserCog,
-  GitCompareArrows,
-  SquareStack,
-  MicVocal,
-  GalleryVertical,
-  MessageSquare,
-  Bell,
-  FileCheck,
   DollarSign,
   HandCoins,
   PlusCircle,
@@ -48,6 +29,7 @@ import {
   FilePen,
   Waypoints,
   Landmark,
+  Megaphone,
 } from "lucide-react";
 
 type Submenu = {
@@ -435,6 +417,31 @@ export function getMenuList(pathname: string): Group[] {
               href: "/dashboard/batch",
               label: "List",
               active: pathname === "/dashboard/batch",
+              icon: List,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      groupLabel: "Notice",
+      menus: [
+        {
+          href: "",
+          label: "Notice",
+          active: pathname.includes("/dashboard/notice"),
+          icon: Megaphone,
+          submenus: [
+            {
+              href: "/dashboard/notice/create",
+              label: "New",
+              active: pathname === "/dashboard/notice/create",
+              icon: PlusCircle,
+            },
+            {
+              href: "/dashboard/notice",
+              label: "List",
+              active: pathname === "/dashboard/notice",
               icon: List,
             },
           ],

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Metadata } from "next";
+import { BookOpen, Megaphone } from "lucide-react";
+import { Day, LeaveStatus, NoticeType } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -7,13 +9,7 @@ import {
     BreadcrumbLink,
     BreadcrumbList,
 } from "@/components/ui/breadcrumb";
-import { ContentLayout } from "./_components/content-layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { BookOpen } from "lucide-react";
-import { db } from "@/lib/prisma";
-import { GET_TEACHER } from "@/services/user.service";
-import { Day, LeaveStatus } from "@prisma/client";
 import {
     Table,
     TableBody,
@@ -23,6 +19,11 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { ContentLayout } from "./_components/content-layout";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { db } from "@/lib/prisma";
+import { GET_TEACHER } from "@/services/user.service";
 
 export const metadata: Metadata = {
     title: "BEC | Dashboard",
@@ -56,6 +57,12 @@ const TeacherDashboard = async () => {
             createdAt: "desc"
         },
         take: 3,
+    })
+
+    const notices = await db.notice.findMany({
+        where: {
+            type: NoticeType.Teacher
+        }
     })
 
     return (
@@ -129,8 +136,17 @@ const TeacherDashboard = async () => {
                         <CardTitle>Notice Board</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <ScrollArea className="w-full h-[400px]">
-
+                        <ScrollArea className="w-full h-[400px] p-2">
+                            {
+                                notices.map(notice => (
+                                    <div key={notice.id} className="flex items-center gap-x-3 border-b border-primary-60 py-2 mt-2">
+                                        <div className="rounded-full border p-2 shadow-sm shadow-primary flex items-center justify-center">
+                                            <Megaphone className="w-5 h-5 text-primary" />
+                                        </div>
+                                        <p className="text-sm">{notice.text}</p>
+                                    </div>
+                                ))
+                            }
                         </ScrollArea>
                     </CardContent>
                 </Card>
