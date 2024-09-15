@@ -86,6 +86,9 @@ export const CREATE_BATCH_CLASS = async ({ id, values }: CreateBatchClass) => {
     where: {
       id,
     },
+    include: {
+      room: true,
+    },
   });
 
   if (!batch) throw new Error("Batch not found");
@@ -101,6 +104,8 @@ export const CREATE_BATCH_CLASS = async ({ id, values }: CreateBatchClass) => {
         subjectName: subject.name,
         teacherName: teacher.name,
         batchName: batch.name,
+        roomName: batch.room.name,
+        roomId: batch.roomId,
       },
     });
   }

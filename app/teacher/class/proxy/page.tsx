@@ -25,14 +25,14 @@ export const metadata: Metadata = {
 type ClassData = {
     time: string;
     day: string;
-    batchName: string;
+    batchName: string | null;
     subjectName: string;
 };
 
 type GroupedData = {
     time: string;
     classes: {
-        batchName: string;
+        batchName: string | null;
         subjectName: string;
         day: string;
     }[];

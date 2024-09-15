@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Image from "next/image";
-import { Day, Month, TransactionStatus } from "@prisma/client";
+import { Class, Level, Month, TransactionStatus } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -15,7 +15,6 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { ContentLayout } from "../../_components/content-layout";
 import { db } from "@/lib/prisma";
@@ -25,6 +24,7 @@ import { BankCard } from "../../_components/charts/bank-chart";
 import { AdvanceList } from "./_components/advance-list";
 import { Header } from "./_components/header";
 import { CustomPagination } from "@/components/custom-pagination";
+import { ClassList } from "./_components/class-list";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -37,14 +37,20 @@ type ClassData = {
     day: string;
     batchName: string;
     subjectName: string;
+    roomName: number;
+    id: string;
+    batchId: string;
 };
 
 type GroupedData = {
     time: string;
+    batchId: string;
     classes: {
         batchName: string;
         subjectName: string;
         day: string;
+        roomName: number;
+        id: string;
     }[];
 };
 
@@ -85,7 +91,7 @@ const TeacherDetails = async ({ params: { id }, searchParams: { session, month, 
     if (!teacher) redirect("/dashboard")
 
     const classes = await db.batchClass.groupBy({
-        by: ["time", "day", "batchName", "subjectName"],
+        by: ["time", "day", "batchName", "subjectName", "roomName", "id", "batchId"],
         where: {
             teacherId: id
         },
@@ -96,14 +102,15 @@ const TeacherDetails = async ({ params: { id }, searchParams: { session, month, 
 
     const groupedData: GroupedData[] = Object.values(
         classes.reduce((acc: { [key: string]: GroupedData }, curr: ClassData) => {
-            const { time, batchName, subjectName, day } = curr;
+            const { time, batchName, subjectName, day, roomName, id, batchId } = curr;
             if (!acc[time]) {
                 acc[time] = {
                     time: time,
                     classes: [],
+                    batchId
                 };
             }
-            acc[time].classes.push({ day, batchName, subjectName });
+            acc[time].classes.push({ day, batchName, subjectName, roomName, id });
             return acc;
         }, {})
     );
@@ -184,7 +191,7 @@ const TeacherDetails = async ({ params: { id }, searchParams: { session, month, 
                                 <Badge>{teacher.teacherId}</Badge>
                             </div>
                         </div>
-                        <div className="flex items-center gap-x-3">
+                        <div className={cn("hidden items-center gap-x-3", !teacher.fee?.perClass && "flex")}>
                             <AddPaymentButton id={id} />
                         </div>
                     </CardContent>
@@ -203,40 +210,7 @@ const TeacherDetails = async ({ params: { id }, searchParams: { session, month, 
                                 <CardDescription>A collection of teacher class.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <Table>
-                                    <TableHeader>
-                                        <TableHead>Time</TableHead>
-                                        {
-                                            Object.values(Day).map((v, i) => (
-                                                <TableHead key={i}>{v}</TableHead>
-                                            ))
-                                        }
-                                    </TableHeader>
-                                    <TableBody>
-                                        {
-                                            groupedData.map((item, index) => (
-                                                <TableRow key={index}>
-                                                    <TableCell>{item.time}</TableCell>
-                                                    {
-                                                        Object.values(Day).map((v, i) => {
-                                                            const isMatchDay = item.classes.find(item => item.day === v)
-                                                            return (
-                                                                <TableCell key={i} className={cn("bg-indigo-100/50", index % 2 === 0 ? "odd:bg-sky-100/50" : "even:bg-sky-100/50")}>
-                                                                    {isMatchDay ? (
-                                                                        <div>
-                                                                            <p className="text-lg font-semibold">{isMatchDay?.subjectName}</p>
-                                                                            <p>{isMatchDay?.batchName}</p>
-                                                                        </div>
-                                                                    ) : "-"}
-                                                                </TableCell>
-                                                            )
-                                                        })
-                                                    }
-                                                </TableRow>
-                                            ))
-                                        }
-                                    </TableBody>
-                                </Table>
+                                <ClassList classes={groupedData} />
                             </CardContent>
                         </Card>
                     </TabsContent>

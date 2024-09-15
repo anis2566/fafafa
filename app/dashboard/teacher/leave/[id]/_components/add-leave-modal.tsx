@@ -29,13 +29,13 @@ export const AddLeaveClassModal = () => {
     const [searchId, setSearchId] = useState<number>()
     const [teacher, setTeacher] = useState<string>("")
 
-    const { open, onClose, day, time, id } = useLeaveClass()
+    const { open, onClose, day, time, id, date } = useLeaveClass()
 
     const { data: teachers } = useQuery({
-        queryKey: ["get-teacher-by-day-time", day, time, searchId],
+        queryKey: ["get-teacher-by-day-time", day, time, searchId, date],
         queryFn: async () => {
             if (day) {
-                const res = await GET_TEACHERS_BY_DAY_TIME({ day, time, id: searchId })
+                const res = await GET_TEACHERS_BY_DAY_TIME({ day, time, id: searchId, date })
                 return res.teachers
             }
         },

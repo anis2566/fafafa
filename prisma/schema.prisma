@@ -199,7 +199,6 @@ model User {
   teacherRequest  TeacherRequest?
   accounts      Account[]
   references    Student[]
-  sessions      Session[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -207,18 +206,6 @@ model User {
   @@unique([email, id])
 }
 
-model Session {
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role         Role             @default(User)
-  status       Status           @default(Pending)
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
- 
 model Account {
   userId            String
   type              String
@@ -444,6 +431,7 @@ model Room {
   houseId       String
   house         House           @relation(fields: [houseId], references: [id], onDelete: Cascade)
   batches       Batch[]
+  classes       BatchClass[]
 
 
   createdAt DateTime @default(now())
@@ -538,7 +526,7 @@ model Teacher {
   level         Level[]
 
   userId        String?     @unique
-  user          User?       @relation(fields: [userId], references: [id])
+  user          User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
   classes       BatchClass[]
   fee           TeacherFee?
   bank          Bank?
@@ -561,9 +549,9 @@ model TeacherRequest {
   status        Status          @default(Pending)
 
   teacherId     String          @unique
-  teacher       Teacher         @relation(fields: [teacherId], references: [id])
+  teacher       Teacher         @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   userId        String          @unique
-  user          User            @relation(fields: [userId], references: [id])
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -594,7 +582,7 @@ model TeacherAdvance {
   status        TransactionStatus @default(Pending)
 
   teacherId     String          
-  teacher       Teacher         @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  teacher       Teacher         @relation(fields: [teacherId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -607,8 +595,9 @@ model LeaveApp {
   id            String          @id @default(cuid())
   reason        String
   days          Day[]
-  status        LeaveStatus     @default(Pending)
+  status        LeaveStatus     @default(Pending) 
   attachments   String[]
+  dates         DateTime[]
 
   teacherId     String          
   teacher       Teacher         @relation(fields: [teacherId], references: [id], onDelete: Cascade)
@@ -626,11 +615,14 @@ model BatchClass {
   time           String
   day            Day
 
+  roomName       Int
+  roomId         String
+  room          Room            @relation(fields: [roomId], references: [id], onDelete: Cascade)
   subjectId     String
-  subject       Subject         @relation(fields: [subjectId], references: [id])
+  subject       Subject         @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   subjectName   String
   teacherId     String
-  teacher       Teacher         @relation(fields: [teacherId], references: [id])
+  teacher       Teacher         @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   teacherName   String
   batchId       String
   batch         Batch           @relation(fields: [batchId], references: [id], onDelete: Cascade)
@@ -647,6 +639,8 @@ model LeaveClass {
   id             String          @id @default(cuid())
   time           String
   day            Day
+  date           DateTime
+  roomName       Int
 
   appId         String
   app           LeaveApp        @relation(fields: [appId], references: [id], onDelete: Cascade)
@@ -656,9 +650,9 @@ model LeaveClass {
   teacherId     String?
   teacher       Teacher?        @relation(fields: [teacherId], references: [id])
   teacherName   String?
-  batchId       String
-  batch         Batch           @relation(fields: [batchId], references: [id])
-  batchName     String
+  batchId       String?
+  batch         Batch?           @relation(fields: [batchId], references: [id])
+  batchName     String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

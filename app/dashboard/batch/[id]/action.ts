@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { Class } from "@prisma/client";
+import { Class, Day } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 type GetStudent = {
@@ -117,8 +117,160 @@ export const REMOVE_CLASS_FROM_BATCH = async (id: string) => {
   });
 
   revalidatePath(`/dashboard/batch/${batchClass.batchId}`);
+  revalidatePath(`/dashboard/teacher/${batchClass.teacherId}`);
 
   return {
     success: "Class removed",
+  };
+};
+
+export const GET_SUBJECT_BY_BATCH = async (id: string) => {
+  const batch = await db.batch.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!batch) throw new Error("Batch not found");
+
+  const subjects = await db.subject.findMany({
+    where: {
+      class: batch.class,
+    },
+  });
+
+  return { subjects };
+};
+
+type GetTeachers = {
+  id: string;
+  searchId?: number;
+};
+
+export const GET_TEACHERS_BY_BATCH = async ({ id, searchId }: GetTeachers) => {
+  const batch = await db.batch.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!batch) throw new Error("Batch not found");
+
+  const teachers = await db.teacher.findMany({
+    where: {
+      level: {
+        has: batch.level,
+      },
+      ...(searchId && { teacherId: searchId }),
+    },
+    take: 3,
+  });
+
+  return { teachers };
+};
+
+type CreateBatchClass = {
+  batchId: string;
+  time: string;
+  day: Day;
+  subjectId: string;
+  teacherId: string;
+};
+
+export const ADD_BATCH_CLASS = async ({
+  batchId,
+  time,
+  day,
+  subjectId,
+  teacherId,
+}: CreateBatchClass) => {
+  const isBatchTimeBook = await db.batchClass.findFirst({
+    where: {
+      batchId,
+      AND: [
+        {
+          day,
+        },
+        {
+          time,
+        },
+      ],
+    },
+  });
+
+  if (isBatchTimeBook) {
+    throw new Error(`The batch time is booked for day ${day}`);
+  }
+
+  const isTeacherTimeBook = await db.batchClass.findFirst({
+    where: {
+      teacherId,
+      AND: [
+        {
+          day,
+        },
+        {
+          time,
+        },
+      ],
+    },
+  });
+
+  if (isTeacherTimeBook) {
+    throw new Error(`The teacher time is booked for day ${day}`);
+  }
+
+  const subject = await db.subject.findUnique({
+    where: {
+      id: subjectId,
+    },
+    select: {
+      name: true,
+    },
+  });
+
+  if (!subject) throw new Error("Subject not found");
+
+  const teacher = await db.teacher.findUnique({
+    where: {
+      id: teacherId,
+    },
+    select: {
+      name: true,
+    },
+  });
+
+  if (!teacher) throw new Error("Teacher not found");
+
+  const batch = await db.batch.findUnique({
+    where: {
+      id: batchId,
+    },
+    include: {
+      room: true,
+    },
+  });
+
+  if (!batch) throw new Error("Batch not found");
+
+  await db.batchClass.create({
+    data: {
+      batchId,
+      day,
+      time,
+      subjectId,
+      teacherId,
+      subjectName: subject.name,
+      teacherName: teacher.name,
+      batchName: batch.name,
+      roomName: batch.room.name,
+      roomId: batch.roomId,
+    },
+  });
+
+  revalidatePath(`/dashboard/batch/${batchId}`);
+
+  return {
+    success: "Class added",
   };
 };

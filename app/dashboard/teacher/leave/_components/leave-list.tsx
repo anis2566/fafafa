@@ -3,6 +3,7 @@
 import { LeaveApp, LeaveClass, LeaveStatus, Teacher } from "@prisma/client"
 import Link from "next/link";
 import { EllipsisVertical, Eye, RefreshCcw } from "lucide-react";
+import { format } from "date-fns";
 
 import {
     Table,
@@ -43,6 +44,7 @@ export const LeaveList = ({ leaves }: Props) => {
                     <TableHead>#ID</TableHead>
                     <TableHead>Image</TableHead>
                     <TableHead>Name</TableHead>
+                    <TableHead>Dates</TableHead>
                     <TableHead>Days</TableHead>
                     <TableHead>Total Class</TableHead>
                     <TableHead>Assigned Class</TableHead>
@@ -61,8 +63,11 @@ export const LeaveList = ({ leaves }: Props) => {
                                     <AvatarFallback>{leave.teacher.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                             </TableCell>
-                            <TableCell className="py-3">{leave.teacher.name}</TableCell>
-                            <TableCell className="py-3">{leave.days[0]} - {leave.days[leave.days.length - 1]}</TableCell>
+                            <TableCell className="py-3 hover:underline">
+                                <Link href={`/dashboard/teacher/${leave.teacherId}`}>{leave.teacher.name}</Link>
+                            </TableCell>
+                            <TableCell className="py-3">{format(leave.dates[0], "dd MMM yyyy")} {leave.dates.length > 1 && "-" + format(leave.dates[leave.dates.length - 1], "dd MMM yyyy")}</TableCell>
+                            <TableCell className="py-3">{leave.days[0]} {leave.days.length > 1 && "-" + leave.days[leave.days.length - 1]}</TableCell>
                             <TableCell className="py-3">{leave.classes.length}</TableCell>
                             <TableCell className="py-3">{leave.classes.filter(item => item.teacherId !== null).length}</TableCell>
                             <TableCell className="py-3">

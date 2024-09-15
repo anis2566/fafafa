@@ -11,6 +11,7 @@ export const DELETE_BATCH = async (id: string) => {
     },
     include: {
       students: true,
+      room: true,
     },
   });
 
@@ -26,6 +27,17 @@ export const DELETE_BATCH = async (id: string) => {
       },
     });
   }
+
+  await db.room.update({
+    where: {
+      id: batch.roomId,
+    },
+    data: {
+      availableTime: batch.room.availableTime.filter(
+        (time) => !batch.time.includes(time)
+      ),
+    },
+  });
 
   await db.batch.delete({
     where: {

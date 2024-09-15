@@ -1,4 +1,5 @@
 import { Batch, Room } from "@prisma/client"
+import Link from "next/link";
 
 import {
     Table,
@@ -9,7 +10,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 
-import { adjustTime, formatTime } from "@/lib/utils"
+import { formatTime } from "@/lib/utils"
 import { Action } from "./action"
 
 interface BatchWithRoomAndStudent extends Batch {
@@ -40,7 +41,9 @@ export const BatchList = ({ batches }: Props) => {
                 {
                     batches.map((batch, index) => (
                         <TableRow key={batch.id}>
-                            <TableCell className="py-3">{batch.name}</TableCell>
+                            <TableCell className="py-3 hover:underline">
+                                <Link href={`/dashboard/batch/${batch.id}`}>{batch.name}</Link>
+                            </TableCell>
                             <TableCell className="py-3">{batch.class}</TableCell>
                             <TableCell className="py-3">{batch.capacity}</TableCell>
                             <TableCell className="py-3">{formatTime(batch.time[0], "start")} - {formatTime(batch.time[batch.time.length - 1], "end")}</TableCell>

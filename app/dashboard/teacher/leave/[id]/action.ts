@@ -11,12 +11,14 @@ type GetTeachers = {
   day: Day;
   time: string;
   id?: number;
+  date: Date;
 };
 
 export const GET_TEACHERS_BY_DAY_TIME = async ({
   day,
   time,
   id,
+  date,
 }: GetTeachers) => {
   const teachers = await db.teacher.findMany({
     where: {
@@ -24,6 +26,13 @@ export const GET_TEACHERS_BY_DAY_TIME = async ({
         none: {
           day,
           time,
+        },
+      },
+      leaveClasses: {
+        none: {
+          day,
+          time,
+          date,
         },
       },
       ...(id && { teacherId: id }),

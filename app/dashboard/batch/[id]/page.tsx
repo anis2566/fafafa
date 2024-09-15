@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { BookOpen, Building, Clock, PlusCircle } from "lucide-react";
-import { PaymentStatus } from "@prisma/client";
+import { Day, PaymentStatus } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -17,14 +17,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-import { cn, formatTime } from "@/lib/utils";
+import { formatTime } from "@/lib/utils";
 import { AddStudentButton } from "./_components/add-student-button";
 import { StudentList } from "./_components/student-list";
 import { db } from "@/lib/prisma";
 import { TeacherList } from "./_components/teacher-list";
 import { dayOrder } from "@/constant";
+import { ClassList } from "./_components/class-list";
 
 export const metadata: Metadata = {
     title: "BEC | Batch Details",
@@ -33,17 +33,24 @@ export const metadata: Metadata = {
 
 type ClassData = {
     time: string;
-    day: string;
+    day: Day;
     teacherName: string;
     subjectName: string;
+    roomName: number;
+    id: string;
+    teacherId: string;
 };
 
 type GroupedData = {
-    day: string;
+    day: Day;
+    time: string;
     classes: {
         time: string;
         teacherName: string;
         subjectName: string;
+        roomName: number;
+        id: string;
+        teacherId: string;
     }[];
 };
 
@@ -87,7 +94,7 @@ const BatchDetails = async ({ params: { id } }: Props) => {
     })
 
     const classes = await db.batchClass.groupBy({
-        by: ["time", "day", "teacherName", "subjectName"],
+        by: ["time", "day", "teacherName", "subjectName", "roomName", "id", "teacherId"],
         where: {
             batchId: id
         },
@@ -96,22 +103,20 @@ const BatchDetails = async ({ params: { id } }: Props) => {
         }
     })
 
-    const groupedData: GroupedData[] = Object.values(
-        classes.sort((a, b) => dayOrder[a.day] - dayOrder[b.day]).reduce((acc: { [key: string]: GroupedData }, curr: ClassData) => {
-            const { day, time, teacherName, subjectName } = curr;
 
-            if (!acc[day]) {
-                acc[day] = {
-                    day: day,
-                    classes: [],
-                };
-            }
+    const groupedData: GroupedData[] = Object.values(Day).map(day => ({
+        day,
+        time: "",
+        classes: []
+    }));
 
-            acc[day].classes.push({ time, teacherName, subjectName });
-
-            return acc;
-        }, {})
-    );
+    classes.sort((a, b) => dayOrder[a.day] - dayOrder[b.day]).forEach((curr: ClassData) => {
+        const { day, time, teacherName, subjectName, roomName, id, teacherId, } = curr;
+        const dayGroup = groupedData.find(group => group.day === day);
+        if (dayGroup) {
+            dayGroup.classes.push({ time, teacherName, subjectName, roomName, id, teacherId });
+        }
+    });
 
     return (
         <ContentLayout title="Batch">
@@ -167,10 +172,10 @@ const BatchDetails = async ({ params: { id } }: Props) => {
                     </CardContent>
                 </Card>
 
-                <Tabs defaultValue="students" className="w-full">
+                <Tabs defaultValue="class" className="w-full">
                     <TabsList className="flex justify-center mb-4">
-                        <TabsTrigger value="students">Students</TabsTrigger>
                         <TabsTrigger value="class">Class</TabsTrigger>
+                        <TabsTrigger value="students">Students</TabsTrigger>
                         <TabsTrigger value="teachers">Teachers</TabsTrigger>
                     </TabsList>
                     <TabsContent value="students">
@@ -191,40 +196,7 @@ const BatchDetails = async ({ params: { id } }: Props) => {
                                 <CardDescription>A collection of batch class.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <Table>
-                                    <TableHeader>
-                                        <TableHead>Day</TableHead>
-                                        {
-                                            batch.classTime.map((time: string, i) => (
-                                                <TableHead key={i}>{time}</TableHead>
-                                            ))
-                                        }
-                                    </TableHeader>
-                                    <TableBody>
-                                        {
-                                            groupedData.map((item, index) => (
-                                                <TableRow key={index}>
-                                                    <TableCell>{item.day}</TableCell>
-                                                    {
-                                                        batch.classTime.map((v, i) => {
-                                                            const isMatchedTime = item.classes.find(item => item.time === v)
-                                                            return (
-                                                                <TableCell key={i} className={cn("bg-indigo-100/50", index % 2 === 0 ? "odd:bg-sky-100/50" : "even:bg-sky-100/50")}>
-                                                                    {isMatchedTime ? (
-                                                                        <div>
-                                                                            <p className="text-lg font-semibold">{isMatchedTime?.subjectName}</p>
-                                                                            <p>{isMatchedTime?.teacherName}</p>
-                                                                        </div>
-                                                                    ) : "-"}
-                                                                </TableCell>
-                                                            )
-                                                        })
-                                                    }
-                                                </TableRow>
-                                            ))
-                                        }
-                                    </TableBody>
-                                </Table>
+                                <ClassList classes={groupedData} classTime={batch.classTime} batchId={id} />
                             </CardContent>
                         </Card>
                     </TabsContent>

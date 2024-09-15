@@ -1,13 +1,17 @@
 "use server";
 
-import { db } from "@/lib/prisma";
 import { Day, LeaveStatus } from "@prisma/client";
+import { addDays } from "date-fns";
+import { revalidatePath } from "next/cache";
+
+import { db } from "@/lib/prisma";
 import { LeaveAppSchema, LeaveAppSchemaType } from "./schema";
 
 export const CREATE_LEAVE_APP = async (values: LeaveAppSchemaType) => {
   const { data, success } = LeaveAppSchema.safeParse(values);
 
   if (!success) throw new Error("Invalid input value");
+  const { dates } = data;
 
   const isApplied = await db.leaveApp.findFirst({
     where: {
@@ -18,33 +22,66 @@ export const CREATE_LEAVE_APP = async (values: LeaveAppSchemaType) => {
 
   if (isApplied) throw new Error("This teacher has already applied.");
 
-  const app = await db.leaveApp.create({
-    data: {
-      ...data,
-    },
+  const dayNames = dates.map((date) => {
+    const dayOfWeek = new Date(date).getDay();
+    return [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ][dayOfWeek] as Day;
   });
 
-  return {
-    success: "Application successful",
-    id: app.id,
-  };
-};
-
-type GetClass = {
-  days: Day[];
-  teacherId: string;
-}
-
-export const GET_CLASS_BY_DAYS = async ({days, teacherId}:GetClass) => {
-
-  const classes = await db.batchClass.findMany({
+  const batchClasses = await db.batchClass.findMany({
     where: {
-      teacherId,
       day: {
-        in: days,
+        in: dayNames,
       },
     },
   });
 
-  return { classes };
+  const updatedDays = dates.map((date) => addDays(new Date(date), 1));
+
+  await db.$transaction(async (ctx) => {
+    const app = await db.leaveApp.create({
+      data: {
+        ...data,
+        days: dayNames,
+      },
+    });
+
+    for (const cls of batchClasses) {
+      const {
+        day,
+        time,
+        subjectId,
+        subjectName,
+        batchId,
+        batchName,
+        roomName,
+      } = cls;
+      await db.leaveClass.create({
+        data: {
+          day,
+          time,
+          subjectId,
+          subjectName,
+          batchId,
+          batchName,
+          date: updatedDays[dayNames.indexOf(day)],
+          appId: app.id,
+          roomName,
+        },
+      });
+    }
+  });
+
+  revalidatePath("/dashboard/teacher/leave");
+
+  return {
+    success: "Application successful",
+  };
 };

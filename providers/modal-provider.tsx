@@ -43,6 +43,7 @@ import { AddLeaveClassModal } from "@/app/dashboard/teacher/leave/[id]/_componen
 import { UpdateLeaveClassModal } from "@/app/dashboard/teacher/leave/[id]/_components/update-teacher-modal"
 import { UpdateLeaveStatussModal } from "@/app/dashboard/teacher/leave/_components/status-modal"
 import { DeleteNoticeModal } from "@/app/dashboard/notice/_components/delete-modal"
+import { AddClassModal } from "@/app/dashboard/batch/[id]/_components/add-class-modal"
 
 export const ModalProvider = () => {
     return (
@@ -93,6 +94,7 @@ export const ModalProvider = () => {
             <UpdateLeaveClassModal />
             <UpdateLeaveStatussModal />
             <DeleteNoticeModal />
+            <AddClassModal />
         </>
     )
 }

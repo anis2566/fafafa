@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Metadata } from "next";
-import { Day } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -10,13 +9,12 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { ContentLayout } from "../_components/content-layout";
 import { db } from "@/lib/prisma";
 import { GET_TEACHER } from "@/services/user.service";
-import { cn } from "@/lib/utils";
+import { ClassList } from "./_components/class-list";
 
 export const metadata: Metadata = {
     title: "BEC | Class",
@@ -28,6 +26,7 @@ type ClassData = {
     day: string;
     batchName: string;
     subjectName: string;
+    roomName: number;
 };
 
 type GroupedData = {
@@ -36,6 +35,7 @@ type GroupedData = {
         batchName: string;
         subjectName: string;
         day: string;
+        roomName: number;
     }[];
 };
 
@@ -43,7 +43,7 @@ const TeacherClass = async () => {
     const { teacherId } = await GET_TEACHER()
 
     const classes = await db.batchClass.groupBy({
-        by: ["time", "day", "batchName", "subjectName"],
+        by: ["time", "day", "batchName", "subjectName", "roomName"],
         where: {
             teacherId
         },
@@ -54,14 +54,14 @@ const TeacherClass = async () => {
 
     const groupedData: GroupedData[] = Object.values(
         classes.reduce((acc: { [key: string]: GroupedData }, curr: ClassData) => {
-            const { time, batchName, subjectName, day } = curr;
+            const { time, batchName, subjectName, day, roomName } = curr;
             if (!acc[time]) {
                 acc[time] = {
                     time: time,
                     classes: [],
                 };
             }
-            acc[time].classes.push({ day, batchName, subjectName });
+            acc[time].classes.push({ day, batchName, subjectName, roomName });
             return acc;
         }, {})
     );
@@ -89,40 +89,7 @@ const TeacherClass = async () => {
                     <CardDescription>A collection of teacher class.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <Table>
-                        <TableHeader>
-                            <TableHead>Time</TableHead>
-                            {
-                                Object.values(Day).map((v, i) => (
-                                    <TableHead key={i}>{v}</TableHead>
-                                ))
-                            }
-                        </TableHeader>
-                        <TableBody>
-                            {
-                                groupedData.map((item, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell>{item.time}</TableCell>
-                                        {
-                                            Object.values(Day).map((v, i) => {
-                                                const isMatchDay = item.classes.find(item => item.day === v)
-                                                return (
-                                                    <TableCell key={i} className={cn("bg-indigo-100/50", index % 2 === 0 ? "odd:bg-sky-100/50" : "even:bg-sky-100/50")}>
-                                                        {isMatchDay ? (
-                                                            <div>
-                                                                <p className="text-lg font-semibold">{isMatchDay?.subjectName}</p>
-                                                                <p>{isMatchDay?.batchName}</p>
-                                                            </div>
-                                                        ) : "-"}
-                                                    </TableCell>
-                                                )
-                                            })
-                                        }
-                                    </TableRow>
-                                ))
-                            }
-                        </TableBody>
-                    </Table>
+                    <ClassList classes={groupedData} />
                 </CardContent>
             </Card>
         </ContentLayout>
