@@ -5,6 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import { CreditCardIcon } from "lucide-react"
+import { useRouter } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button"
@@ -22,10 +23,17 @@ interface Props {
 export const PaymentForm = ({ student }: Props) => {
     const [method, setMethod] = useState<string>("cash")
 
+    const router = useRouter()
+
     const { mutate: payWithCash, isPending } = useMutation({
         mutationFn: PAY_WITH_CASH,
         onSuccess: (data) => {
-            alert(data?.success)
+            toast.success("Payment successful")
+            const baseUrl = process.env.NODE_ENV === 'production'
+                ? 'https://basiceducationcare.vercel.app'
+                : 'http://localhost:3000';
+            window.open(`${baseUrl}/dashboard/invoice/fee/monthly/${data.id}`, "_blank");
+            router.push("/dashboard")
         },
         onError: (error) => {
             toast.error(error.message)
@@ -79,7 +87,7 @@ export const PaymentForm = ({ student }: Props) => {
                             Cash
                         </Label>
                         <Label htmlFor="mbanking" className="flex items-center gap-2 cursor-pointer">
-                            <RadioGroupItem id="mbanking" value="mbanking" />
+                            <RadioGroupItem id="mbanking" value="mbanking" disabled />
                             Mobile Banking
                         </Label>
                     </RadioGroup>

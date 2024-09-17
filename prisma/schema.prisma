@@ -676,6 +676,21 @@ model LeaveClass {
 }
 
 
+model Income {
+  id            String          @id @default(cuid())
+  name          String
+  amount        Int
+  month         Month
+  session       Int
+  note          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id])
+}
+
+
 model Expense {
   id            String          @id @default(cuid())
   type          Expenses

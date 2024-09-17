@@ -27,7 +27,6 @@ export interface PaymentProps {
     payments: {
         name: string;
         studentId: number;
-        class: Class;
         imageUrl: string;
         payments: MonthlyPayment[]
     }[]
@@ -42,7 +41,6 @@ export const SalaryList = ({ payments }: PaymentProps) => {
                         <TableHead>#ID</TableHead>
                         <TableHead>Image</TableHead>
                         <TableHead>Name</TableHead>
-                        <TableHead>Class</TableHead>
                         {
                             Object.values(Month).map((month, i) => (
                                 <TableHead key={i}>{month}</TableHead>
@@ -64,7 +62,6 @@ export const SalaryList = ({ payments }: PaymentProps) => {
                                     </Avatar>
                                 </TableCell>
                                 <TableCell>{item.name}</TableCell>
-                                <TableCell>{formatString(item.class)}</TableCell>
                                 {
                                     Object.values(Month).map((month, index) => {
                                         const payment = item.payments.find(p => p.month === month);

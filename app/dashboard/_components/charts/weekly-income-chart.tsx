@@ -17,9 +17,8 @@ const chartConfig = {
 } satisfies ChartConfig
 
 const colors = [
-  "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#800000", "#008000", "#000080", "#808000", "#800080", "#008080"
+  "#00FFFF", "#800080", "#0000FF", "#008000", "#FF00FF", "#808000", "#FF0000", "#000080", "#FFFF00", "#008080", "#00FF00", "#800000"
 ];
-
 
 const dayColorMap: Record<Day, string> = Object.values(Day).reduce((acc, dayName, index) => {
   acc[dayName] = colors[index % colors.length];

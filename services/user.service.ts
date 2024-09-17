@@ -26,6 +26,7 @@ export const GET_USER = async () => {
   return {
     user,
     userId: user.id,
+    role: user.role
   };
 };
 

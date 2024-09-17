@@ -52,6 +52,13 @@ const FinalReport = async () => {
         }
     })
 
+    const othersIncome = await db.income.groupBy({
+        by: ["month"],
+        _sum: {
+            amount: true
+        }
+    })
+
 
     const totalTeacherBill = await db.teacherPayment.groupBy({
         by: ["month"],
@@ -80,13 +87,30 @@ const FinalReport = async () => {
         }
     })
 
+    const teacherAdvance = await db.teacherAdvance.groupBy({
+        by: ["month"],
+        where: {
+            teacher: {
+                bank: {
+                    advance: {
+                        gt: 0
+                    }
+                }
+            }
+        },
+        _sum: {
+            amount: true
+        }
+    })
+
     // Combine the data income
     const combinedDataIncome = Object.values(Month).map(month => {
         const salaryBill = totalSalary.find(item => item.month === month)?._sum.amount || 0;
         const admissionBill = totalAdmissionFee.find(item => item.month === month)?._sum.amount || 0;
+        const othersBill = othersIncome.find(item => item.month === month)?._sum.amount || 0;
         return {
             month,
-            total: salaryBill + admissionBill
+            total: salaryBill + admissionBill + othersBill
         };
     });
 
@@ -97,9 +121,10 @@ const FinalReport = async () => {
         const teacherBill = totalTeacherBill.find(item => item.month === month)?._sum.amount || 0;
         const houseRent = totalHouseRent.find(item => item.month === month)?._sum.amount || 0;
         const utilityBill = totalUtilityBill.find(item => item.month === month)?._sum.amount || 0;
+        const teacherAdvanceTotal = teacherAdvance.find(item => item.month === month)?._sum.amount || 0;
         return {
             month,
-            total: teacherBill + houseRent + utilityBill
+            total: teacherBill + houseRent + utilityBill + teacherAdvanceTotal
         };
     });
     const totalExpense = combinedDataExpense.reduce((acc, curr) => acc + curr.total, 0)

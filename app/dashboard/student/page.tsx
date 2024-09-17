@@ -45,7 +45,7 @@ const Student = async ({ searchParams }: Props) => {
     const students = await db.student.findMany({
         where: {
             session: formatedSession,
-            // isPresent: true,
+            isPresent: true,
             ...(className && { class: className }),
             ...(studentId && { studentId }),
             ...(name && { name: { contains: name, mode: "insensitive" } }),
@@ -58,10 +58,15 @@ const Student = async ({ searchParams }: Props) => {
                 select: {
                     id: true
                 }
+            },
+            batch: {
+                select: {
+                    name: true
+                }
             }
         },
         orderBy: {
-            createdAt: "desc"
+            id: "asc"
         },
         skip: (currentPage - 1) * itemsPerPage,
         take: itemsPerPage,

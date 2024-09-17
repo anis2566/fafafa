@@ -8,6 +8,7 @@ import { db } from "@/lib/prisma";
 import { SignInSchemaType } from "../sign-in/schema";
 import { SignUpSchema } from "./schema";
 import { saltAndHashPassword } from "@/lib/utils";
+import streamServerClient from "@/lib/stream";
 
 const knock = new Knock(process.env.NEXT_PUBLIC_KNOCK_API_KEY);
 
@@ -23,7 +24,7 @@ export const SIGN_UP = async (values: SignInSchemaType) => {
     },
   });
 
-  if (user) {  
+  if (user) {
     throw new Error("User already exists");
   }
 
@@ -41,6 +42,12 @@ export const SIGN_UP = async (values: SignInSchemaType) => {
     avatar: newUser.image,
   });
 
+  await streamServerClient.upsertUser({
+    id: newUser.id,
+    name: data.name,
+    username: data.name,
+  });
+
   // const { data: res } = await axios.post(
   //   `${
   //     process.env.NODE_ENV === "production"
@@ -53,7 +60,7 @@ export const SIGN_UP = async (values: SignInSchemaType) => {
   //   }
   // );
 
-  redirect("/auth/sign-in")
+  redirect("/auth/sign-in");
 
   // if (res?.success) {
   //   redirect(`/auth/verify/${newUser.id}`);

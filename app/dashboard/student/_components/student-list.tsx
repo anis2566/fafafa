@@ -23,7 +23,8 @@ import {
 import { formatString } from "@/lib/utils";
 
 interface StudentWithProp extends Student {
-    payments: { id: string }[]
+    payments: { id: string }[];
+    batch: {name: string} | null;
 }
 
 interface Props {
@@ -39,6 +40,7 @@ export const StudentList = ({ students }: Props) => {
                     <TableHead>Image</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Class</TableHead>
+                    <TableHead>Batch</TableHead>
                     <TableHead>F. Phone</TableHead>
                     <TableHead>M. Phone</TableHead>
                     <TableHead>Due</TableHead>
@@ -49,19 +51,22 @@ export const StudentList = ({ students }: Props) => {
                 {
                     students.map(student => (
                         <TableRow key={student.id}>
-                            <TableCell>{student.studentId}</TableCell>
-                            <TableCell>
+                            <TableCell className="py-3">{student.studentId}</TableCell>
+                            <TableCell className="py-3">
                                 <Avatar>
                                     <AvatarImage src={student.imageUrl} />
                                     <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                             </TableCell>
-                            <TableCell>{student.name}</TableCell>
-                            <TableCell>{formatString(student.class)}</TableCell>
-                            <TableCell>{student.fPhone}</TableCell>
-                            <TableCell>{student.mPhone}</TableCell>
-                            <TableCell>{student.payments.length > 0 ? `${student.payments.length} Months` : "Paid"}</TableCell>
-                            <TableCell>
+                            <TableCell className="py-3 hover:underline">
+                                <Link href={`/dashboard/student/${student.id}`}>{student.name}</Link>
+                            </TableCell>
+                            <TableCell className="py-3">{formatString(student.class)}</TableCell>
+                            <TableCell className="py-3">{student.batch?.name}</TableCell>
+                            <TableCell className="py-3">{student.fPhone}</TableCell>
+                            <TableCell className="py-3">{student.mPhone}</TableCell>
+                            <TableCell className="py-3">{student.payments.length > 0 ? `${student.payments.length} Months` : "Paid"}</TableCell>
+                            <TableCell className="py-3">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" className="h-8 w-8 p-0">

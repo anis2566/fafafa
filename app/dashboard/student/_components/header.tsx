@@ -16,6 +16,8 @@ import { useDebounce } from "@/hooks/use-debounce"
 export const Header = () => {
     const [search, setSearch] = useState<string>("")
     const [id, setId] = useState<string>("")
+    const [session, setSession] = useState<number>(new Date().getFullYear())
+    const [className, setClassName] = useState<Class | undefined>()
 
     const pathname = usePathname()
     const router = useRouter()
@@ -74,6 +76,7 @@ export const Header = () => {
     }
 
     const handleSessionChange = (session: string) => {
+        setSession(parseInt(session))
         const params = Object.fromEntries(searchParams.entries());
         const url = queryString.stringifyUrl({
             url: pathname,
@@ -86,11 +89,19 @@ export const Header = () => {
         router.push(url)
     }
 
+    const handleReset = () => {
+        router.push(pathname)
+        setSearch("")
+        setId("")
+        setSession(new Date().getFullYear())
+        setClassName(undefined)
+    }
+
     return (
         <div className="space-y-2 shadow-sm shadow-primary px-2 py-3">
             <div className="flex items-center justify-between gap-x-3">
                 <div className="flex items-center gap-x-3">
-                    <Select defaultValue="2024" onValueChange={(value) => handleSessionChange(value)}>
+                    <Select value={session.toString()} onValueChange={(value) => handleSessionChange(value)}>
                         <SelectTrigger className="w-[130px]">
                             <SelectValue placeholder="Session" />
                         </SelectTrigger>
@@ -102,7 +113,13 @@ export const Header = () => {
                             }
                         </SelectContent>
                     </Select>
-                    <Select onValueChange={(value) => handleClassChange(value as Class)}>
+                    <Select
+                        value={className || ""}
+                        onValueChange={(value) => {
+                            handleClassChange(value as Class)
+                            setClassName(value as Class)
+                        }}
+                    >
                         <SelectTrigger className="w-[130px]">
                             <SelectValue placeholder="Class" />
                         </SelectTrigger>
@@ -137,11 +154,7 @@ export const Header = () => {
                     <Button
                         variant="outline"
                         className="hidden md:flex text-rose-500"
-                        onClick={() => {
-                            setSearch("")
-                            setId("")
-                            router.push(pathname)
-                        }}
+                        onClick={handleReset}
                     >
                         Reset
                     </Button>

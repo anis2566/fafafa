@@ -30,6 +30,8 @@ import {
   Waypoints,
   Landmark,
   Megaphone,
+  GitFork,
+  MessageSquareMore,
 } from "lucide-react";
 
 type Submenu = {
@@ -166,6 +168,12 @@ export function getMenuList(pathname: string): Group[] {
               label: "Salary",
               active: pathname === "/dashboard/report/income/salary",
               icon: CalendarDays,
+            },
+            {
+              href: "/dashboard/report/income/others",
+              label: "Others",
+              active: pathname === "/dashboard/report/income/others",
+              icon: GitFork,
             },
             {
               href: "/dashboard/report/income",
@@ -449,18 +457,37 @@ export function getMenuList(pathname: string): Group[] {
       ],
     },
     {
-      groupLabel: "Payments",
+      groupLabel: "Discussion",
+      menus: [
+        {
+          href: "/dashboard/chat",
+          label: "Chat",
+          active: pathname.includes("/dashboard/chat"),
+          icon: MessageSquareMore,
+          submenus: [],
+        },
+      ],
+    },
+    {
+      groupLabel: "Income",
       menus: [
         {
           href: "/dashboard/salary/new",
-          label: "New Payment",
+          label: "New Salary",
           active: pathname.includes("/dashboard/salary/new"),
           icon: PlusCircle,
           submenus: [],
         },
         {
+          href: "/dashboard/salary/others",
+          label: "Others",
+          active: pathname.includes("/dashboard/salary/others"),
+          icon: PlusCircle,
+          submenus: [],
+        },
+        {
           href: "/dashboard/salary",
-          label: "Salary",
+          label: "History",
           active: pathname.includes("/dashboard/salary"),
           icon: HandCoins,
           submenus: [

@@ -57,6 +57,22 @@ const ExpenseOverview = async () => {
         }
     })
 
+    const teacherAdvance = await db.teacherAdvance.groupBy({
+        by: ["month"],
+        where: {
+            teacher: {
+                bank: {
+                    advance: {
+                        gt: 0
+                    }
+                }
+            }
+        },
+        _sum: {
+            amount: true
+        }
+    })
+
     const modifiedUtilityPayment = utilityPayment.reduce((acc: { type: Expenses, months: { month: Month, amount: number }[] }[], payment) => {
         const existingType = acc.find(item => item.type === payment.type);
 
@@ -169,6 +185,22 @@ const ExpenseOverview = async () => {
                                     </TableRow>
                                 ))
                             }
+                            <TableRow>
+                                <TableCell>Advance</TableCell>
+                                {
+                                    Object.values(Month).map((month, i) => {
+                                        const monthData = teacherAdvance.find(m => m.month === month);
+                                        return (
+                                            <TableCell key={i} className="text-center">
+                                                {monthData ? monthData._sum.amount : 0}
+                                            </TableCell>
+                                        );
+                                    })
+                                }
+                                <TableCell className="font-semibold">
+                                    {teacherAdvance.reduce((total, m) => total + (m._sum.amount ?? 0) ,0)}
+                                </TableCell>
+                            </TableRow>
                         </TableBody>
                         <TableFooter>
                             <TableRow>
@@ -182,6 +214,8 @@ const ExpenseOverview = async () => {
                                             return total + (monthData ? monthData.amount : 0);
                                         }, 0) + teacherPayment.reduce((total, item) => {
                                             return total + (item.month === month ? item._sum.amount ?? 0 : 0);
+                                        }, 0) + teacherAdvance.reduce((total, item) => {
+                                            return total + (item.month === month ? item._sum.amount ?? 0 : 0);
                                         }, 0);
                                         return (
                                             <TableCell key={i} className="text-center font-semibold">
@@ -190,7 +224,21 @@ const ExpenseOverview = async () => {
                                         );
                                     })
                                 }
-                                <TableCell></TableCell>
+                                <TableCell className="font-semibold">
+                                    {Object.values(Month).reduce((grandTotal, month) => {
+                                        const totalAmountForMonth = housePayment.reduce((total, item) => {
+                                            return total + (item.month === month ? item._sum.amount ?? 0 : 0);
+                                        }, 0) + modifiedUtilityPayment.reduce((total, item) => {
+                                            const monthData = item.months.find(m => m.month === month);
+                                            return total + (monthData ? monthData.amount : 0);
+                                        }, 0) + teacherPayment.reduce((total, item) => {
+                                            return total + (item.month === month ? item._sum.amount ?? 0 : 0);
+                                        }, 0) + teacherAdvance.reduce((total, item) => {
+                                            return total + (item.month === month ? item._sum.amount ?? 0 : 0);
+                                        }, 0);
+                                        return grandTotal + totalAmountForMonth;
+                                    }, 0)}
+                                </TableCell>
                             </TableRow>
                         </TableFooter>
                     </Table>

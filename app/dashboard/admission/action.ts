@@ -1,7 +1,8 @@
 "use server";
 
-import { db } from "@/lib/prisma";
 import { Class, Role } from "@prisma/client";
+
+import { db } from "@/lib/prisma";
 import { StudentSchema, StudentSchemaType } from "./schema";
 
 export const CREATE_STUDENT = async (values: StudentSchemaType) => {
@@ -21,16 +22,19 @@ export const CREATE_STUDENT = async (values: StudentSchemaType) => {
     throw new Error("Counter not found");
   }
 
-  const newStudent = await db.student.create({
-    data: {
-      studentId: counter.count + 1,
-      session: new Date().getFullYear(),
-      ...data,
-    },
-  });
+  const { referenceId, ...rest } = data;
 
-  if (newStudent) {
-    await db.counter.update({
+  const id = await db.$transaction(async (ctx) => {
+    const newStudent = await ctx.student.create({
+      data: {
+        studentId: counter.count + 1,
+        session: new Date().getFullYear(),
+        ...rest,
+        ...(referenceId && { referenceId }),
+      },
+    });
+
+    await ctx.counter.update({
       where: {
         id: counter.id,
       },
@@ -40,11 +44,13 @@ export const CREATE_STUDENT = async (values: StudentSchemaType) => {
         },
       },
     });
-  }
+
+    return newStudent.id;
+  });
 
   return {
     success: "Student created",
-    id: newStudent.id,
+    id,
   };
 };
 

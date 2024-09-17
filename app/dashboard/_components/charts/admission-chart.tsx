@@ -33,13 +33,13 @@ interface Props {
 
 export function AdmissionChart({data}:Props) {
     return (
-        <Card>
+        <Card className="hidden md:block">
             <CardHeader>
                 <CardTitle>Admission Analytics</CardTitle>
                 <CardDescription>{Object.values(Month)[new Date().getMonth()]} {new Date().getFullYear()}</CardDescription>
             </CardHeader>
             <CardContent>
-                <ChartContainer config={chartConfig} className="h-[250px]">
+                <ChartContainer config={chartConfig} className="h-[250px] w-full">
                     <BarChart
                         accessibilityLayer
                         data={data}

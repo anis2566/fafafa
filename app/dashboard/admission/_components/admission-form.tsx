@@ -167,7 +167,7 @@ export const AdmissionForm = () => {
     })
 
     return (
-        <div className="py-5 space-y-6 px-6 w-full max-w-screen-xl mx-auto">
+        <div className="py-5 space-y-6 md:px-6 w-full max-w-screen-xl mx-auto">
             <div className="w-full flex flex-col items-center justify-center space-y-2">
                 <div className="w-[100px] h-[100px] rounded-full shadow-md shadow-primary flex items-center justify-center p-2">
                     <img
@@ -570,7 +570,7 @@ export const AdmissionForm = () => {
                         />
                     </div>
 
-                    <div className={cn("hidden", currentStep === 2 && "block space-y-2")}>
+                    <div className={cn("hidden", currentStep === 2 && "block")}>
                         <h1 className="text-lg font-semibold text-center">Present Address</h1>
 
                         <div className="grid md:grid-cols-2 gap-6">
@@ -640,7 +640,7 @@ export const AdmissionForm = () => {
                             />
                         </div>
 
-                        <h1 className="text-lg font-semibold text-center">Permanent Address</h1>
+                        <h1 className="text-lg font-semibold text-center mt-4">Permanent Address</h1>
                         <div className="grid md:grid-cols-2 gap-6">
                             <FormField
                                 control={form.control}

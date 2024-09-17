@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Metadata } from "next";
-import { Class } from "@prisma/client";
+import { Month } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -14,41 +14,42 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { ContentLayout } from "@/app/dashboard/_components/content-layout";
 import { db } from "@/lib/prisma";
-import { Header } from "./_components/header";
-import { SalaryList } from "./_components/salary-list";
+import { IncomeList } from "./_components/income-list";
 
 export const metadata: Metadata = {
-    title: "BEC | Salary Report",
+    title: "BEC | Report | Income | Others",
     description: "Basic Education Care",
 };
 
-interface Props {
-    searchParams: {
-        session: string;
-        className: Class;
-    }
-}
+const OtherReport = async () => {
 
-const SalaryIncome = async ({ searchParams }: Props) => {
-    const { session, className } = searchParams;
-    const formatedSession = session ? parseInt(session) : new Date().getFullYear()
-
-    const payments = await db.student.findMany({
-        where: {
-            session: formatedSession,
-            class: className ? className : Class.Two
-        },
-        select: {
-            id: true,
-            name: true,
-            studentId: true,
-            imageUrl: true,
-            payments: true,
-        },
-        orderBy: {
-            studentId: "asc"
-        },
+    const payments = await db.income.groupBy({
+        by: ["month", "name"],
+        _sum: {
+            amount: true
+        }
     })
+
+    const modifiedPayments = payments.reduce((acc: { name: string, months: { month: Month, amount: number }[] }[], payment) => {
+        const existingType = acc.find(item => item.name === payment.name);
+
+        if (existingType) {
+            existingType.months.push({
+                month: payment.month,
+                amount: payment._sum.amount ?? 0
+            });
+        } else {
+            acc.push({
+                name: payment.name,
+                months: [{
+                    month: payment.month,
+                    amount: payment._sum.amount ?? 0
+                }]
+            });
+        }
+
+        return acc;
+    }, []);
 
     return (
         <ContentLayout title="Report">
@@ -67,22 +68,23 @@ const SalaryIncome = async ({ searchParams }: Props) => {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>Salary</BreadcrumbPage>
+                        <BreadcrumbPage>Others</BreadcrumbPage>
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
 
             <Card className="mt-4">
                 <CardHeader>
-                    <CardTitle>Salary Report</CardTitle>
+                    <CardTitle>Others Report</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <Header />
-                    <SalaryList payments={payments} />
+                    <IncomeList data={modifiedPayments} />
+                    {/* <Header />
+                    <SalaryList payments={payments} /> */}
                 </CardContent>
             </Card>
         </ContentLayout>
     )
 }
 
-export default SalaryIncome
+export default OtherReport

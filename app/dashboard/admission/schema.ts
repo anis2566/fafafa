@@ -10,9 +10,13 @@ import {
 
 const requiredString = z.string().trim().min(1, { message: "required" });
 
+const banglaRegex = /^[\u0980-\u09FF\s]+$/;
+
 export const StudentSchema = z.object({
   name: requiredString.min(4, { message: "min length 4" }),
-  nameBangla: requiredString.min(4, { message: "min length 4" }),
+  nameBangla: requiredString
+    .min(4, { message: "min length 4" })
+    .regex(banglaRegex, { message: "Must be in Bangla" }),
   fName: requiredString.min(4, { message: "min length 4" }),
   mName: requiredString.min(4, { message: "min length 4" }),
   dob: z.date().refine((date) => date !== null, { message: "required" }),
