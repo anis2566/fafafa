@@ -3,12 +3,13 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { Day } from "@prisma/client"
 import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Trash } from "lucide-react"
+import { CalendarIcon } from "lucide-react"
+import { format } from "date-fns"
 
 import {
     Form,
@@ -18,16 +19,23 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
-import { MultiSelect } from "@/components/ui/multi-select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
 
-import { LeaveAppSchema } from "../schema"
 import { UploadDropzone } from "@/lib/uploadthing"
-import { CREATE_LEAVE_APP  } from "../action"
+import { LeaveAppSchema } from "../schema"
+import { CREATE_LEAVE_APP } from "../action"
+import { cn } from "@/lib/utils"
 
 export const LeaveFrom = () => {
+
     const router = useRouter()
 
     const { mutate: applyLeave, isPending } = useMutation({
@@ -37,7 +45,7 @@ export const LeaveFrom = () => {
             toast.success(data.success, {
                 id: "create-app"
             });
-            router.push(`/teacher/leave/apply/${data?.id}/class`)
+            router.push(`/teacher/leave/history`)
         },
         onError: (error) => {
             toast.error(error.message, {
@@ -49,10 +57,9 @@ export const LeaveFrom = () => {
     const form = useForm<z.infer<typeof LeaveAppSchema>>({
         resolver: zodResolver(LeaveAppSchema),
         defaultValues: {
-            days: [],
             reason: "",
             attachments: [],
-            // classes: []
+            dates: []
         },
     })
 
@@ -60,7 +67,14 @@ export const LeaveFrom = () => {
         toast.loading("Applying...", {
             id: "create-app"
         });
-        applyLeave(values)
+
+        // Convert string dates back to Date objects
+        const formattedValues = {
+            ...values,
+            dates: values.dates.map(date => new Date(date))
+        };
+
+        applyLeave(formattedValues);
     }
 
     return (
@@ -73,22 +87,81 @@ export const LeaveFrom = () => {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField
                             control={form.control}
-                            name="days"
+                            name="dates"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Days</FormLabel>
-                                    <FormControl>
-                                        <MultiSelect
-                                            options={Object.values(Day).map(item => ({ label: item, value: item }))}
-                                            onValueChange={field.onChange}
-                                            defaultValue={field.value}
-                                            placeholder="Select days"
-                                            variant="inverted"
-                                            animation={2}
-                                            maxCount={3}
-                                            disabled={isPending}
-                                        />
-                                    </FormControl>
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <FormControl>
+                                                    <Button
+                                                        variant={"outline"}
+                                                        className={cn(
+                                                            "w-full pl-3 text-left font-normal",
+                                                            !field.value && "text-muted-foreground"
+                                                        )}
+                                                    >
+                                                        {field.value && field.value[0] ? (
+                                                            format(new Date(field.value[0]), "PPP")
+                                                        ) : (
+                                                            <span>From (date)</span>
+                                                        )}
+                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                    </Button>
+                                                </FormControl>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={field.value[0]}
+                                                    onSelect={(date) => {
+                                                        if (date) {
+                                                            field.onChange([date]);
+                                                        }
+                                                    }}
+                                                    disabled={(date) =>
+                                                        date < new Date(Date.now())
+                                                    }
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <FormControl>
+                                                    <Button
+                                                        variant={"outline"}
+                                                        className={cn(
+                                                            "w-full pl-3 text-left font-normal",
+                                                            !field.value && "text-muted-foreground"
+                                                        )}
+                                                    >
+                                                        {field.value && field.value[1] ? (
+                                                            format(new Date(field.value[1]), "PPP")
+                                                        ) : (
+                                                            <span>To (date)</span>
+                                                        )}
+                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                    </Button>
+                                                </FormControl>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={field.value[1]}
+                                                    onSelect={(date) => {
+                                                        if (date) {
+                                                            field.onChange([form.getValues("dates")[0], date]);
+                                                        }
+                                                    }}
+                                                    disabled={(date) =>
+                                                        date < new Date() || date <= form.getValues("dates")[0]
+                                                    }
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
                                     <FormMessage />
                                 </FormItem>
                             )}

@@ -199,7 +199,8 @@ model User {
   teacherRequest  TeacherRequest?
   accounts      Account[]
   references    Student[]
-
+  pushSubscription PushSubscriber[]
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -234,7 +235,21 @@ model VerificationToken {
  
   @@id([identifier])
 }
- 
+
+model PushSubscriber {
+  id                    String          @id @default(cuid())
+  endpoint              String 
+  auth                  String
+  p256dh                String
+  
+  userId                String 
+  user                  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([userId])
+} 
 
 model Student {
   id            String          @id @default(cuid())

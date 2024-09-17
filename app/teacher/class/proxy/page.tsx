@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Metadata } from "next";
-import { Day } from "@prisma/client";
+import { BookOpen, BuildingIcon, Clock, Layers } from "lucide-react";
+import { format } from "date-fns";
 
 import {
     Breadcrumb,
@@ -10,7 +11,7 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { ContentLayout } from "../../_components/content-layout";
@@ -27,14 +28,18 @@ type ClassData = {
     day: string;
     batchName: string | null;
     subjectName: string;
+    date: Date;
+    roomName: number;
 };
 
 type GroupedData = {
-    time: string;
+    date: string;
     classes: {
+        time: string;
         batchName: string | null;
         subjectName: string;
         day: string;
+        roomName: number;
     }[];
 };
 
@@ -42,9 +47,12 @@ const ProxyClass = async () => {
     const { teacherId } = await GET_TEACHER()
 
     const classes = await db.leaveClass.groupBy({
-        by: ["time", "day", "batchName", "subjectName"],
+        by: ["time", "day", "batchName", "subjectName", "date", "roomName"],
         where: {
-            teacherId
+            teacherId,
+            date: {
+                gte: new Date()
+            }
         },
         orderBy: {
             time: "desc"
@@ -53,17 +61,20 @@ const ProxyClass = async () => {
 
     const groupedData: GroupedData[] = Object.values(
         classes.reduce((acc: { [key: string]: GroupedData }, curr: ClassData) => {
-            const { time, batchName, subjectName, day } = curr;
-            if (!acc[time]) {
-                acc[time] = {
-                    time: time,
+            const { time, batchName, subjectName, day, date, roomName } = curr;
+            const dateString = date.toISOString();
+            if (!acc[dateString]) {
+                acc[dateString] = {
+                    date: dateString,
                     classes: [],
                 };
             }
-            acc[time].classes.push({ day, batchName, subjectName });
+            acc[dateString].classes.push({ day, batchName, subjectName, time, roomName });
             return acc;
         }, {})
     );
+
+    console.log(groupedData)
 
     return (
         <ContentLayout title="Class">
@@ -94,33 +105,34 @@ const ProxyClass = async () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <Table>
-                        <TableHeader>
-                            <TableHead>Time</TableHead>
-                            {
-                                Object.values(Day).map((v, i) => (
-                                    <TableHead key={i}>{v}</TableHead>
-                                ))
-                            }
-                        </TableHeader>
                         <TableBody>
                             {
                                 groupedData.map((item, index) => (
                                     <TableRow key={index}>
-                                        <TableCell>{item.time}</TableCell>
+                                        <TableCell className="border">{format(item.date, "dd MMM yyyy")}</TableCell>
                                         {
-                                            Object.values(Day).map((v, i) => {
-                                                const isMatchDay = item.classes.find(item => item.day === v)
-                                                return (
-                                                    <TableCell key={i}>
-                                                        {isMatchDay ? (
-                                                            <div>
-                                                                <p className="text-lg font-semibold">{isMatchDay?.subjectName}</p>
-                                                                <p>{isMatchDay?.batchName}</p>
-                                                            </div>
-                                                        ) : "-"}
-                                                    </TableCell>
-                                                )
-                                            })
+                                            item.classes.map((cls, i) => (
+                                                <TableCell key={i} className="border">
+                                                    <div className="space-y-1">
+                                                        <div className="flex items-center gap-x-2">
+                                                            <BookOpen className="w-5 h-5" />
+                                                            <p className="text-lg font-semibold">{cls.subjectName}</p>
+                                                        </div>
+                                                        <div className="flex items-center gap-x-2">
+                                                            <Layers className="w-5 h-5" />
+                                                            <p className="text-md">{cls?.batchName}</p>
+                                                        </div>
+                                                        <div className="flex items-center gap-x-2">
+                                                            <BuildingIcon className="w-5 h-5" />
+                                                            <p className="text-md">{cls.roomName}</p>
+                                                        </div>
+                                                        <div className="flex items-center gap-x-2">
+                                                            <Clock className="w-5 h-5" />
+                                                            <p className="text-md">{cls.time}</p>
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+                                            ))
                                         }
                                     </TableRow>
                                 ))

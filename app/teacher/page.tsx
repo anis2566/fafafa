@@ -24,6 +24,8 @@ import { ContentLayout } from "./_components/content-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/lib/prisma";
 import { GET_TEACHER } from "@/services/user.service";
+import { NoticeList } from "./_components/notice-list";
+import { format } from "date-fns";
 
 export const metadata: Metadata = {
     title: "BEC | Dashboard",
@@ -79,8 +81,8 @@ const TeacherDashboard = async () => {
 
             <div className="mt-4 grid md:grid-cols-3 gap-6">
                 <div className="md:col-span-2 space-y-5">
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <Card className="flex flex-col max-h-[120px]">
+                    {/* <div className="grid md:grid-cols-2 gap-6">
+                        <Card className="flex flex-col">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0">
                                 <CardTitle className="text-md font-medium">Class Today</CardTitle>
                                 <BookOpen className="h-4 w-4 text-muted-foreground" />
@@ -89,7 +91,7 @@ const TeacherDashboard = async () => {
                                 {todayClass}
                             </CardContent>
                         </Card>
-                        <Card className="flex flex-col max-h-[120px]">
+                        <Card className="flex flex-col">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0">
                                 <CardTitle className="text-md font-medium">Proxy Today</CardTitle>
                                 <BookOpen className="h-4 w-4 text-muted-foreground" />
@@ -98,7 +100,7 @@ const TeacherDashboard = async () => {
                                 {todayProxy}
                             </CardContent>
                         </Card>
-                    </div>
+                    </div> */}
                     <Card>
                         <CardHeader>
                             <CardTitle>Recent Leave</CardTitle>
@@ -108,6 +110,7 @@ const TeacherDashboard = async () => {
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>#SL</TableHead>
+                                        <TableHead>Dates</TableHead>
                                         <TableHead>Days</TableHead>
                                         <TableHead>Status</TableHead>
                                     </TableRow>
@@ -117,6 +120,7 @@ const TeacherDashboard = async () => {
                                         leaves?.map((leave, i) => (
                                             <TableRow key={leave.id}>
                                                 <TableCell className="py-3">{i + 1}</TableCell>
+                                                <TableCell className="py-3">{format(leave.dates[0], "dd MMM yyyy")}  {leave.dates.length > 1 && "- " + format(leave.dates[leave.dates.length - 1], "dd MMM yyyy")}</TableCell>
                                                 <TableCell className="py-3">{leave.days[0]} - {leave.days[leave.days.length - 1]}</TableCell>
                                                 <TableCell className="py-3">
                                                     <Badge variant={leave.status === LeaveStatus.Approved ? "default" : leave.status === LeaveStatus.Rejected ? "destructive" : "outline"}>
@@ -131,25 +135,7 @@ const TeacherDashboard = async () => {
                         </CardContent>
                     </Card>
                 </div>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Notice Board</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ScrollArea className="w-full h-[400px] p-2">
-                            {
-                                notices.map(notice => (
-                                    <div key={notice.id} className="flex items-center gap-x-3 border-b border-primary-60 py-2 mt-2">
-                                        <div className="rounded-full border p-2 shadow-sm shadow-primary flex items-center justify-center">
-                                            <Megaphone className="w-5 h-5 text-primary" />
-                                        </div>
-                                        <p className="text-sm">{notice.text}</p>
-                                    </div>
-                                ))
-                            }
-                        </ScrollArea>
-                    </CardContent>
-                </Card>
+                <NoticeList notices={notices} />
             </div>
         </ContentLayout>
     )

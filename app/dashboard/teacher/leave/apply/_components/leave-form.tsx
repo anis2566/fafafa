@@ -91,8 +91,6 @@ export const LeaveFrom = () => {
         applyLeave(formattedValues);
     }
 
-    console.log(form.getValues("dates"))
-
     return (
         <Card className="mt-4">
             <CardHeader>
