@@ -129,12 +129,20 @@ export const GET_SUBJECT_BY_CLASS = async (className: Class) => {
   };
 };
 
-export const GET_TEACHER_BY_LEVEL = async (level: Level) => {
+type GetTeacher = {
+  level: Level;
+  id?: number;
+};
+
+export const GET_TEACHER_BY_LEVEL = async ({ level, id }: GetTeacher) => {
   const teachers = await db.teacher.findMany({
     where: {
       level: {
         has: level,
       },
+      ...(id && {
+        teacherId: id,
+      }),
     },
     take: 3,
   });

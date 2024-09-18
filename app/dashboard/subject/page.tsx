@@ -26,36 +26,45 @@ export const metadata: Metadata = {
 
 interface Props {
     searchParams: {
-        className: Class;
-        name: string;
+        className?: Class;
+        name?: string;
         page: string;
         perPage: string;
     }
 }
 
 const Subject = async ({ searchParams }: Props) => {
-    const { name, className, page, perPage } = searchParams;
-    const itemsPerPage = parseInt(perPage) || 5;
-    const currentPage = parseInt(page) || 1;
+    const {
+        className,
+        name,
+        page = "1",
+        perPage = "5"
+    } = searchParams;
 
-    const subjects = await db.subject.findMany({
-        where: {
-            ...(className && { class: className }),
-            ...(name && { name: { contains: name, mode: "insensitive" } }),
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
+    const itemsPerPage = parseInt(perPage, 10);
+    const currentPage = parseInt(page, 10);
 
-    const totalSubject = await db.batch.count({
-        where: {
-            ...(className && { class: className }),
-            ...(name && { name: { contains: name, mode: "insensitive" } }),
-        },
-    })
+
+    const [subjects, totalSubject] = await Promise.all([
+        await db.subject.findMany({
+            where: {
+                ...(className && { class: className }),
+                ...(name && { name: { contains: name, mode: "insensitive" } }),
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        await db.batch.count({
+            where: {
+                ...(className && { class: className }),
+                ...(name && { name: { contains: name, mode: "insensitive" } }),
+            },
+        })
+    ])
+
 
     const totalPage = Math.ceil(totalSubject / itemsPerPage)
 

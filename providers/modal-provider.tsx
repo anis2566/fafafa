@@ -13,7 +13,7 @@ import { UpdateMonthlyFeeModal } from "@/app/dashboard/fee/monthly/_components/u
 import { DeleteRoomModal } from "@/app/dashboard/room/_components/delete-modal"
 
 // ROOM
-import { UpdateAdmissionPaymentModal } from "@/app/dashboard/salary/admission/_components/update-modal"
+import { UpdateAdmissionPaymentModal } from "@/app/dashboard/income/admission/_components/update-modal"
 
 // STUDNET
 import { AddStudentModal } from "@/app/dashboard/batch/[id]/_components/add-student-modal"

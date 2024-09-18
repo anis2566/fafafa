@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button"
 
 import { formatString } from "@/lib/utils"
 import { useDeleteSubject, useUpdateSubject } from "@/hooks/use-subject"
+import { EmptyData } from "@/components/empty-stat"
 
 interface Props {
     subjects: Subject[]
@@ -29,6 +30,10 @@ interface Props {
 export const SubjectList = ({ subjects }: Props) => {
     const { onOpen } = useUpdateSubject()
     const { onOpen: onOpenDelete } = useDeleteSubject()
+
+    if(subjects.length === 0) {
+        return <EmptyData title="No Subject Found!" />
+    }
 
     return (
         <Table>

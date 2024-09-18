@@ -5,24 +5,47 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import queryString from "query-string"
 import { Class } from "@prisma/client"
 import { useEffect, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+} from "@/components/ui/sheet"
 
 import { useDebounce } from "@/hooks/use-debounce"
 import { formatString } from "@/lib/utils"
+import { GET_ROOMS } from "../create/action"
 
 
-export const Header = () => {
+interface Props {
+    open: boolean;
+    handleClose: () => void;
+}
+
+export const FilterDrawer = ({ open, handleClose }: Props) => {
     const [search, setSearch] = useState<string>("")
-    const [perPage, setPerPage] = useState<number>()
+    const [room, setRoom] = useState<string>()
     const [className, setClassName] = useState<Class | undefined>()
 
     const pathname = usePathname()
     const router = useRouter()
     const searchParams = useSearchParams()
     const searchValue = useDebounce(search, 500)
+
+    const { data: rooms } = useQuery({
+        queryKey: ["get-rooms-header"],
+        queryFn: async () => {
+            const res = await GET_ROOMS();
+            return res.rooms
+        },
+        staleTime: 60 * 60 * 1000
+    })
 
     useEffect(() => {
         const params = Object.fromEntries(searchParams.entries());
@@ -35,22 +58,10 @@ export const Header = () => {
         }, { skipEmptyString: true, skipNull: true });
 
         router.push(url);
-    }, [searchValue, router, pathname])
-
-    const handlePerPageChange = (perPage: string) => {
-        const params = Object.fromEntries(searchParams.entries());
-        const url = queryString.stringifyUrl({
-            url: pathname,
-            query: {
-                ...params,
-                perPage,
-            }
-        }, { skipNull: true, skipEmptyString: true })
-
-        router.push(url)
-    }
+    }, [searchValue, router, pathname, searchParams])
 
     const handleClassChange = (className: Class) => {
+        setClassName(className)
         const params = Object.fromEntries(searchParams.entries());
         const url = queryString.stringifyUrl({
             url: pathname,
@@ -63,25 +74,55 @@ export const Header = () => {
         router.push(url)
     }
 
+    const handleRoomChange = (room: string) => {
+        setRoom(room)
+        const params = Object.fromEntries(searchParams.entries());
+        const url = queryString.stringifyUrl({
+            url: pathname,
+            query: {
+                ...params,
+                room
+            }
+        }, { skipNull: true, skipEmptyString: true })
+
+        router.push(url)
+    }
+
     const handleReset = () => {
         router.push(pathname)
         setSearch("")
         setClassName(undefined)
-        setPerPage(undefined)
+        setRoom("")
     }
 
     return (
-        <div className="space-y-2 shadow-sm shadow-primary px-2 py-3">
-            <div className="flex items-center justify-between gap-x-3">
-                <div className="flex items-center gap-x-3">
+        <Sheet open={open} onOpenChange={handleClose}>
+            <SheetContent>
+                <SheetHeader className="space-y-0">
+                    <SheetTitle className="text-start">Filter</SheetTitle>
+                    <SheetDescription className="text-start">
+                        Filter search result
+                    </SheetDescription>
+                </SheetHeader>
+
+                <div className="space-y-3 mt-4">
+                    <Select value={room} onValueChange={(value) => handleRoomChange(value)}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Room" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {
+                                rooms?.map((room, i) => (
+                                    <SelectItem value={room.name.toString()} key={i}>{room.name}</SelectItem>
+                                ))
+                            }
+                        </SelectContent>
+                    </Select>
                     <Select
                         value={className || ""}
-                        onValueChange={(value) => {
-                            handleClassChange(value as Class)
-                            setClassName(value as Class)
-                        }}
+                        onValueChange={(value) => handleClassChange(value as Class)}
                     >
-                        <SelectTrigger className="w-[130px]">
+                        <SelectTrigger>
                             <SelectValue placeholder="Class" />
                         </SelectTrigger>
                         <SelectContent>
@@ -92,7 +133,7 @@ export const Header = () => {
                             }
                         </SelectContent>
                     </Select>
-                    <div className="flex-1">
+                    <div>
                         <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             type="search"
@@ -103,51 +144,14 @@ export const Header = () => {
                         />
                     </div>
                     <Button
-                        className="hidden md:flex bg-rose-500 text-white"
+                        className="bg-rose-500 text-white"
                         onClick={handleReset}
                     >
                         Reset
                     </Button>
                 </div>
-                <Select value={perPage?.toString() || ""} onValueChange={(value) => {
-                    handlePerPageChange(value)
-                    setPerPage(parseInt(value))
-                }}>
-                    <SelectTrigger className="w-[130px] hidden md:flex">
-                        <SelectValue placeholder="Limit" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {
-                            ["5", "10", "20", "50", "100", "200"].map((v, i) => (
-                                <SelectItem value={v} key={i}>{v}</SelectItem>
-                            ))
-                        }
-                    </SelectContent>
-                </Select>
-            </div>
-            <div className="flex md:hidden items-center gap-x-3">
-                <Select value={perPage?.toString() || ""} onValueChange={(value) => {
-                    handlePerPageChange(value)
-                    setPerPage(parseInt(value))
-                }}>
-                    <SelectTrigger className="w-[130px]">
-                        <SelectValue placeholder="Limit" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {
-                            ["5", "10", "20", "50", "100", "200"].map((v, i) => (
-                                <SelectItem value={v} key={i}>{v}</SelectItem>
-                            ))
-                        }
-                    </SelectContent>
-                </Select>
-                <Button
-                    className="bg-rose-500 text-white"
-                    onClick={handleReset}
-                >
-                    Reset
-                </Button>
-            </div>
-        </div>
+            </SheetContent>
+        </Sheet>
+
     )
 }

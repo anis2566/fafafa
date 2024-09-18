@@ -3,51 +3,22 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import queryString from "query-string"
 import { Month } from "@prisma/client"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
 
-import { useDebounce } from "@/hooks/use-debounce"
-
-
 export const Header = () => {
-    const [search, setSearch] = useState<string>("")
-    const [id, setId] = useState<string>("")
+    const [session, setSession] = useState<number>(new Date().getFullYear())
+    const [month, setMonth] = useState<Month | undefined>()
+    const [perPage, setPerPage] = useState<number>()
 
     const pathname = usePathname()
     const router = useRouter()
     const searchParams = useSearchParams()
-    const searchValue = useDebounce(search, 500)
-    const searchIdValue = useDebounce(id, 500)
-
-    useEffect(() => {
-        const params = Object.fromEntries(searchParams.entries());
-        const url = queryString.stringifyUrl({
-            url: pathname,
-            query: {
-                ...params,
-                name: searchValue
-            }
-        }, { skipEmptyString: true, skipNull: true });
-
-        router.push(url);
-    }, [searchValue, router, pathname])
-
-    useEffect(() => {
-        const params = Object.fromEntries(searchParams.entries());
-        const url = queryString.stringifyUrl({
-            url: pathname,
-            query: {
-                ...params,
-                id: searchIdValue
-            }
-        }, { skipEmptyString: true, skipNull: true });
-
-        router.push(url);
-    }, [searchIdValue, router, pathname])
 
     const handlePerPageChange = (perPage: string) => {
+        setPerPage(parseInt(perPage))
         const params = Object.fromEntries(searchParams.entries());
         const url = queryString.stringifyUrl({
             url: pathname,
@@ -61,6 +32,7 @@ export const Header = () => {
     }
 
     const handleMonthChange = (month: Month) => {
+        setMonth(month)
         const params = Object.fromEntries(searchParams.entries());
         const url = queryString.stringifyUrl({
             url: pathname,
@@ -74,6 +46,7 @@ export const Header = () => {
     }
 
     const handleSessionChange = (session: string) => {
+        setSession(parseInt(session))
         const params = Object.fromEntries(searchParams.entries());
         const url = queryString.stringifyUrl({
             url: pathname,
@@ -86,11 +59,19 @@ export const Header = () => {
         router.push(url)
     }
 
+    const handleReset = () => {
+        router.push(pathname)
+        setSession(new Date().getFullYear())
+        setPerPage(undefined)
+        setMonth(undefined)
+    }
+
+
     return (
         <div className="space-y-2 shadow-sm shadow-primary px-2 py-3">
             <div className="flex items-center justify-between gap-x-3">
                 <div className="flex items-center gap-x-3">
-                    <Select defaultValue="2024" onValueChange={(value) => handleSessionChange(value)}>
+                    <Select value={session.toString() || ""} onValueChange={(value) => handleSessionChange(value)}>
                         <SelectTrigger className="w-[130px]">
                             <SelectValue placeholder="Session" />
                         </SelectTrigger>
@@ -102,7 +83,7 @@ export const Header = () => {
                             }
                         </SelectContent>
                     </Select>
-                    <Select onValueChange={(value) => handleMonthChange(value as Month)}>
+                    <Select value={month || ""} onValueChange={(value) => handleMonthChange(value as Month)}>
                         <SelectTrigger className="w-[130px]">
                             <SelectValue placeholder="Month" />
                         </SelectTrigger>
@@ -117,16 +98,12 @@ export const Header = () => {
                     <Button
                         variant="outline"
                         className="hidden md:flex text-rose-500"
-                        onClick={() => {
-                            setSearch("")
-                            setId("")
-                            router.push(pathname)
-                        }}
+                        onClick={handleReset}
                     >
                         Reset
                     </Button>
                 </div>
-                <Select onValueChange={(value) => handlePerPageChange(value)}>
+                <Select value={perPage?.toString() || ""} onValueChange={(value) => handlePerPageChange(value)}>
                     <SelectTrigger className="w-[130px]">
                         <SelectValue placeholder="Limit" />
                     </SelectTrigger>

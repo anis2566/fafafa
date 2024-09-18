@@ -24,42 +24,49 @@ export const metadata: Metadata = {
 
 interface Props {
     searchParams: {
-        session: string;
-        id: string;
-        name: string;
+        session?: string;
+        id?: string;
+        name?: string;
         page: string;
         perPage: string;
     }
 }
 
-
 const Teacher = async ({ searchParams }: Props) => {
-    const { session, id, name, page, perPage } = searchParams;
-    const itemsPerPage = parseInt(perPage) || 5;
-    const currentPage = parseInt(page) || 1;
-    const formatedSession = session ? parseInt(session) : new Date().getFullYear()
-    const teacherId = id ? parseInt(id) : undefined
+    const {
+        session,
+        id,
+        name,
+        page = "1",
+        perPage = "5"
+    } = searchParams;
 
-    const teachers = await db.teacher.findMany({
-        where: {
-            session: formatedSession,
-            ...(teacherId && { teacherId }),
-            ...(name && { name: { contains: name, mode: "insensitive" } }),
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
+    const itemsPerPage = parseInt(perPage, 10);
+    const currentPage = parseInt(page, 10);
+    const formatedSession = parseInt(session || `${new Date().getFullYear()}`);
+    const teacherId = id ? parseInt(id) : undefined;
 
-    const totalTeacher = await db.teacher.count({
-        where: {
-            session: formatedSession,
-            ...(teacherId && { teacherId }),
-            ...(name && { name: { contains: name, mode: "insensitive" } }),
-        }
-    })
+    const [teachers, totalTeacher] = await Promise.all([
+        await db.teacher.findMany({
+            where: {
+                session: formatedSession,
+                ...(teacherId && { teacherId }),
+                ...(name && { name: { contains: name, mode: "insensitive" } }),
+            },
+            orderBy: {
+                teacherId: "asc"
+            },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        await db.teacher.count({
+            where: {
+                session: formatedSession,
+                ...(teacherId && { teacherId }),
+                ...(name && { name: { contains: name, mode: "insensitive" } }),
+            }
+        })
+    ])
 
     const totalPage = Math.ceil(totalTeacher / itemsPerPage)
 

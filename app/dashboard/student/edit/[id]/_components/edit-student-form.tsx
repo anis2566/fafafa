@@ -1,14 +1,13 @@
 "use client"
 
-import { Student } from "@prisma/client"
+import { Student, Gender, Nationality, Religion, Class as PrismaClass, Shift, Group } from "@prisma/client"
 import { Trash2 } from "lucide-react"
 import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { Gender, Nationality, Religion, Class as PrismaClass, Shift, Group } from "@prisma/client"
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css"
 import { toast } from "sonner"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
@@ -30,30 +29,22 @@ interface Props {
 }
 
 export const EditStudentFrom = ({ student }: Props) => {
-    const [dob, setDob] = useState<Date>(new Date())
-
+    const [dob, setDob] = useState<Date>(new Date(student.dob || Date.now()))
     const router = useRouter()
 
-    const { data: users } = useQuery({
+    const { data } = useQuery({
         queryKey: ["get-user-for-ref"],
-        queryFn: async () => {
-            const res = await GET_USERS()
-            return res.users
-        },
+        queryFn: GET_USERS
     })
 
     const { mutate: updateStudent, isPending } = useMutation({
         mutationFn: UPDATE_STUDENT,
         onSuccess: (data) => {
-            toast.success(data?.success, {
-                id: "update-student"
-            })
+            toast.success(data?.success, { id: "update-student" })
             router.push(`/dashboard/student`)
         },
         onError: (error) => {
-            toast.error(error.message, {
-                id: "update-student"
-            })
+            toast.error(error.message, { id: "update-student" })
         }
     })
 
@@ -91,96 +82,63 @@ export const EditStudentFrom = ({ student }: Props) => {
         },
     })
 
-    function onSubmit(values: z.infer<typeof StudentSchema>) {
-        toast.loading("Student updating...", {
-            id: "update-student"
-        })
+    const onSubmit = (values: z.infer<typeof StudentSchema>) => {
+        toast.loading("Student updating...", { id: "update-student" })
         updateStudent({ id: student.id, values })
     }
+
+    const renderFormField = (name: keyof z.infer<typeof StudentSchema>, label: string, type: string = "text") => (
+        <FormField
+            control={form.control}
+            name={name}
+            render={({ field }) => (
+                <FormItem>
+                    <FormLabel>{label}</FormLabel>
+                    <FormControl>
+                        <Input {...field} type={type} disabled={isPending} value={field.value?.toString()} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )}
+        />
+    )
+
+    const renderSelectField = (name: keyof z.infer<typeof StudentSchema>, label: string, options: any) => (
+        <FormField
+            control={form.control}
+            name={name}
+            render={({ field }) => (
+                <FormItem>
+                    <FormLabel>{label}</FormLabel>
+                    <Select defaultValue={field.value?.toString()} onValueChange={(value) => field.onChange(value)} disabled={isPending}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            {Object.values(options).map((v, i) => (
+                                <SelectItem value={v as string} key={i}>{formatString(v as string)}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                </FormItem>
+            )}
+        />
+    )
+
     return (
         <Form {...form}>
             <form className="space-y-4 border p-4 mt-4 rounded-md" onSubmit={form.handleSubmit(onSubmit)}>
-                <div className="space-y-4">
-                    <h1 className="text-xl font-semibold text-center text-primary border-b border-primary">Personal Information</h1>
-                </div>
+                {/* Personal Information */}
+                <h1 className="text-xl font-semibold text-center text-primary border-b border-primary">Personal Information</h1>
                 <div className="grid md:grid-cols-2 gap-6">
-                    <FormField
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Name</FormLabel>
-                                <FormControl>
-                                    <Input {...field} disabled={isPending} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="nameBangla"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Name Bangla</FormLabel>
-                                <FormControl>
-                                    <Input {...field} disabled={isPending} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="fName"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Father Name</FormLabel>
-                                <FormControl>
-                                    <Input {...field} disabled={isPending} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="mName"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Mother Name</FormLabel>
-                                <FormControl>
-                                    <Input {...field} disabled={isPending} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="gender"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Gender</FormLabel>
-                                <Select defaultValue={field.value} onValueChange={(value) => field.onChange(value)} disabled={isPending}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select gender" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {
-                                            Object.values(Gender).map((v, i) => (
-                                                <SelectItem value={v} key={i}>{v}</SelectItem>
-
-                                            ))
-                                        }
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                    {renderFormField("name", "Name")}
+                    {renderFormField("nameBangla", "Name Bangla")}
+                    {renderFormField("fName", "Father Name")}
+                    {renderFormField("mName", "Mother Name")}
+                    {renderSelectField("gender", "Gender", Gender)}
                     <FormField
                         control={form.control}
                         name="dob"
@@ -209,56 +167,8 @@ export const EditStudentFrom = ({ student }: Props) => {
                             </FormItem>
                         )}
                     />
-                    <FormField
-                        control={form.control}
-                        name="nationality"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Nationality</FormLabel>
-                                <Select defaultValue={field.value} onValueChange={(value) => field.onChange(value)} disabled={isPending}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select nationality" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {
-                                            Object.values(Nationality).map((v, i) => (
-                                                <SelectItem value={v} key={i}>{v}</SelectItem>
-
-                                            ))
-                                        }
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="religion"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Religion</FormLabel>
-                                <Select defaultValue={field.value} onValueChange={(value) => field.onChange(value)} disabled={isPending}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select religion" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {
-                                            Object.values(Religion).map((v, i) => (
-                                                <SelectItem value={v} key={i}>{v}</SelectItem>
-
-                                            ))
-                                        }
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                    {renderSelectField("nationality", "Nationality", Nationality)}
+                    {renderSelectField("religion", "Religion", Religion)}
                     <FormField
                         control={form.control}
                         name="imageUrl"
@@ -267,11 +177,11 @@ export const EditStudentFrom = ({ student }: Props) => {
                                 <FormLabel>Image</FormLabel>
                                 {
                                     form.watch("imageUrl") ? (
-                                        <div className="relative">
+                                        <div className="relative w-[70px]">
                                             <Avatar>
                                                 <AvatarImage src={form.getValues("imageUrl")} />
                                             </Avatar>
-                                            <Button type="button" onClick={() => form.setValue("imageUrl", "")} variant="ghost" size="icon" className="absolute right-0 top-0" disabled={isPending}>
+                                            <Button type="button" onClick={() => form.setValue("imageUrl", "")} variant="ghost" size="icon" className="absolute right-0 -top-2" disabled={isPending}>
                                                 <Trash2 className="w-5 h-5 text-rose-500" />
                                             </Button>
                                         </div>
@@ -294,302 +204,50 @@ export const EditStudentFrom = ({ student }: Props) => {
                     />
                 </div>
 
-                <div className="space-y-4">
-                    <h1 className="text-xl font-semibold text-center text-primary border-b border-primary">Academic Information</h1>
-                </div>
+                {/* Academic Information */}
+                <h1 className="text-xl font-semibold text-center text-primary border-b border-primary">Academic Information</h1>
                 <div className="grid md:grid-cols-2 gap-6">
-                    <FormField
-                        control={form.control}
-                        name="school"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>School Name</FormLabel>
-                                <FormControl>
-                                    <Input {...field} disabled={isPending} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="class"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Class</FormLabel>
-                                <Select defaultValue={field.value} onValueChange={(value) => field.onChange(value)} disabled={isPending}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select class" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {
-                                            Object.values(PrismaClass).map((v, i) => (
-                                                <SelectItem value={v} key={i}>{formatString(v)}</SelectItem>
-                                            ))
-                                        }
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="section"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Section</FormLabel>
-                                <FormControl>
-                                    <Input {...field} disabled={isPending} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="shift"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Shift</FormLabel>
-                                <Select defaultValue={field.value} onValueChange={(value) => field.onChange(value)} disabled={isPending}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select shift" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {
-                                            Object.values(Shift).map((v, i) => (
-                                                <SelectItem value={v} key={i}>{v}</SelectItem>
-                                            ))
-                                        }
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="group"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Group</FormLabel>
-                                <Select defaultValue={field.value} onValueChange={(value) => field.onChange(value)} disabled={isPending}>
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select group" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        {
-                                            Object.values(Group).map((v, i) => (
-                                                <SelectItem value={v} key={i}>{formatString(v)}</SelectItem>
-                                            ))
-                                        }
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="roll"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Roll</FormLabel>
-                                <FormControl>
-                                    <Input {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} type="number" disabled={isPending} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                    {renderFormField("school", "School Name")}
+                    {renderSelectField("class", "Class", PrismaClass)}
+                    {renderFormField("section", "Section")}
+                    {renderSelectField("shift", "Shift", Shift)}
+                    {renderSelectField("group", "Group", Group)}
+                    {renderFormField("roll", "Roll", "number")}
                 </div>
 
-                <div className="space-y-4">
-                    <h1 className="text-xl font-semibold text-center text-primary border-b border-primary">Address</h1>
-                </div>
+                {/* Address */}
+                <h1 className="text-xl font-semibold text-center text-primary border-b border-primary">Address</h1>
                 <div className="grid md:grid-cols-2 gap-6">
+                    {/* Present Address */}
                     <div className="space-y-2">
                         <h1 className="text-lg font-semibold text-center">Present Address</h1>
-                        <FormField
-                            control={form.control}
-                            name="presentHouseNo"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>House No</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} disabled={isPending} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="presentMoholla"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Moholla</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} disabled={isPending} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="presentPost"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Post</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} disabled={isPending} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="presentThana"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Thana</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} disabled={isPending} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        {renderFormField("presentHouseNo", "House No")}
+                        {renderFormField("presentMoholla", "Moholla")}
+                        {renderFormField("presentPost", "Post")}
+                        {renderFormField("presentThana", "Thana")}
                     </div>
-
+                    {/* Permanent Address */}
                     <div className="space-y-2">
                         <h1 className="text-lg font-semibold text-center">Permanent Address</h1>
-                        <FormField
-                            control={form.control}
-                            name="permanentVillage"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Village</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} disabled={isPending} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="permanentPost"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Post</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} disabled={isPending} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="permanentThana"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Thana</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} disabled={isPending} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="permanentDistrict"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>District</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} disabled={isPending} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        {renderFormField("permanentVillage", "Village")}
+                        {renderFormField("permanentPost", "Post")}
+                        {renderFormField("permanentThana", "Thana")}
+                        {renderFormField("permanentDistrict", "District")}
                     </div>
                 </div>
 
-                <div className="space-y-4">
-                    <h1 className="text-xl font-semibold text-center text-primary border-b border-primary">Contact</h1>
-                </div>
+                {/* Contact */}
+                <h1 className="text-xl font-semibold text-center text-primary border-b border-primary">Contact</h1>
                 <div className="grid md:grid-cols-2 gap-6">
-                    <FormField
-                        control={form.control}
-                        name="fPhone"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Father Phone No</FormLabel>
-                                <FormControl>
-                                    <Input {...field} disabled={isPending} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="mPhone"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Mother Phone No</FormLabel>
-                                <FormControl>
-                                    <Input {...field} disabled={isPending} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                    {renderFormField("fPhone", "Father Phone No")}
+                    {renderFormField("mPhone", "Mother Phone No")}
                 </div>
 
-                <div className="space-y-4">
-                    <h1 className="text-xl font-semibold text-center text-primary border-b border-primary">Salary</h1>
-                </div>
+                {/* Salary */}
+                <h1 className="text-xl font-semibold text-center text-primary border-b border-primary">Salary</h1>
                 <div className="grid md:grid-cols-2 gap-6">
-                    <FormField
-                        control={form.control}
-                        name="admissionFee"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Admission Fee</FormLabel>
-                                <FormControl>
-                                    <Input {...field} value={field.value} type="number" disabled={isPending} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="monthlyFee"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Monthly Fee</FormLabel>
-                                <FormControl>
-                                    <Input {...field} value={field.value} type="number" disabled={isPending} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                    {renderFormField("admissionFee", "Admission Fee", "number")}
+                    {renderFormField("monthlyFee", "Monthly Fee", "number")}
                     <FormField
                         control={form.control}
                         name="referenceId"
@@ -604,7 +262,7 @@ export const EditStudentFrom = ({ student }: Props) => {
                                     </FormControl>
                                     <SelectContent>
                                         {
-                                            users?.map((v, i) => (
+                                            data?.users.map((v, i) => (
                                                 <SelectItem value={v.id} key={i}>{v.name}</SelectItem>
                                             ))
                                         }

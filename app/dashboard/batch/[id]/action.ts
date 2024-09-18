@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { Class, Day } from "@prisma/client";
+import { Class, Day, Status } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 type GetStudent = {
@@ -14,6 +14,7 @@ export const GET_STUDENTS_FOR_BATCH = async ({ id, className }: GetStudent) => {
     where: {
       ...(id && { studentId: id }),
       class: className,
+      isPresent: true,
       batchId: {
         equals: "" || null,
       },
@@ -51,7 +52,7 @@ export const ADD_STUDENT_TO_BATCH = async ({ ids, batchId }: AddStudent) => {
   }
 
   if (batch.capacity - batch.students.length < ids.length) {
-    throw new Error("Batch capacity is full");
+    throw new Error("Batch is full");
   }
 
   for (const id of ids) {
@@ -68,7 +69,7 @@ export const ADD_STUDENT_TO_BATCH = async ({ ids, batchId }: AddStudent) => {
   revalidatePath(`/dashboard/batch/${batchId}`);
 
   return {
-    success: "Student added",
+    success: "Student assigned",
   };
 };
 
@@ -161,6 +162,7 @@ export const GET_TEACHERS_BY_BATCH = async ({ id, searchId }: GetTeachers) => {
       level: {
         has: batch.level,
       },
+      status: Status.Active,
       ...(searchId && { teacherId: searchId }),
     },
     take: 3,

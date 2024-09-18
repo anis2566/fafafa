@@ -9,8 +9,16 @@ import { useEffect, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 import { useDebounce } from "@/hooks/use-debounce"
+import { FilterDrawer } from "./filter-drawer"
+import { formatString } from "@/lib/utils"
 
 
 export const Header = () => {
@@ -18,12 +26,18 @@ export const Header = () => {
     const [id, setId] = useState<string>("")
     const [session, setSession] = useState<number>(new Date().getFullYear())
     const [className, setClassName] = useState<Class | undefined>()
+    const [perPage, setPerPage] = useState<number>()
+    const [open, setOpen] = useState<boolean>(false)
 
     const pathname = usePathname()
     const router = useRouter()
     const searchParams = useSearchParams()
     const searchValue = useDebounce(search, 500)
     const searchIdValue = useDebounce(id, 500)
+
+    const handleClose = () => {
+        setOpen(false)
+    }
 
     useEffect(() => {
         const params = Object.fromEntries(searchParams.entries());
@@ -50,6 +64,7 @@ export const Header = () => {
     }, [searchIdValue, router, pathname])
 
     const handlePerPageChange = (perPage: string) => {
+        setPerPage(parseInt(perPage))
         const params = Object.fromEntries(searchParams.entries());
         const url = queryString.stringifyUrl({
             url: pathname,
@@ -63,6 +78,7 @@ export const Header = () => {
     }
 
     const handleClassChange = (className: Class) => {
+        setClassName(className)
         const params = Object.fromEntries(searchParams.entries());
         const url = queryString.stringifyUrl({
             url: pathname,
@@ -94,13 +110,26 @@ export const Header = () => {
         setSearch("")
         setId("")
         setSession(new Date().getFullYear())
+        setPerPage(undefined)
         setClassName(undefined)
     }
 
     return (
         <div className="space-y-2 shadow-sm shadow-primary px-2 py-3">
+            <FilterDrawer open={open} handleClose={handleClose} />
             <div className="flex items-center justify-between gap-x-3">
-                <div className="flex items-center gap-x-3">
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild className="md:hidden">
+                            <Button onClick={() => setOpen(true)}>Filter</Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Filter result</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+
+                <div className="hidden md:flex items-center gap-x-3">
                     <Select value={session.toString()} onValueChange={(value) => handleSessionChange(value)}>
                         <SelectTrigger className="w-[130px]">
                             <SelectValue placeholder="Session" />
@@ -115,10 +144,7 @@ export const Header = () => {
                     </Select>
                     <Select
                         value={className || ""}
-                        onValueChange={(value) => {
-                            handleClassChange(value as Class)
-                            setClassName(value as Class)
-                        }}
+                        onValueChange={(value) => handleClassChange(value as Class)}
                     >
                         <SelectTrigger className="w-[130px]">
                             <SelectValue placeholder="Class" />
@@ -126,7 +152,7 @@ export const Header = () => {
                         <SelectContent>
                             {
                                 Object.values(Class).map((v, i) => (
-                                    <SelectItem value={v} key={i}>{v}</SelectItem>
+                                    <SelectItem value={v} key={i}>{formatString(v)}</SelectItem>
                                 ))
                             }
                         </SelectContent>
@@ -153,13 +179,13 @@ export const Header = () => {
                     </div>
                     <Button
                         variant="outline"
-                        className="hidden md:flex text-rose-500"
+                        className="bg-rose-500 text-white"
                         onClick={handleReset}
                     >
                         Reset
                     </Button>
                 </div>
-                <Select onValueChange={(value) => handlePerPageChange(value)}>
+                <Select value={perPage?.toString() || ""} onValueChange={(value) => handlePerPageChange(value)}>
                     <SelectTrigger className="w-[130px]">
                         <SelectValue placeholder="Limit" />
                     </SelectTrigger>

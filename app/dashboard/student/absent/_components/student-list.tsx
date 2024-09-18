@@ -27,6 +27,8 @@ import {
     HoverCardTrigger,
 } from "@/components/ui/hover-card"
 
+import { EmptyData } from "@/components/empty-stat";
+
 interface StudentWithProp extends Student {
     payments: { id: string }[]
 }
@@ -36,6 +38,10 @@ interface Props {
 }
 
 export const StudentList = ({ students }: Props) => {
+    if (students.length === 0) {
+        return <EmptyData title="No Student Found!" />
+    }
+
     return (
         <Table>
             <TableHeader>
@@ -55,22 +61,24 @@ export const StudentList = ({ students }: Props) => {
                 {
                     students.map(student => (
                         <TableRow key={student.id}>
-                            <TableCell>{student.studentId}</TableCell>
-                            <TableCell>
+                            <TableCell className="py-3">{student.studentId}</TableCell>
+                            <TableCell className="py-3">
                                 <Avatar>
                                     <AvatarImage src={student.imageUrl} />
                                     <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                             </TableCell>
-                            <TableCell>{student.name}</TableCell>
-                            <TableCell>{formatString(student.class)}</TableCell>
-                            <TableCell>{student.fPhone}</TableCell>
-                            <TableCell>{student.mPhone}</TableCell>
-                            <TableCell>{student.payments.length > 0 ? `${student.payments.length} Months` : "Paid"}</TableCell>
-                            <TableCell>
+                            <TableCell className="py-3 hover:underline">
+                                <Link href={`/dashboard/student/${student.id}`}>{student.name}</Link>
+                            </TableCell>
+                            <TableCell className="py-3">{formatString(student.class)}</TableCell>
+                            <TableCell className="py-3">{student.fPhone}</TableCell>
+                            <TableCell className="py-3">{student.mPhone}</TableCell>
+                            <TableCell className="py-3">{student.payments.length > 0 ? `${student.payments.length} Months` : "Paid"}</TableCell>
+                            <TableCell className="py-3">
                                 <HoverCard>
                                     <HoverCardTrigger asChild>
-                                        <Badge>
+                                        <Badge className="text-white dark:text-white/80">
                                             {student.leftReason?.substring(0, 15)}...
                                         </Badge>
                                     </HoverCardTrigger>
@@ -79,7 +87,7 @@ export const StudentList = ({ students }: Props) => {
                                     </HoverCardContent>
                                 </HoverCard>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="py-3">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" className="h-8 w-8 p-0">

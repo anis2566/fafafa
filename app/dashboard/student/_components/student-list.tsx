@@ -21,10 +21,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { formatString } from "@/lib/utils";
+import { EmptyData } from "@/components/empty-stat";
 
 interface StudentWithProp extends Student {
     payments: { id: string }[];
-    batch: {name: string} | null;
+    batch: { name: string } | null;
 }
 
 interface Props {
@@ -32,6 +33,11 @@ interface Props {
 }
 
 export const StudentList = ({ students }: Props) => {
+
+    if (students.length === 0) {
+        return <EmptyData title="No Student Found!" />
+    }
+
     return (
         <Table>
             <TableHeader>

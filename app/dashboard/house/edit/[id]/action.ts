@@ -17,13 +17,13 @@ export const UPDATE_HOUSE = async ({ id, values }: UpdateHouse) => {
     throw new Error("Invalid input value");
   }
 
-  const room = await db.house.findUnique({
+  const house = await db.house.findUnique({
     where: {
       id,
     },
   });
 
-  if (!room) {
+  if (!house) {
     throw new Error("House not found");
   }
 

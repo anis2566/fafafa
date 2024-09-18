@@ -14,7 +14,7 @@ import { ContentLayout } from "../../_components/content-layout"
 import { PaymentForm } from "./_components/payment";
 
 export const metadata: Metadata = {
-    title: "BEC | New Payment",
+    title: "BEC | Salary | New",
     description: "Basic Education Care",
 };
 
@@ -31,7 +31,7 @@ const NewPayment = () => {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>New Payment</BreadcrumbPage>
+                        <BreadcrumbPage>New Salary</BreadcrumbPage>
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>

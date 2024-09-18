@@ -12,10 +12,11 @@ import {
 
 import { formatTime } from "@/lib/utils"
 import { Action } from "./action"
+import { EmptyData } from "@/components/empty-stat";
 
 interface BatchWithRoomAndStudent extends Batch {
     room: Room;
-    students: {id: string}[]
+    students: { id: string }[]
 }
 
 interface Props {
@@ -23,6 +24,10 @@ interface Props {
 }
 
 export const BatchList = ({ batches }: Props) => {
+
+    if (batches.length === 0) {
+        return <EmptyData title="No Batch Found!" />
+    }
 
     return (
         <Table>

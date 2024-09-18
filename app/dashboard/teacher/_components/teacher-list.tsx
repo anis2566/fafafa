@@ -20,11 +20,18 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge";
 
+import { EmptyData } from "@/components/empty-stat";
+
 interface Props {
     teachers: Teacher[]
 }
 
 export const TeacherList = ({ teachers }: Props) => {
+
+    if (teachers.length === 0) {
+        return <EmptyData title="No Teacher Found" />
+    }
+
     return (
         <Table>
             <TableHeader>
@@ -33,7 +40,6 @@ export const TeacherList = ({ teachers }: Props) => {
                     <TableHead>Image</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Phone</TableHead>
-                    <TableHead>Class</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Action</TableHead>
                 </TableRow>
@@ -42,20 +48,21 @@ export const TeacherList = ({ teachers }: Props) => {
                 {
                     teachers.map(teacher => (
                         <TableRow key={teacher.id}>
-                            <TableCell>{teacher.teacherId}</TableCell>
-                            <TableCell>
+                            <TableCell className="py-3">{teacher.teacherId}</TableCell>
+                            <TableCell className="py-3">
                                 <Avatar>
                                     <AvatarImage src={teacher.imageUrl} />
                                     <AvatarFallback>{teacher.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                             </TableCell>
-                            <TableCell>{teacher.name}</TableCell>
-                            <TableCell>{teacher.phone}</TableCell>
-                            <TableCell>{3}</TableCell>
-                            <TableCell>
+                            <TableCell className="py-3 hover:underline">
+                                <Link href={`/dashboard/teacher/${teacher.id}`}>{teacher.name}</Link>
+                            </TableCell>
+                            <TableCell className="py-3">{teacher.phone}</TableCell>
+                            <TableCell className="py-3">
                                 <Badge variant={teacher.status === Status.Active ? "default" : teacher.status === Status.Suspended ? "destructive" : "secondary"}>{teacher.status}</Badge>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="py-3">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" className="h-8 w-8 p-0">

@@ -10,18 +10,34 @@ import { useQuery } from "@tanstack/react-query"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 import { useDebounce } from "@/hooks/use-debounce"
 import { GET_ROOMS } from "../create/action"
+import { formatString } from "@/lib/utils"
+import { FilterDrawer } from "./filter-drawer"
 
 
 export const Header = () => {
     const [search, setSearch] = useState<string>("")
+    const [perPage, setPerPage] = useState<number>()
+    const [room, setRoom] = useState<string>()
+    const [className, setClassName] = useState<Class | undefined>()
+    const [open, setOpen] = useState<boolean>(false)
 
     const pathname = usePathname()
     const router = useRouter()
     const searchParams = useSearchParams()
     const searchValue = useDebounce(search, 500)
+
+    const handleClose = () => {
+        setOpen(false)
+    }
 
     const { data: rooms } = useQuery({
         queryKey: ["get-rooms-header"],
@@ -46,6 +62,7 @@ export const Header = () => {
     }, [searchValue, router, pathname, searchParams])
 
     const handlePerPageChange = (perPage: string) => {
+        setPerPage(parseInt(perPage))
         const params = Object.fromEntries(searchParams.entries());
         const url = queryString.stringifyUrl({
             url: pathname,
@@ -59,6 +76,7 @@ export const Header = () => {
     }
 
     const handleClassChange = (className: Class) => {
+        setClassName(className)
         const params = Object.fromEntries(searchParams.entries());
         const url = queryString.stringifyUrl({
             url: pathname,
@@ -72,6 +90,7 @@ export const Header = () => {
     }
 
     const handleRoomChange = (room: string) => {
+        setRoom(room)
         const params = Object.fromEntries(searchParams.entries());
         const url = queryString.stringifyUrl({
             url: pathname,
@@ -84,11 +103,30 @@ export const Header = () => {
         router.push(url)
     }
 
+    const handleReset = () => {
+        router.push(pathname)
+        setSearch("")
+        setPerPage(undefined)
+        setClassName(undefined)
+        setRoom("")
+    }
+
     return (
         <div className="space-y-2 shadow-sm shadow-primary px-2 py-3">
+            <FilterDrawer open={open} handleClose={handleClose} />
             <div className="flex items-center justify-between gap-x-3">
-                <div className="flex items-center gap-x-3">
-                    <Select onValueChange={(value) => handleRoomChange(value)}>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild className="md:hidden">
+                            <Button onClick={() => setOpen(true)}>Filter</Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Filter result</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+                <div className="hidden md:flex items-center gap-x-3">
+                    <Select value={room} onValueChange={(value) => handleRoomChange(value)}>
                         <SelectTrigger className="w-[130px]">
                             <SelectValue placeholder="Room" />
                         </SelectTrigger>
@@ -100,14 +138,17 @@ export const Header = () => {
                             }
                         </SelectContent>
                     </Select>
-                    <Select onValueChange={(value) => handleClassChange(value as Class)}>
+                    <Select
+                        value={className || ""}
+                        onValueChange={(value) => handleClassChange(value as Class)}
+                    >
                         <SelectTrigger className="w-[130px]">
                             <SelectValue placeholder="Class" />
                         </SelectTrigger>
                         <SelectContent>
                             {
                                 Object.values(Class).map((v, i) => (
-                                    <SelectItem value={v} key={i}>{v}</SelectItem>
+                                    <SelectItem value={v} key={i}>{formatString(v)}</SelectItem>
                                 ))
                             }
                         </SelectContent>
@@ -124,16 +165,13 @@ export const Header = () => {
                     </div>
                     <Button
                         variant="outline"
-                        className="hidden md:flex text-rose-500"
-                        onClick={() => {
-                            setSearch("")
-                            router.push(pathname)
-                        }}
+                        className="bg-rose-500 text-white"
+                        onClick={handleReset}
                     >
                         Reset
                     </Button>
                 </div>
-                <Select onValueChange={(value) => handlePerPageChange(value)}>
+                <Select value={perPage?.toString() || ""} onValueChange={(value) => handlePerPageChange(value)}>
                     <SelectTrigger className="w-[130px]">
                         <SelectValue placeholder="Limit" />
                     </SelectTrigger>

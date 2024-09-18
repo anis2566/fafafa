@@ -4,8 +4,6 @@ import { Day } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/lib/prisma";
-import { sendNotification } from "@/services/notification.service";
-import { GET_USER } from "@/services/user.service";
 
 type GetTeachers = {
   day: Day;
@@ -71,19 +69,6 @@ export const UPDATE_LEAVE_CLASS_TEACHER = async ({
     data: {
       teacherId,
       teacherName: teacher.name,
-    },
-  });
-
-  const { userId } = await GET_USER();
-
-  await sendNotification({
-    trigger: "leave-class",
-    actor: {
-      id: userId,
-    },
-    recipients: [teacher.userId || ""],
-    data: {
-      redirectUrl: "/teacher/class/proxy",
     },
   });
 

@@ -65,7 +65,7 @@ export const AddStudentModal = () => {
 
 
     const handleAddStudent = () => {
-        toast.loading("Student adding...", {
+        toast.loading("Student assigning...", {
             id: "add-student"
         })
         addStudent({ batchId: id, ids: selectedStudents })
@@ -75,7 +75,7 @@ export const AddStudentModal = () => {
         <Dialog open={open && !!id} onOpenChange={onClose}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Add Student</DialogTitle>
+                    <DialogTitle>Assign Student</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 p-2">
                     <Input

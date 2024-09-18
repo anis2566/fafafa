@@ -46,7 +46,7 @@ export const CREATE_LEAVE_APP = async (values: LeaveAppSchemaType) => {
   const updatedDays = dates.map((date) => addDays(new Date(date), 1));
 
   await db.$transaction(async (ctx) => {
-    const app = await db.leaveApp.create({
+    const app = await ctx.leaveApp.create({
       data: {
         ...data,
         days: dayNames,
@@ -63,7 +63,7 @@ export const CREATE_LEAVE_APP = async (values: LeaveAppSchemaType) => {
         batchName,
         roomName,
       } = cls;
-      await db.leaveClass.create({
+      await ctx.leaveClass.create({
         data: {
           day,
           time,

@@ -57,10 +57,15 @@ export const CREATE_NOTICE = async (values: NoticeSchemaType) => {
               },
             }
           )
-          .catch((error) => {
+          .catch(async (error) => {
             console.error("Error sending push notification: ", error);
             if (error instanceof WebPushError && error.statusCode === 410) {
               console.log("Push subscription expired, deleting...");
+              await db.pushSubscriber.delete({
+                where: {
+                  id: item.id,
+                },
+              });
             }
           });
       }

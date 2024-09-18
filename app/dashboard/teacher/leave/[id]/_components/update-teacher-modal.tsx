@@ -43,10 +43,8 @@ export const UpdateLeaveClassModal = () => {
     })
 
     useEffect(() => {
-        if (teachers) {
-            setTeacher(teacherId)
-        }
-    }, [teacherId, teachers])
+        setTeacher(teacherId)
+    }, [teacherId])
 
     const { mutate: updateClassTeacher, isPending } = useMutation({
         mutationFn: UPDATE_LEAVE_CLASS_TEACHER,
@@ -76,7 +74,7 @@ export const UpdateLeaveClassModal = () => {
         <Dialog open={open && !!id} onOpenChange={onClose}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Update Class Teacher</DialogTitle>
+                    <DialogTitle>Update Leave Class</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-6">
                     <Select defaultValue={teacherId} value={teacher} onValueChange={(value) => setTeacher(value)} disabled={isPending}>

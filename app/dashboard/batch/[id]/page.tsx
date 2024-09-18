@@ -27,7 +27,7 @@ import { dayOrder } from "@/constant";
 import { ClassList } from "./_components/class-list";
 
 export const metadata: Metadata = {
-    title: "BEC | Batch Details",
+    title: "BEC | Batch | Details",
     description: "Basic Education Care",
 };
 
@@ -83,26 +83,26 @@ const BatchDetails = async ({ params: { id } }: Props) => {
 
     if (!batch) redirect("/dashboard")
 
-    const teachers = await db.batchClass.findMany({
-        where: {
-            batchId: id,
-        },
-        include: {
-            teacher: true
-        },
-        distinct: ['teacherId']
-    })
-
-    const classes = await db.batchClass.groupBy({
-        by: ["time", "day", "teacherName", "subjectName", "roomName", "id", "teacherId"],
-        where: {
-            batchId: id
-        },
-        orderBy: {
-            time: "asc"
-        }
-    })
-
+    const [teachers, classes] = await Promise.all([
+        await db.batchClass.findMany({
+            where: {
+                batchId: id,
+            },
+            include: {
+                teacher: true
+            },
+            distinct: ['teacherId']
+        }),
+        await db.batchClass.groupBy({
+            by: ["time", "day", "teacherName", "subjectName", "roomName", "id", "teacherId"],
+            where: {
+                batchId: id
+            },
+            orderBy: {
+                time: "asc"
+            }
+        })
+    ])
 
     const groupedData: GroupedData[] = Object.values(Day).map(day => ({
         day,

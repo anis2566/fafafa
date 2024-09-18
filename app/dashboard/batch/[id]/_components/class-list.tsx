@@ -42,10 +42,10 @@ export const ClassList = ({ classes, classTime, batchId }: Props) => {
     return (
         <Table>
             <TableHeader>
-                <TableHead className="border bg-sky-100/60">Day</TableHead>
+                <TableHead className="border">Day</TableHead>
                 {
                     classTime.map((time: string, i) => (
-                        <TableHead key={i} className="border bg-sky-100/60">{time}</TableHead>
+                        <TableHead key={i} className="border">{time}</TableHead>
                     ))
                 }
             </TableHeader>
@@ -53,7 +53,7 @@ export const ClassList = ({ classes, classTime, batchId }: Props) => {
                 {
                     classes.map((item, index) => (
                         <TableRow key={index}>
-                            <TableCell className="border bg-sky-100/40">{item.day}</TableCell>
+                            <TableCell className="border">{item.day}</TableCell>
                             {
                                 classTime.map((v, i) => {
                                     const isMatchedTime = item.classes.find(item => item.time === v)

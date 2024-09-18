@@ -16,7 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 
 import { Action } from "./action"
-import { formatTime } from "@/lib/utils"
+import { EmptyData } from "@/components/empty-stat"
 
 interface RoomWithBatch extends Room {
     batches: Batch[];
@@ -28,6 +28,11 @@ interface Props {
 }
 
 export const RoomList = ({ rooms }: Props) => {
+
+    if (rooms.length === 0) {
+        return <EmptyData title="No Room Found!" />
+    }
+
     return (
         <Table>
             <TableHeader>
@@ -58,7 +63,7 @@ export const RoomList = ({ rooms }: Props) => {
                                         </HoverCardTrigger>
                                         <HoverCardContent className="w-60">
                                             {
-                                                room.bookTime.filter(time => room.availableTime.includes(time)).length !== 0 ? (
+                                                room.availableTime.filter(time => room.bookTime.includes(time)).length !== 0 ? (
                                                     <p className="italic text-muted-foreground text-center">No available time!</p>
                                                 ) : (
                                                     <div className="grid grid-cols-2 gap-2">

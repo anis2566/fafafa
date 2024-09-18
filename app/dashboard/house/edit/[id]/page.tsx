@@ -16,7 +16,7 @@ import { ContentLayout } from "@/app/dashboard/_components/content-layout";
 import { EditHouseForm } from "./_components/edit-house-form";
 
 export const metadata: Metadata = {
-    title: "BEC | Edit House",
+    title: "BEC | House | Edit",
     description: "Basic Education Care",
 };
 

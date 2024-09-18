@@ -23,22 +23,22 @@ export const CREATE_TEACHER = async (values: TeacherSchemaType) => {
     throw new Error("Counter not found");
   }
 
-  const newTeacher = await db.teacher.create({
-    data: {
-      ...data,
-      session: new Date().getFullYear(),
-      teacherId: counter.count + 1,
-    },
-  });
+  await db.$transaction(async (ctx) => {
+    const newTeacher = await ctx.teacher.create({
+      data: {
+        ...data,
+        session: new Date().getFullYear(),
+        teacherId: counter.count + 1,
+      },
+    });
 
-  if (newTeacher) {
-    await db.bank.create({
+    await ctx.bank.create({
       data: {
         teacherId: newTeacher.id,
       },
     });
 
-    await db.counter.update({
+    await ctx.counter.update({
       where: {
         id: counter.id,
       },
@@ -48,7 +48,7 @@ export const CREATE_TEACHER = async (values: TeacherSchemaType) => {
         },
       },
     });
-  }
+  });
 
   revalidatePath("/dashboard/teacher");
 

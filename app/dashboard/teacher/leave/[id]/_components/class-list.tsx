@@ -61,10 +61,10 @@ export const ClassList = ({ classes }: Props) => {
     return (
         <Table>
             <TableHeader>
-                <TableHead>Time</TableHead>
+                <TableHead className="border">Time</TableHead>
                 {
                     Object.values(Day).map((v, i) => (
-                        <TableHead key={i}>{v}</TableHead>
+                        <TableHead key={i} className="border">{v}</TableHead>
                     ))
                 }
             </TableHeader>

@@ -1,108 +1,72 @@
 "use client"
 
+import { MonthlyPayment } from "@prisma/client"
+
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { Month, MonthlyPayment, PaymentMethod, Student } from "@prisma/client"
+import { Month, PaymentMethod } from "@prisma/client"
 import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { useState } from "react"
-import { Edit, Lock } from "lucide-react"
-import { useRouter } from "next/navigation"
 
+import { MonthlyPaymentSchema } from "@/app/dashboard/income/new/[id]/schema"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
     FormMessage,
 } from "@/components/ui/form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import {
-    Collapsible,
-    CollapsibleContent,
-} from "@/components/ui/collapsible"
-import { Textarea } from "@/components/ui/textarea"
 
-import { PAY_WITH_CASH } from "../action"
-import { PAY_WITH_MBL } from "@/services/payment-service"
-import { MonthlyPaymentSchema } from "../schema"
-
-
-interface StudentWithPayment extends Student {
-    payments: MonthlyPayment[]
-}
+import { UPDATE_PAYMENT } from "../action"
 
 interface Props {
-    student: StudentWithPayment;
-    unpaidMonth: Month[]
+    payment: MonthlyPayment;
 }
 
-export const PaymentForm = ({ student, unpaidMonth }: Props) => {
-    const [enableEdit, setEnableEdit] = useState<boolean>(false)
+export const EditPaymentForm = ({ payment }: Props) => {
 
-    const router = useRouter()
-
-    const { mutate: payWithCash, isPending } = useMutation({
-        mutationFn: PAY_WITH_CASH,
+    const { mutate: updatePayment, isPending } = useMutation({
+        mutationFn: UPDATE_PAYMENT,
         onSuccess: (data) => {
             toast.success(data.success, {
-                id: "payment"
+                id: "payment-update"
             })
-            window.open(`http://localhost:3000/dashboard/invoice/fee/monthly/${data.id}`, "_blank");
-            router.push("/dashboard/salary/monthly")
         },
         onError: (error) => {
             toast.error(error.message, {
-                id: "payment"
+                id: "payment-update"
             })
-        }
-    })
-
-    const { mutate: payWithMobileBanking, isPending: isLoading } = useMutation({
-        mutationFn: PAY_WITH_MBL,
-        onSuccess: (data) => {
-            if (data?.url) {
-                window.location.replace(data?.url)
-            }
-        },
-        onError: (error) => {
-            toast.error(error.message)
         }
     })
 
     const form = useForm<z.infer<typeof MonthlyPaymentSchema>>({
         resolver: zodResolver(MonthlyPaymentSchema),
         defaultValues: {
-            month: undefined,
-            class: student.class,
-            amount: student.monthlyFee,
-            method: PaymentMethod.Cash,
-            note: ""
+            month: payment.month,
+            amount: payment.amount,
+            method: payment.method ?? "Cash",
         },
     })
 
     function onSubmit(values: z.infer<typeof MonthlyPaymentSchema>) {
-        toast.loading("Paying...", {
-            id: "payment"
+        toast.loading("Payment updating...", {
+            id: "payment-update"
         })
-        if (values.method === PaymentMethod.Cash) {
-            payWithCash({ values, studentId: student.id, })
-        } else {
-            payWithMobileBanking({ month: values.month, studentId: student.id, amount: student.monthlyFee.toString() })
-        }
+        updatePayment({ id: payment.id, values })
     }
 
     return (
-        <Card>
+        <Card className="mt-4">
             <CardHeader>
-                <CardTitle>Payment Form</CardTitle>
+                <CardTitle>Edit Payment</CardTitle>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
@@ -112,15 +76,15 @@ export const PaymentForm = ({ student, unpaidMonth }: Props) => {
                             name="month"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Month</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending || isLoading}>
+                                    <FormLabel>Class</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending}>
                                         <FormControl>
                                             <SelectTrigger>
-                                                <SelectValue placeholder="Select month" />
+                                                <SelectValue placeholder="Select status" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {unpaidMonth.map((v) => (
+                                            {Object.values(Month).map((v) => (
                                                 <SelectItem key={v} value={v}>
                                                     {v}
                                                 </SelectItem>
@@ -138,14 +102,7 @@ export const PaymentForm = ({ student, unpaidMonth }: Props) => {
                                 <FormItem>
                                     <FormLabel>Amoont</FormLabel>
                                     <FormControl>
-                                        <div className="relative">
-                                            <Input placeholder="Enter amount..." {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} type="number" disabled={!enableEdit} />
-                                            <Button variant="ghost" size="icon" className="absolute right-0 top-0" type="button" onClick={() => setEnableEdit(!enableEdit)}>
-                                                {
-                                                    enableEdit ? <Lock className="w-4 h-4" /> : <Edit className="w-4 h-4" />
-                                                }
-                                            </Button>
-                                        </div>
+                                        <Input placeholder="Enter amount..." {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} type="number" disabled={isPending} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -160,9 +117,9 @@ export const PaymentForm = ({ student, unpaidMonth }: Props) => {
                                     <FormControl>
                                         <RadioGroup
                                             onValueChange={field.onChange}
-                                            defaultValue={PaymentMethod.Cash}
+                                            defaultValue={field.value}
                                             className="flex flex-col space-y-1"
-                                            disabled={isPending || isLoading}
+                                            disabled={isPending}
                                         >
                                             <FormItem className="flex items-center space-x-3 space-y-0">
                                                 <FormControl>
@@ -174,7 +131,7 @@ export const PaymentForm = ({ student, unpaidMonth }: Props) => {
                                             </FormItem>
                                             <FormItem className="flex items-center space-x-3 space-y-0">
                                                 <FormControl>
-                                                    <RadioGroupItem value={PaymentMethod.MobileBanking} disabled />
+                                                    <RadioGroupItem value={PaymentMethod.MobileBanking} />
                                                 </FormControl>
                                                 <FormLabel className="font-normal">
                                                     Mobile Banking
@@ -186,31 +143,7 @@ export const PaymentForm = ({ student, unpaidMonth }: Props) => {
                                 </FormItem>
                             )}
                         />
-                        <Collapsible open={enableEdit}>
-                            <CollapsibleContent>
-                                <FormField
-                                    control={form.control}
-                                    name="note"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Note</FormLabel>
-                                            <FormControl>
-                                                <Textarea
-                                                    className="resize-none"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormDescription>
-                                                Describe salary reduction reason.
-                                            </FormDescription>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </CollapsibleContent>
-                        </Collapsible>
-
-                        <Button type="submit" disabled={isPending || isLoading}>Pay Now</Button>
+                        <Button type="submit" disabled={isPending}>Update</Button>
                     </form>
                 </Form>
             </CardContent>

@@ -15,7 +15,7 @@ import { db } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-    title: "BEC | Batch Class",
+    title: "BEC | Batch | Class",
     description: "Basic Education Care",
 };
 

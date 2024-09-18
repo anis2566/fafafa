@@ -24,58 +24,66 @@ export const metadata: Metadata = {
 
 interface Props {
     searchParams: {
-        id: string;
-        name: string;
+        id?: string;
+        name?: string;
         page: string;
         perPage: string;
     }
 }
 
-
 const Leaves = async ({ searchParams }: Props) => {
-    const { id, name, page, perPage } = searchParams;
-    const itemsPerPage = parseInt(perPage) || 5;
-    const currentPage = parseInt(page) || 1;
-    const teacherId = id ? parseInt(id) : undefined
+    const {
+        id,
+        name,
+        page = "1",
+        perPage = "5"
+    } = searchParams;
 
-    const leaves = await db.leaveApp.findMany({
-        where: {
-            ...(teacherId && {
-                teacher: {
-                    teacherId
-                }
-            }),
-            ...(name && {
-                teacher: {
-                    name: { contains: name, mode: "insensitive" }
-                }
-            }),
-        },
-        include: {
-            classes: true,
-            teacher: true
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
+    const itemsPerPage = parseInt(perPage, 10);
+    const currentPage = parseInt(page, 10);
+    const teacherId = id ? parseInt(id) : undefined;
 
-    const totalLeave = await db.leaveApp.count({
-        where: {
-            ...(teacherId && {
-                teacher: {
-                    teacherId
-                }
-            }),
-            ...(name && {
-                teacher: {
-                    name: { contains: name, mode: "insensitive" }
-                }
-            }),
-        }
-    })
+    const [leaves, totalLeave] = await Promise.all([
+        db.leaveApp.findMany({
+            where: {
+                ...(teacherId && {
+                    teacher: {
+                        teacherId
+                    }
+                }),
+                ...(name && {
+                    teacher: {
+                        name: { contains: name, mode: "insensitive" }
+                    }
+                }),
+
+            },
+            include: {
+                classes: true,
+                teacher: true
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        await db.leaveApp.count({
+            where: {
+                ...(teacherId && {
+                    teacher: {
+                        teacherId
+                    }
+                }),
+                ...(name && {
+                    teacher: {
+                        name: { contains: name, mode: "insensitive" }
+                    }
+                }),
+            }
+        })
+    ])
+
 
     const totalPage = Math.ceil(totalLeave / itemsPerPage)
 
@@ -90,14 +98,14 @@ const Leaves = async ({ searchParams }: Props) => {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>Leave History</BreadcrumbPage>
+                        <BreadcrumbPage>History</BreadcrumbPage>
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
 
             <Card className="mt-4">
                 <CardHeader>
-                    <CardTitle>Leave History</CardTitle>
+                    <CardTitle>History</CardTitle>
                     <CardDescription>A collection of leave app.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">

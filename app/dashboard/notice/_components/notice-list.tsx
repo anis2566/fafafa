@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button"
 
 import { useNotice } from "@/hooks/use-notice"
+import { EmptyData } from "@/components/empty-stat"
 
 interface Props {
     notices: Notice[]
@@ -29,6 +30,10 @@ interface Props {
 
 export const NoticeList = ({ notices }: Props) => {
     const { onOpen } = useNotice()
+
+    if(notices.length === 0) {
+        return <EmptyData title="No Notice Found!" />
+    }
 
     return (
         <Table>

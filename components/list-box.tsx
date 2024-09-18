@@ -1,8 +1,6 @@
 import { format } from "date-fns";
 import { LucideIcon } from "lucide-react"
 
-import { cn } from "@/lib/utils";
-
 interface ListBoxProps {
     icon: LucideIcon;
     title: string;
@@ -14,7 +12,7 @@ export const ListBox = ({ icon: Icon, title, description, date }: ListBoxProps) 
 
     return (
         <div className="flex gap-x-4">
-            <div className="bg-violet-400 flex items-center justify-center w-10 h-10 rounded-md flex-shrink-0">
+            <div className="bg-sky-400 flex items-center justify-center w-10 h-10 rounded-md flex-shrink-0">
                 <Icon className="text-white" />
             </div>
             <div className="space-y-1">

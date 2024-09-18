@@ -22,6 +22,7 @@ import {
 import { Button } from "@/components/ui/button"
 
 import { useHouse } from "@/hooks/use-house"
+import { EmptyData } from "@/components/empty-stat"
 
 interface HouseWithRooms extends House {
     rooms: { id: string }[]
@@ -34,12 +35,16 @@ interface Props {
 export const HouseList = ({ houses }: Props) => {
     const { onOpen } = useHouse()
 
+    if (houses.length === 0) {
+        return <EmptyData title="No House Found!" />
+    }
+
     return (
         <Table>
             <TableHeader>
                 <TableRow>
                     <TableHead>House Name</TableHead>
-                    <TableHead>Capacity</TableHead>
+                    <TableHead>No of Room</TableHead>
                     <TableHead>Room Booked</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Action</TableHead>

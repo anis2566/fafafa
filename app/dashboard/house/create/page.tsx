@@ -14,7 +14,7 @@ import { CreateHouseForm } from "./_components/create-house-form";
 
 
 export const metadata: Metadata = {
-    title: "BEC | Create House",
+    title: "BEC | House | Create",
     description: "Basic Education Care",
 };
 

@@ -40,7 +40,7 @@ export const PaymentForm = () => {
     const { mutate: findStudent, isPending } = useMutation({
         mutationFn: FIND_STUDENT,
         onSuccess: (data) => {
-            router.push(`/dashboard/salary/new/${data.student.id}`)
+            router.push(`/dashboard/income/new/${data.student.id}`)
         },
         onError: (error) => {
             toast.error(error.message, {

@@ -25,56 +25,64 @@ export const metadata: Metadata = {
 
 interface Props {
     searchParams: {
-        className: Class;
-        name: string;
+        className?: Class;
+        name?: string;
         page: string;
         perPage: string;
-        room: string;
+        room?: string;
     }
 }
 
 const Batch = async ({ searchParams }: Props) => {
-    const { name, className, page, perPage, room } = searchParams;
-    const itemsPerPage = parseInt(perPage) || 5;
-    const currentPage = parseInt(page) || 1;
-    const formatedRoom = parseInt(room) || undefined
+    const {
+        className,
+        room,
+        name,
+        page = "1",
+        perPage = "5"
+    } = searchParams;
 
-    const batches = await db.batch.findMany({
-        where: {
-            ...(className && { class: className }),
-            ...(name && { name: { contains: name, mode: "insensitive" } }),
-            ...(formatedRoom && {
-                room: {
-                    name: formatedRoom
-                }
-            })
-        },
-        include: {
-            room: true,
-            students: {
-                select: {
-                    id: true
-                }
-            }
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
+    const itemsPerPage = parseInt(perPage, 10);
+    const currentPage = parseInt(page, 10);
+    const formatedRoom = room ? parseInt(room) : undefined
 
-    const totalBatch = await db.batch.count({
-        where: {
-            ...(className && { class: className }),
-            ...(name && { name: { contains: name, mode: "insensitive" } }),
-            ...(formatedRoom && {
-                room: {
-                    name: formatedRoom
+    const [batches, totalBatch] = await Promise.all([
+        await db.batch.findMany({
+            where: {
+                ...(className && { class: className }),
+                ...(name && { name: { contains: name, mode: "insensitive" } }),
+                ...(formatedRoom && {
+                    room: {
+                        name: formatedRoom
+                    }
+                })
+            },
+            include: {
+                room: true,
+                students: {
+                    select: {
+                        id: true
+                    }
                 }
-            })
-        },
-    })
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        await db.batch.count({
+            where: {
+                ...(className && { class: className }),
+                ...(name && { name: { contains: name, mode: "insensitive" } }),
+                ...(formatedRoom && {
+                    room: {
+                        name: formatedRoom
+                    }
+                })
+            },
+        })
+    ])
 
     const totalPage = Math.ceil(totalBatch / itemsPerPage)
 

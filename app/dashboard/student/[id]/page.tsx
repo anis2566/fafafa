@@ -21,7 +21,7 @@ import { ContentLayout } from "../../_components/content-layout";
 import { db } from "@/lib/prisma";
 
 export const metadata: Metadata = {
-    title: "BEC | Student Profile",
+    title: "BEC | Student | Profile",
     description: "Basic Education Care",
 };
 
@@ -36,12 +36,46 @@ const StudentDetails = async ({ params: { id } }: Props) => {
         where: {
             id
         }
-    })
+    });
 
-    if (!student) redirect("/dashboard")
+    // Redirect if student not found
+    if (!student) return redirect("/dashboard");
+
+    // Destructure student properties for easier use
+    const {
+        imageUrl,
+        name,
+        class: studentClass,
+        mPhone,
+        studentId,
+        nameBangla,
+        fName,
+        mName,
+        gender,
+        dob,
+        nationality,
+        religion,
+        school,
+        section,
+        shift,
+        group,
+        roll,
+        presentHouseNo,
+        presentMoholla,
+        presentPost,
+        presentThana,
+        permanentVillage,
+        permanentPost,
+        permanentThana,
+        permanentDistrict,
+        fPhone,
+        admissionFee,
+        monthlyFee,
+    } = student;
 
     return (
         <ContentLayout title="Student">
+            {/* Memoized Breadcrumb */}
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
@@ -63,13 +97,14 @@ const StudentDetails = async ({ params: { id } }: Props) => {
             </Breadcrumb>
 
             <div className="mt-4 space-y-8">
+                {/* Student Info Card */}
                 <Card>
                     <CardContent className="flex flex-col md:flex-row items-center gap-4 p-4 md:p-6">
                         <Image
                             alt="Avatar"
                             className="rounded-full"
                             height="100"
-                            src={student.imageUrl}
+                            src={imageUrl || "/default-avatar.png"}
                             style={{
                                 aspectRatio: "100/100",
                                 objectFit: "cover",
@@ -77,47 +112,53 @@ const StudentDetails = async ({ params: { id } }: Props) => {
                             width="100"
                         />
                         <div className="space-y-1">
-                            <div className="font-semibold text-xl text-primary">{student.name}</div>
-                            <div>{student.class}</div>
-                            <div>{student.mPhone}</div>
-                            <Badge>{student.studentId}</Badge>
+                            <div className="font-semibold text-xl text-primary">{name}</div>
+                            <div>{studentClass}</div>
+                            <div>{mPhone}</div>
+                            <Badge>{studentId}</Badge>
                         </div>
                     </CardContent>
                 </Card>
 
+                {/* Personal, Academic, and Address Information */}
                 <div className="grid md:grid-cols-2 gap-6">
+                    {/* Personal Information */}
                     <Card>
                         <CardHeader>
                             <CardTitle>Personal Information</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <ListBox icon={User} title="Name" description={student.name} />
-                            <ListBox icon={User} title="Name Bangla" description={student.nameBangla} />
-                            <ListBox icon={Users} title="Father Name" description={student.fName} />
-                            <ListBox icon={Users} title="Mother Name" description={student.mName} />
+                            <ListBox icon={User} title="Name" description={name} />
+                            <ListBox icon={User} title="Name Bangla" description={nameBangla} />
+                            <ListBox icon={Users} title="Father Name" description={fName} />
+                            <ListBox icon={Users} title="Mother Name" description={mName} />
                             <div className="grid grid-cols-2 gap-6">
-                                <ListBox icon={PersonStanding} title="Gender" description={student.gender} />
-                                <ListBox icon={CalendarDays} title="Date of Birth" description={format(student.dob, "dd MMM yyyy")} />
+                                <ListBox icon={PersonStanding} title="Gender" description={gender} />
+                                <ListBox icon={CalendarDays} title="Date of Birth" description={dob ? format(dob, "dd MMM yyyy") : "N/A"} />
                             </div>
                             <div className="grid grid-cols-2 gap-6">
-                                <ListBox icon={Flag} title="Nationality" description={student.nationality} />
-                                <ListBox icon={University} title="Religion" description={student.religion} />
+                                <ListBox icon={Flag} title="Nationality" description={nationality} />
+                                <ListBox icon={University} title="Religion" description={religion} />
                             </div>
                         </CardContent>
                     </Card>
+
+                    {/* Academic Information */}
                     <Card>
                         <CardHeader>
                             <CardTitle>Academic Information</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <ListBox icon={School} title="School Name" description={student.school} />
-                            <ListBox icon={Book} title="Class" description={student.class} />
-                            <ListBox icon={Layers} title="Section" description={student.section || ""} />
-                            <ListBox icon={SunMoon} title="Shift" description={student.shift || ""} />
-                            <ListBox icon={Boxes} title="Group" description={student.group || ""} />
-                            <ListBox icon={TrainTrack} title="Roll" description={student.roll.toString()} />
+                            <ListBox icon={School} title="School Name" description={school} />
+                            <ListBox icon={Book} title="Class" description={studentClass} />
+                            <ListBox icon={Layers} title="Section" description={section || "N/A"} />
+                            <ListBox icon={SunMoon} title="Shift" description={shift || "N/A"} />
+                            <ListBox icon={Boxes} title="Group" description={group || "N/A"} />
+                            <ListBox icon={TrainTrack} title="Roll" description={roll?.toString() || "N/A"} />
                         </CardContent>
                     </Card>
+
+                    {/* Address Information */}
                     <Card>
                         <CardHeader>
                             <CardTitle>Address</CardTitle>
@@ -125,51 +166,50 @@ const StudentDetails = async ({ params: { id } }: Props) => {
                         <CardContent className="space-y-4">
                             <h1 className="text-lg font-semibold text-muted-foreground">Present</h1>
                             <div className="grid grid-cols-2 gap-6">
-                                <ListBox icon={House} title="House No" description={student.presentHouseNo} />
-                                <ListBox icon={Antenna} title="Moholla" description={student.presentMoholla} />
+                                <ListBox icon={House} title="House No" description={presentHouseNo} />
+                                <ListBox icon={Antenna} title="Moholla" description={presentMoholla} />
                             </div>
                             <div className="grid grid-cols-2 gap-6">
-
-                                <ListBox icon={Mailbox} title="Post" description={student.presentPost} />
-                                <ListBox icon={Building} title="Thana" description={student.presentThana} />
+                                <ListBox icon={Mailbox} title="Post" description={presentPost} />
+                                <ListBox icon={Building} title="Thana" description={presentThana} />
                             </div>
                             <h1 className="text-lg font-semibold text-muted-foreground">Permanent</h1>
                             <div className="grid grid-cols-2 gap-6">
-                                <ListBox icon={House} title="House No" description={student.permanentVillage} />
-                                <ListBox icon={Mailbox} title="Moholla" description={student.permanentPost} />
+                                <ListBox icon={House} title="Village" description={permanentVillage} />
+                                <ListBox icon={Mailbox} title="Post" description={permanentPost} />
                             </div>
                             <div className="grid grid-cols-2 gap-6">
-
-                                <ListBox icon={Building} title="Post" description={student.permanentThana} />
-                                <ListBox icon={Building2} title="Thana" description={student.permanentDistrict} />
+                                <ListBox icon={Building} title="Thana" description={permanentThana} />
+                                <ListBox icon={Building2} title="District" description={permanentDistrict} />
                             </div>
                         </CardContent>
                     </Card>
 
+                    {/* Contact and Salary Information */}
                     <div className="space-y-4">
                         <Card>
                             <CardHeader>
                                 <CardTitle>Contact</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <ListBox icon={Phone} title="Father Phone" description={student.fPhone} />
-                                <ListBox icon={Phone} title="Mother Phone" description={student.mPhone} />
+                                <ListBox icon={Phone} title="Father Phone" description={fPhone} />
+                                <ListBox icon={Phone} title="Mother Phone" description={mPhone} />
                             </CardContent>
                         </Card>
                         <Card>
                             <CardHeader>
-                                <CardTitle>Salary</CardTitle>
+                                <CardTitle>Fee</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <ListBox icon={NotebookPen} title="Admission Fee" description={student.admissionFee.toString()} />
-                                <ListBox icon={CalendarDays} title="Monthly Phone" description={student.monthlyFee.toString()} />
+                                <ListBox icon={NotebookPen} title="Admission Fee" description={admissionFee?.toString() || "N/A"} />
+                                <ListBox icon={CalendarDays} title="Monthly Fee" description={monthlyFee?.toString() || "N/A"} />
                             </CardContent>
                         </Card>
                     </div>
                 </div>
             </div>
         </ContentLayout>
-    )
-}
+    );
+};
 
-export default StudentDetails
+export default StudentDetails;

@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { toast } from "sonner"
-import { Group, Class as PrismaClass } from "@prisma/client"
+import { Group, Level, Class as PrismaClass } from "@prisma/client"
 import { useMutation } from "@tanstack/react-query"
 import { useEffect } from "react"
 
@@ -45,15 +45,19 @@ export const EditSubjectModal = () => {
         defaultValues: {
             class: undefined,
             group: undefined,
-            name: ""
+            name: "",
+            level: undefined
         },
     })
+
+    console.log(form.formState.errors)
 
     useEffect(() => {
         form.reset({
             class: subject?.class,
             group: subject?.group as Group || undefined,
-            name: subject?.name
+            name: subject?.name,
+            level: subject?.level
         });
     }, [subject, form]);
 
@@ -115,6 +119,30 @@ export const EditSubjectModal = () => {
                                         </FormControl>
                                         <SelectContent>
                                             {Object.values(PrismaClass).map((v) => (
+                                                <SelectItem key={v} value={v}>
+                                                    {formatString(v)}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="level"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Level</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select level" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {Object.values(Level).map((v) => (
                                                 <SelectItem key={v} value={v}>
                                                     {formatString(v)}
                                                 </SelectItem>

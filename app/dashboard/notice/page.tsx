@@ -16,6 +16,7 @@ import { db } from "@/lib/prisma";
 import { NoticeList } from "./_components/notice-list";
 import { Header } from "./_components/header";
 import { CustomPagination } from "@/components/custom-pagination";
+import { NoticeType } from "@prisma/client";
 
 export const metadata: Metadata = {
     title: "BEC | Notice",
@@ -26,23 +27,33 @@ interface Props {
     searchParams: {
         page: string;
         perPage: string;
+        type?: NoticeType;
     }
 }
 
 const Notices = async ({ searchParams }: Props) => {
-    const { page, perPage } = searchParams;
-    const itemsPerPage = parseInt(perPage) || 5;
-    const currentPage = parseInt(page) || 1;
+    const {
+        type,
+        page = "1",
+        perPage = "5"
+    } = searchParams;
 
-    const notices = await db.notice.findMany({
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
+    const itemsPerPage = parseInt(perPage, 10);
+    const currentPage = parseInt(page, 10);
 
-    const totalNotice = await db.notice.count()
+    const [notices, totalNotice] = await Promise.all([
+        await db.notice.findMany({
+            where: {
+                ...(type && { type }),
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        await db.notice.count()
+    ])
 
     const totalPage = Math.ceil(totalNotice / itemsPerPage)
 

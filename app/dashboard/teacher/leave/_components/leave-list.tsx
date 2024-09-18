@@ -24,6 +24,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 import { useLeaveClassStatus } from "@/hooks/use-leave-class";
+import { EmptyData } from "@/components/empty-stat";
 
 interface LeaveWithTeacherAndClass extends LeaveApp {
     teacher: Teacher;
@@ -36,6 +37,10 @@ interface Props {
 
 export const LeaveList = ({ leaves }: Props) => {
     const { onOpen } = useLeaveClassStatus()
+
+    if(leaves.length === 0) {
+        return <EmptyData title="No Application Found!" />
+    }
 
     return (
         <Table>
@@ -66,7 +71,7 @@ export const LeaveList = ({ leaves }: Props) => {
                             <TableCell className="py-3 hover:underline">
                                 <Link href={`/dashboard/teacher/${leave.teacherId}`}>{leave.teacher.name}</Link>
                             </TableCell>
-                            <TableCell className="py-3">{format(leave.dates[0], "dd MMM yyyy")} {leave.dates.length > 1 && "-" + format(leave.dates[leave.dates.length - 1], "dd MMM yyyy")}</TableCell>
+                            <TableCell className="py-3">{format(leave.dates[0], "dd MMM")} {leave.dates.length > 1 && "- " + format(leave.dates[leave.dates.length - 1], "dd MMM")}</TableCell>
                             <TableCell className="py-3">{leave.days[0]} {leave.days.length > 1 && "-" + leave.days[leave.days.length - 1]}</TableCell>
                             <TableCell className="py-3">{leave.classes.length}</TableCell>
                             <TableCell className="py-3">{leave.classes.filter(item => item.teacherId !== null).length}</TableCell>

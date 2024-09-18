@@ -14,6 +14,7 @@ import { useDebounce } from "@/hooks/use-debounce"
 
 export const Header = () => {
     const [search, setSearch] = useState<string>("")
+    const [perPage, setPerPage] = useState<number>()
 
     const pathname = usePathname()
     const router = useRouter()
@@ -34,6 +35,7 @@ export const Header = () => {
     }, [searchValue, router, pathname])
 
     const handlePerPageChange = (perPage: string) => {
+        setPerPage(parseInt(perPage))
         const params = Object.fromEntries(searchParams.entries());
         const url = queryString.stringifyUrl({
             url: pathname,
@@ -44,6 +46,12 @@ export const Header = () => {
         }, { skipNull: true, skipEmptyString: true })
 
         router.push(url)
+    }
+
+    const handleReset = () => {
+        router.push(pathname)
+        setSearch("")
+        setPerPage(undefined)
     }
 
     return (
@@ -61,23 +69,19 @@ export const Header = () => {
                         />
                     </div>
                     <Button
-                        variant="outline"
-                        className="hidden md:flex text-rose-500"
-                        onClick={() => {
-                            setSearch("")
-                            router.push(pathname)
-                        }}
+                        variant="destructive"
+                        onClick={handleReset}
                     >
                         Reset
                     </Button>
                 </div>
-                <Select onValueChange={(value) => handlePerPageChange(value)}>
+                <Select value={perPage?.toString() || ""} onValueChange={(value) => handlePerPageChange(value)}>
                     <SelectTrigger className="w-[130px]">
                         <SelectValue placeholder="Limit" />
                     </SelectTrigger>
                     <SelectContent>
                         {
-                            ["5", "10", "20", "50"].map((v, i) => (
+                            ["5", "10", "20", "50", "100", "200"].map((v, i) => (
                                 <SelectItem value={v} key={i}>{v}</SelectItem>
                             ))
                         }

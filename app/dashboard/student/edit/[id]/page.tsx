@@ -16,7 +16,7 @@ import { db } from "@/lib/prisma";
 import { EditStudentFrom } from "./_components/edit-student-form";
 
 export const metadata: Metadata = {
-    title: "BEC | Edit Student",
+    title: "BEC | Student | Edit",
     description: "Basic Education Care",
 };
 
@@ -47,7 +47,7 @@ const EditStudent = async ({ params: { id } }: Props) => {
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link href="/dashboard/student">Student</Link>
+                            <Link href="/dashboard/student">Students</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
@@ -61,5 +61,5 @@ const EditStudent = async ({ params: { id } }: Props) => {
         </ContentLayout>
     )
 }
-
 export default EditStudent
+

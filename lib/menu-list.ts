@@ -320,7 +320,7 @@ export function getMenuList(pathname: string): Group[] {
           submenus: [
             {
               href: "/dashboard/teacher/create",
-              label: "Create",
+              label: "New",
               active: pathname === "/dashboard/teacher/create",
               icon: PlusCircle,
             },
@@ -372,7 +372,7 @@ export function getMenuList(pathname: string): Group[] {
           submenus: [
             {
               href: "/dashboard/house/create",
-              label: "Create",
+              label: "New",
               active: pathname === "/dashboard/house/create",
               icon: PlusCircle,
             },
@@ -392,7 +392,7 @@ export function getMenuList(pathname: string): Group[] {
           submenus: [
             {
               href: "/dashboard/room/create",
-              label: "Create",
+              label: "New",
               active: pathname === "/dashboard/room/create",
               icon: PlusCircle,
             },
@@ -417,7 +417,7 @@ export function getMenuList(pathname: string): Group[] {
           submenus: [
             {
               href: "/dashboard/batch/create",
-              label: "Create",
+              label: "New",
               active: pathname === "/dashboard/batch/create",
               icon: PlusCircle,
             },
@@ -472,35 +472,35 @@ export function getMenuList(pathname: string): Group[] {
       groupLabel: "Income",
       menus: [
         {
-          href: "/dashboard/salary/new",
+          href: "/dashboard/income/new",
           label: "New Salary",
-          active: pathname.includes("/dashboard/salary/new"),
+          active: pathname.includes("/dashboard/income/new"),
           icon: PlusCircle,
           submenus: [],
         },
         {
-          href: "/dashboard/salary/others",
+          href: "/dashboard/income/others",
           label: "Others",
-          active: pathname.includes("/dashboard/salary/others"),
+          active: pathname.includes("/dashboard/income/others"),
           icon: PlusCircle,
           submenus: [],
         },
         {
-          href: "/dashboard/salary",
+          href: "/dashboard/income",
           label: "History",
           active: pathname.includes("/dashboard/salary"),
           icon: HandCoins,
           submenus: [
             {
-              href: "/dashboard/salary/admission",
+              href: "/dashboard/income/admission",
               label: "Admission",
-              active: pathname === "/dashboard/salary/admission",
+              active: pathname === "/dashboard/income/admission",
               icon: NotebookPen,
             },
             {
-              href: "/dashboard/salary/monthly",
+              href: "/dashboard/income/monthly",
               label: "Monthly",
-              active: pathname === "/dashboard/salary/monthly",
+              active: pathname === "/dashboard/income/monthly",
               icon: CalendarDays,
             },
           ],

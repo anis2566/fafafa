@@ -4,7 +4,7 @@ import { ContentLayout } from "../../_components/content-layout";
 import { TeacherForm } from "./_components/teacher-form";
 
 export const metadata: Metadata = {
-    title: "BEC | Create Teacher",
+    title: "BEC | Teacher | Create",
     description: "Basic Education Care",
 };
 

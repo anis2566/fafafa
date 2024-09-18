@@ -70,7 +70,7 @@ export const AddLeaveClassModal = () => {
         <Dialog open={open && !!id} onOpenChange={onClose}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Leave Class Teacher</DialogTitle>
+                    <DialogTitle>Assign Leave Class</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-6">
                     <Select value={teacher} onValueChange={(value) => setTeacher(value)} disabled={isPending}>

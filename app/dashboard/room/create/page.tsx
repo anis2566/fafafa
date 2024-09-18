@@ -14,7 +14,7 @@ import { ContentLayout } from "../../_components/content-layout";
 import { CreateRoomForm } from "./_components/create-room-form";
 
 export const metadata: Metadata = {
-    title: "BEC | Create Room",
+    title: "BEC | Room | Create",
     description: "Basic Education Care",
 };
 

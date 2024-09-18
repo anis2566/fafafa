@@ -20,7 +20,7 @@ import { db } from "@/lib/prisma";
 import { PaymentForm } from "./_components/payment-from";
 
 export const metadata: Metadata = {
-    title: "BEC | New Payment",
+    title: "BEC | Salary | New",
     description: "Basic Education Care",
 };
 
@@ -62,7 +62,7 @@ const Payment = async ({ params: { id } }: Props) => {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>New Payment</BreadcrumbPage>
+                        <BreadcrumbPage>New Salary</BreadcrumbPage>
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>

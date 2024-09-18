@@ -94,7 +94,15 @@ export const CREATE_ATTENDENCE = async (values: AttendenceSchemaType) => {
 
   for (const studentId of students) {
     const student = await db.student.findUnique({
-      where: { id: studentId },
+      where: {
+        id: studentId,
+        payments: {
+          none: {
+            status: PaymentStatus.Paid,
+            month: Object.values(Month)[currentMonthIndex],
+          },
+        },
+      },
       select: { monthlyFee: true, class: true, id: true },
     });
 

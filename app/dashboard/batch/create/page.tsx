@@ -15,7 +15,7 @@ import { CreateBatchForm } from "./_components/create-batch-form";
 
 
 export const metadata: Metadata = {
-    title: "BEC | Create Batch",
+    title: "BEC | Batch | Create",
     description: "Basic Education Care",
 };
 

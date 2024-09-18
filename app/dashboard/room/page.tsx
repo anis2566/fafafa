@@ -24,38 +24,44 @@ export const metadata: Metadata = {
 
 interface Props {
     searchParams: {
-        room: string;
+        room?: string;
         page: string;
         perPage: string;
     }
 }
 
 const Room = async ({ searchParams }: Props) => {
-    const { room, page, perPage } = searchParams;
-    const itemsPerPage = parseInt(perPage) || 5;
-    const currentPage = parseInt(page) || 1;
-    const formatedRoom = room ? parseInt(room) : undefined
+    const {
+        room,
+        page = "1",
+        perPage = "5"
+    } = searchParams;
 
-    const rooms = await db.room.findMany({
-        where: {
-            ...(formatedRoom && { name: formatedRoom })
-        },
-        include: {
-            batches: true,
-            house: true
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
+    const itemsPerPage = parseInt(perPage, 10);
+    const currentPage = parseInt(page, 10);
+    const formatedRoom = room ? parseInt(room) : undefined;
 
-    const totalRoom = await db.room.count({
-        where: {
-            ...(formatedRoom && { name: formatedRoom })
-        },
-    })
+    const [rooms, totalRoom] = await Promise.all([
+        await db.room.findMany({
+            where: {
+                ...(formatedRoom && { name: formatedRoom })
+            },
+            include: {
+                batches: true,
+                house: true
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        await db.room.count({
+            where: {
+                ...(formatedRoom && { name: formatedRoom })
+            },
+        })
+    ])
 
     const totalPage = Math.ceil(totalRoom / itemsPerPage)
 
@@ -70,7 +76,7 @@ const Room = async ({ searchParams }: Props) => {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>Room</BreadcrumbPage>
+                        <BreadcrumbPage>Rooms</BreadcrumbPage>
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>

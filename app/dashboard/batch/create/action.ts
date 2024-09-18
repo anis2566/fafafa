@@ -45,21 +45,23 @@ export const CREATE_BATCH = async (values: BatchSchemaType) => {
     throw new Error("Batch capacity is bigger than room capacity");
   }
 
-  await db.batch.create({
-    data: {
-      ...data,
-    },
-  });
-
-  await db.room.update({
-    where: {
-      id: data.roomId,
-    },
-    data: {
-      bookTime: {
-        push: data.time,
+  await db.$transaction(async (ctx) => {
+    await db.batch.create({
+      data: {
+        ...data,
       },
-    },
+    });
+
+    await db.room.update({
+      where: {
+        id: data.roomId,
+      },
+      data: {
+        bookTime: {
+          push: data.time,
+        },
+      },
+    });
   });
 
   revalidatePath("/dashboard/batch");

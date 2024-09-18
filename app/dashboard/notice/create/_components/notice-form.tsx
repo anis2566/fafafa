@@ -41,7 +41,7 @@ export const CreateNoticeForm = () => {
             toast.success(data.success, {
                 id: "create-notice"
             });
-            // router.push("/dashboard/notice")
+            router.push("/dashboard/notice")
         },
         onError: (error) => {
             toast.error(error.message, {

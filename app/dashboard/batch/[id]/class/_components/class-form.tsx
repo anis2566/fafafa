@@ -9,6 +9,7 @@ import { Batch, Day } from "@prisma/client"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 import {
     Form,
@@ -21,6 +22,7 @@ import {
 import { MultiSelect } from "@/components/ui/multi-select"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 
 import { CREATE_BATCH_CLASS, GET_SUBJECT_BY_CLASS, GET_TEACHER_BY_LEVEL } from "../action"
 
@@ -29,6 +31,8 @@ interface Props {
 }
 
 export const ClassForm = ({ batch }: Props) => {
+    const [id, setId] = useState<number | undefined>()
+
     const router = useRouter()
 
     const { data: subjects } = useQuery({
@@ -40,9 +44,9 @@ export const ClassForm = ({ batch }: Props) => {
     })
 
     const { data: teachers } = useQuery({
-        queryKey: ["get-teacher-by-level", batch.level],
+        queryKey: ["get-teacher-by-level", batch.level, id],
         queryFn: async () => {
-            const res = await GET_TEACHER_BY_LEVEL(batch.level)
+            const res = await GET_TEACHER_BY_LEVEL({ level: batch.level, id })
             return res.teachers
         },
     })
@@ -171,6 +175,7 @@ export const ClassForm = ({ batch }: Props) => {
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
+                                            <Input placeholder="Search by id..." type="number" onChange={(e) => setId(parseInt(e.target.value))} className="my-2" />
                                             {
                                                 teachers?.map((subject, i) => (
                                                     <SelectItem value={subject.id} key={i}>{subject.name}</SelectItem>

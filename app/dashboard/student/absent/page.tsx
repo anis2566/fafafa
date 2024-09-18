@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Metadata } from "next";
+import { Class, PaymentStatus } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -9,9 +10,9 @@ import {
     BreadcrumbPage,
     BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
-import { ContentLayout } from "../../_components/content-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Class, PaymentStatus } from "@prisma/client";
+
+import { ContentLayout } from "../../_components/content-layout";
 import { db } from "@/lib/prisma";
 import { CustomPagination } from "@/components/custom-pagination";
 import { StudentList } from "./_components/student-list";
@@ -24,59 +25,73 @@ export const metadata: Metadata = {
 
 interface Props {
     searchParams: {
-        session: string;
-        className: Class;
-        id: string;
-        name: string;
-        page: string;
-        perPage: string;
-    }
+        session?: string;
+        className?: Class;
+        id?: string;
+        name?: string;
+        page?: string;
+        perPage?: string;
+    };
 }
 
 
 const AbsentStudents = async ({ searchParams }: Props) => {
-    const { session, className, id, name, page, perPage } = searchParams;
-    const itemsPerPage = parseInt(perPage) || 5;
-    const currentPage = parseInt(page) || 1;
-    const formatedSession = session ? parseInt(session) : new Date().getFullYear()
-    const studentId = id ? parseInt(id) : undefined
+    const {
+        session,
+        className,
+        id,
+        name,
+        page = "1",
+        perPage = "5"
+    } = searchParams;
 
-    const students = await db.student.findMany({
-        where: {
-            session: formatedSession,
-            isPresent: false,
-            ...(className && { class: className }),
-            ...(studentId && { studentId }),
-            ...(name && { name: { contains: name, mode: "insensitive" } }),
-        },
-        include: {
-            payments: {
-                where: {
-                    status: PaymentStatus.Unpaid
+    const itemsPerPage = parseInt(perPage, 10);
+    const currentPage = parseInt(page, 10);
+    const formatedSession = parseInt(session || `${new Date().getFullYear()}`);
+    const studentId = id ? parseInt(id) : undefined;
+
+    const [students, totalStudent] = await Promise.all([
+        db.student.findMany({
+            where: {
+                session: formatedSession,
+                isPresent: false,
+                ...(className && { class: className }),
+                ...(studentId && { studentId }),
+                ...(name && { name: { contains: name, mode: "insensitive" } }),
+            },
+            include: {
+                payments: {
+                    where: {
+                        status: PaymentStatus.Unpaid,
+                    },
+                    select: {
+                        id: true,
+                    },
                 },
-                select: {
-                    id: true
-                }
-            }
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
+                batch: {
+                    select: {
+                        name: true,
+                    },
+                },
+            },
+            orderBy: {
+                id: "asc",
+            },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        db.student.count({
+            where: {
+                session: formatedSession,
+                isPresent: false,
+                ...(className && { class: className }),
+                ...(studentId && { studentId }),
+                ...(name && { name: { contains: name, mode: "insensitive" } }),
+            },
+        }),
+    ]);
 
-    const totalStudent = await db.student.count({
-        where: {
-            session: formatedSession,
-            isPresent: true,
-            ...(className && { class: className }),
-            ...(studentId && { studentId }),
-            ...(name && { name: { contains: name, mode: "insensitive" } }),
-        }
-    })
-
-    const totalPage = Math.ceil(totalStudent / itemsPerPage)
+    const totalPage = Math.ceil(totalStudent / itemsPerPage);
 
     return (
         <ContentLayout title="Student">

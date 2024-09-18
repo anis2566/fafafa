@@ -95,7 +95,7 @@ export const CreateHouseForm = () => {
                                 <FormItem>
                                     <FormLabel>No of Rooms</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Enter room number..." {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} disabled={isPending} />
+                                        <Input placeholder="Enter room number..." {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} type="number" disabled={isPending} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

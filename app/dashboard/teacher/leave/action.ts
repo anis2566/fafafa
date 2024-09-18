@@ -4,8 +4,6 @@ import { LeaveStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/lib/prisma";
-import { sendNotification } from "@/services/notification.service";
-import { GET_USER } from "@/services/user.service";
 
 type UpdateStatus = {
   id: string;
@@ -18,12 +16,12 @@ export const UPDATE_LEAVE_STATUS = async ({ id, status }: UpdateStatus) => {
       id,
     },
     include: {
-        teacher: {
-            select: {
-                userId: true
-            }
-        }
-    }
+      teacher: {
+        select: {
+          userId: true,
+        },
+      },
+    },
   });
 
   if (!app) throw new Error("Application not found");
@@ -32,19 +30,6 @@ export const UPDATE_LEAVE_STATUS = async ({ id, status }: UpdateStatus) => {
     where: {
       id,
     },
-    data: {
-      status,
-    },
-  });
-
-  const { userId } = await GET_USER();
-
-  await sendNotification({
-    trigger: "leave-response",
-    actor: {
-      id: userId,
-    },
-    recipients: [app.teacher.userId || ""],
     data: {
       status,
     },

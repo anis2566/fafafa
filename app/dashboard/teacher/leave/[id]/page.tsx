@@ -19,7 +19,7 @@ import { db } from "@/lib/prisma";
 import { DownloadButton } from "./_components/download-button";
 
 export const metadata: Metadata = {
-    title: "BEC | Teacher | Leave | Details",
+    title: "BEC | Teacher | Leave | Class",
     description: "Basic Education Care",
 };
 
@@ -54,7 +54,7 @@ const LeaveDetails = async ({ params: { id } }: Props) => {
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link href="/dashboard/leave/history">History</Link>
+                            <Link href="/dashboard/teacher/leave">History</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
@@ -67,7 +67,7 @@ const LeaveDetails = async ({ params: { id } }: Props) => {
             <div className="mt-4 space-y-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Leave Info</CardTitle>
+                        <CardTitle>Information</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div>
@@ -101,7 +101,7 @@ const LeaveDetails = async ({ params: { id } }: Props) => {
                 </Card>
                 <Card>
                     <CardHeader>
-                        <CardTitle>Leave Class</CardTitle>
+                        <CardTitle>Classes</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <ClassList classes={app.classes} />

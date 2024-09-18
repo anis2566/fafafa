@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Image from "next/image";
-import { Class, Level, Month, TransactionStatus } from "@prisma/client";
+import { Month, TransactionStatus } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -18,7 +18,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 import { ContentLayout } from "../../_components/content-layout";
 import { db } from "@/lib/prisma";
-import { AddPaymentButton } from "./_components/add-payment-button,";
 import { Profile } from "./_components/profile";
 import { BankCard } from "../../_components/charts/bank-chart";
 import { AdvanceList } from "./_components/advance-list";
@@ -26,6 +25,7 @@ import { Header } from "./_components/header";
 import { CustomPagination } from "@/components/custom-pagination";
 import { ClassList } from "./_components/class-list";
 import { cn } from "@/lib/utils";
+import { AddPaymentButton } from "./_components/add-payment-button,";
 
 export const metadata: Metadata = {
     title: "BEC | Teacher | Profile",
@@ -54,99 +54,75 @@ type GroupedData = {
     }[];
 };
 
-
 interface Props {
     params: {
         id: string;
     },
     searchParams: {
-        month: Month,
-        session: string;
+        month?: Month,
+        session?: string;
         page: string;
         perPage: string;
     }
 }
 
-const TeacherDetails = async ({ params: { id }, searchParams: { session, month, page, perPage } }: Props) => {
-    const itemsPerPage = parseInt(perPage) || 5;
-    const currentPage = parseInt(page) || 1;
-    const formatedSession = session ? parseInt(session) : new Date().getFullYear()
+const TeacherDetails = async ({ params: { id }, searchParams }: Props) => {
+    const {
+        session,
+        month,
+        page = "1",
+        perPage = "5"
+    } = searchParams;
+
+    const itemsPerPage = parseInt(perPage, 10);
+    const currentPage = parseInt(page, 10);
+    const formatedSession = parseInt(session || `${new Date().getFullYear()}`);
 
     const teacher = await db.teacher.findUnique({
-        where: {
-            id,
-        },
+        where: { id },
         include: {
-            classes: {
-                include: {
-                    batch: true,
-                    subject: true,
-                }
-            },
+            classes: { include: { batch: true, subject: true } },
             fee: true,
             bank: true,
         }
-    })
+    });
 
-    if (!teacher) redirect("/dashboard")
+    if (!teacher) redirect("/dashboard");
 
-    const classes = await db.batchClass.groupBy({
-        by: ["time", "day", "batchName", "subjectName", "roomName", "id", "batchId"],
-        where: {
-            teacherId: id
-        },
-        orderBy: {
-            day: "asc"
-        }
-    })
+    const [classes, pendingBalance, advances, totalAdvance] = await Promise.all([
+        await db.batchClass.groupBy({
+            by: ["time", "day", "batchName", "subjectName", "roomName", "id", "batchId"],
+            where: { teacherId: id },
+            orderBy: { day: "asc" }
+        }),
+        await db.teacherPayment.aggregate({
+            where: { status: TransactionStatus.Pending, teacherId: id },
+            _sum: { amount: true }
+        }),
+        await db.teacherAdvance.findMany({
+            where: { teacherId: id, session: formatedSession, ...(month && { month }) },
+            orderBy: { createdAt: "desc" },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        await db.teacherAdvance.count({
+            where: { teacherId: id, session: formatedSession, ...(month && { month }) },
+        })
+
+    ])
 
     const groupedData: GroupedData[] = Object.values(
         classes.reduce((acc: { [key: string]: GroupedData }, curr: ClassData) => {
             const { time, batchName, subjectName, day, roomName, id, batchId } = curr;
             if (!acc[time]) {
-                acc[time] = {
-                    time: time,
-                    classes: [],
-                    batchId
-                };
+                acc[time] = { time, classes: [], batchId };
             }
             acc[time].classes.push({ day, batchName, subjectName, roomName, id });
             return acc;
         }, {})
     );
 
-    const pendingBalance = await db.teacherPayment.aggregate({
-        where: {
-            status: TransactionStatus.Pending,
-            teacherId: id
-        },
-        _sum: {
-            amount: true
-        }
-    })
-
-    const advances = await db.teacherAdvance.findMany({
-        where: {
-            teacherId: id,
-            session: formatedSession,
-            ...(month && { month })
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
-
-    const totalAdvance = await db.teacherAdvance.count({
-        where: {
-            teacherId: id,
-            session: formatedSession,
-            ...(month && { month })
-        },
-    })
-
-    const totalPage = Math.ceil(totalAdvance / itemsPerPage)
+    const totalPage = Math.ceil(totalAdvance / itemsPerPage);
 
     return (
         <ContentLayout title="Teacher">
@@ -165,7 +141,7 @@ const TeacherDetails = async ({ params: { id }, searchParams: { session, month, 
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>Details</BreadcrumbPage>
+                        <BreadcrumbPage>Profile</BreadcrumbPage>
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
@@ -179,10 +155,7 @@ const TeacherDetails = async ({ params: { id }, searchParams: { session, month, 
                                 className="rounded-full"
                                 height="100"
                                 src={teacher.imageUrl}
-                                style={{
-                                    aspectRatio: "100/100",
-                                    objectFit: "cover",
-                                }}
+                                style={{ aspectRatio: "100/100", objectFit: "cover" }}
                                 width="100"
                             />
                             <div className="space-y-1">

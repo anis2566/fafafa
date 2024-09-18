@@ -16,7 +16,7 @@ import { db } from "@/lib/prisma";
 import { EditRoomForm } from "./_components/edit-room-form";
 
 export const metadata: Metadata = {
-    title: "BEC | Edit Room",
+    title: "BEC | Room | Edit",
     description: "Basic Education Care",
 };
 

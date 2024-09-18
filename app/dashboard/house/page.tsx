@@ -24,40 +24,46 @@ export const metadata: Metadata = {
 
 interface Props {
     searchParams: {
-        name: string;
+        name?: string;
         page: string;
         perPage: string;
     }
 }
 
 const House = async ({ searchParams }: Props) => {
-    const { name, page, perPage } = searchParams;
-    const itemsPerPage = parseInt(perPage) || 5;
-    const currentPage = parseInt(page) || 1;
+    const {
+        name,
+        page = "1",
+        perPage = "5"
+    } = searchParams;
 
-    const houses = await db.house.findMany({
-        where: {
-            ...(name && { name: { contains: name, mode: "insensitive" } })
-        },
-        include: {
-            rooms: {
-                select: {
-                    id: true
+    const itemsPerPage = parseInt(perPage, 10);
+    const currentPage = parseInt(page, 10);
+
+    const [houses, totalHouse] = await Promise.all([
+        await db.house.findMany({
+            where: {
+                ...(name && { name: { contains: name, mode: "insensitive" } })
+            },
+            include: {
+                rooms: {
+                    select: {
+                        id: true
+                    }
                 }
-            }
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
-
-    const totalHouse = await db.house.count({
-        where: {
-            ...(name && { name: { contains: name, mode: "insensitive" } })
-        },
-    })
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        await db.house.count({
+            where: {
+                ...(name && { name: { contains: name, mode: "insensitive" } })
+            },
+        })
+    ])
 
     const totalPage = Math.ceil(totalHouse / itemsPerPage)
 
