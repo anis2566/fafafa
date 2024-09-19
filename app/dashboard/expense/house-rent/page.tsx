@@ -25,36 +25,48 @@ export const metadata: Metadata = {
 
 interface Props {
     searchParams: {
-        month: Month;
-        page: string;
-        perPage: string;
-        search: string;
-    }
+        session?: string;
+        month?: Month;
+        name?: string;
+        page?: string;
+        perPage?: string;
+    };
 }
 
 const HouseRent = async ({ searchParams }: Props) => {
-    const { month, search, page, perPage } = searchParams;
-    const itemsPerPage = parseInt(perPage) || 5;
-    const currentPage = parseInt(page) || 1;
+    const {
+        session,
+        month,
+        name,
+        page = "1",
+        perPage = "5"
+    } = searchParams;
 
-    const payments = await db.housePayment.findMany({
-        where: {
-            ...(month && { month }),
-            ...(search && { houseName: { contains: search, mode: "insensitive" } })
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
+    const itemsPerPage = parseInt(perPage, 10);
+    const currentPage = parseInt(page, 10);
+    const formatedSession = parseInt(session || `${new Date().getFullYear()}`);
 
-    const totalPayment = await db.housePayment.count({
-        where: {
-            ...(month && { month }),
-            ...(search && { houseName: { contains: search, mode: "insensitive" } })
-        },
-    })
+    const [payments, totalPayment] = await Promise.all([
+        await db.housePayment.findMany({
+            where: {
+                session: formatedSession,
+                ...(month && { month }),
+                ...(name && { houseName: { contains: name, mode: "insensitive" } })
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        await db.housePayment.count({
+            where: {
+                session: formatedSession,
+                ...(month && { month }),
+                ...(name && { houseName: { contains: name, mode: "insensitive" } })
+            },
+        })
+    ])
 
     const totalPage = Math.ceil(totalPayment / itemsPerPage)
 

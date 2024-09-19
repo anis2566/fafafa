@@ -31,6 +31,7 @@ export const FilterDrawer = ({ open, handleClose }: Props) => {
     const [id, setId] = useState<string>("")
     const [session, setSession] = useState<number>(new Date().getFullYear())
     const [className, setClassName] = useState<Class | undefined>()
+    const [perPage, setPerPage] = useState<string>()
 
     const pathname = usePathname()
     const router = useRouter()
@@ -88,6 +89,21 @@ export const FilterDrawer = ({ open, handleClose }: Props) => {
 
         router.push(url)
     }
+
+    const handlePerPageChange = (perPage: string) => {
+        setPerPage(perPage)
+        const params = Object.fromEntries(searchParams.entries());
+        const url = queryString.stringifyUrl({
+            url: pathname,
+            query: {
+                ...params,
+                perPage,
+            }
+        }, { skipNull: true, skipEmptyString: true })
+
+        router.push(url)
+    }
+
 
     const handleReset = () => {
         router.push(pathname)
@@ -159,6 +175,18 @@ export const FilterDrawer = ({ open, handleClose }: Props) => {
                             value={search}
                         />
                     </div>
+                    <Select value={perPage || ""} onValueChange={(value) => handlePerPageChange(value)}>
+                        <SelectTrigger className="w-[130px]">
+                            <SelectValue placeholder="Limit" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {
+                                ["5", "10", "20", "50", "100", "200"].map((v, i) => (
+                                    <SelectItem value={v} key={i}>{v}</SelectItem>
+                                ))
+                            }
+                        </SelectContent>
+                    </Select>
                     <Button
                         className="bg-rose-500 text-white"
                         onClick={handleReset}

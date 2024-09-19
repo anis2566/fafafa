@@ -89,15 +89,11 @@ const TeacherDetails = async ({ params: { id }, searchParams }: Props) => {
 
     if (!teacher) redirect("/dashboard");
 
-    const [classes, pendingBalance, advances, totalAdvance] = await Promise.all([
+    const [classes, advances, totalAdvance] = await Promise.all([
         await db.batchClass.groupBy({
             by: ["time", "day", "batchName", "subjectName", "roomName", "id", "batchId"],
             where: { teacherId: id },
             orderBy: { day: "asc" }
-        }),
-        await db.teacherPayment.aggregate({
-            where: { status: TransactionStatus.Pending, teacherId: id },
-            _sum: { amount: true }
         }),
         await db.teacherAdvance.findMany({
             where: { teacherId: id, session: formatedSession, ...(month && { month }) },
@@ -188,10 +184,9 @@ const TeacherDetails = async ({ params: { id }, searchParams }: Props) => {
                         </Card>
                     </TabsContent>
                     <TabsContent value="bank" className="space-y-6">
-                        <div className="grid md:grid-cols-3 gap-6">
+                        <div className="grid md:grid-cols-2 gap-6">
                             <BankCard amount={teacher.bank?.current ?? 0} title="Net Balance" />
                             <BankCard amount={teacher.bank?.advance ?? 0} title="Advance" />
-                            <BankCard amount={pendingBalance._sum.amount ?? 0} title="Pending" />
                         </div>
                         <Card>
                             <CardHeader>

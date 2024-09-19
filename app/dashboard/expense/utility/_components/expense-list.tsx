@@ -25,12 +25,18 @@ import {
 } from "@/components/ui/hover-card"
 
 import { formatString } from "@/lib/utils"
+import { EmptyData } from "@/components/empty-stat"
 
 interface Props {
     expenses: Expense[]
 }
 
 export const ExpenseList = ({ expenses }: Props) => {
+
+    if (expenses.length === 0) {
+        return <EmptyData title="No Expense Found!" />
+    }
+
     return (
         <Table>
             <TableHeader>

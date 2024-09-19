@@ -1,5 +1,6 @@
 import { Teacher, TeacherAdvance } from "@prisma/client";
 import { format } from "date-fns";
+import Link from "next/link";
 
 import {
     Table,
@@ -12,6 +13,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+import { EmptyData } from "@/components/empty-stat";
+
 interface AdvanceWithTeacher extends TeacherAdvance {
     teacher: Teacher;
 }
@@ -21,6 +24,11 @@ interface Props {
 }
 
 export const AdvanceList = ({ advances }: Props) => {
+
+    if (advances.length === 0) {
+        return <EmptyData title="No Advance Found!" />
+    }
+
     return (
         <Table>
             <TableHeader>
@@ -38,18 +46,20 @@ export const AdvanceList = ({ advances }: Props) => {
                 {
                     advances.map((advance) => (
                         <TableRow key={advance.id}>
-                            <TableCell className="py-3">{advance.teacher.teacherId}</TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-2">{advance.teacher.teacherId}</TableCell>
+                            <TableCell className="py-2">
                                 <Avatar>
                                     <AvatarImage src={advance.teacher.imageUrl} />
                                     <AvatarFallback>{advance.teacher.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                             </TableCell>
-                            <TableCell className="py-3">{advance.teacher.name}</TableCell>
-                            <TableCell className="py-3">{format(advance.createdAt, "dd MMM yyyy")}</TableCell>
-                            <TableCell className="py-3">{advance.month}</TableCell>
-                            <TableCell className="py-3">{advance.amount}</TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-2 hover:underline">
+                                <Link href={`/dashboard/teacher/${advance.teacher.id}`}>{advance.teacher.name}</Link>
+                            </TableCell>
+                            <TableCell className="py-2">{format(advance.createdAt, "dd MMM yyyy")}</TableCell>
+                            <TableCell className="py-2">{advance.month}</TableCell>
+                            <TableCell className="py-2">{advance.amount}</TableCell>
+                            <TableCell className="py-2">
                                 <Badge>{advance.status}</Badge>
                             </TableCell>
                         </TableRow>

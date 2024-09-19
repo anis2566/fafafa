@@ -42,3 +42,8 @@ export function getRandomColor() {
 export const formatTime = (time: string, position: "start" | "end") => {
   return time.split("-")[position === "start" ? 0 : 1];
 };
+
+
+export function generateInvoiceId() {
+  return Math.random().toString(36).substring(2, 10).toUpperCase();
+}

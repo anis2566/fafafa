@@ -23,6 +23,12 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 import { cn } from "@/lib/utils"
 import { UPDATE_ATTENDENCES } from "../action"
@@ -58,13 +64,13 @@ export const AttendenceList = ({ students, batchId }: Props) => {
 
     const { onOpen } = useAttendenceCall()
     const { onOpen: onOpenUpdate } = useAttendenceUpdate()
-    const {onOpen: onOpenLeft} = useAttendenceLeft()
+    const { onOpen: onOpenLeft } = useAttendenceLeft()
 
     const handleEdit = (day: number) => {
-        // if (day > currentDay) {
-        //     toast.error("Cannot edit future dates");
-        //     return;
-        // }
+        if (day > currentDay) {
+            toast.error("Cannot edit future dates");
+            return;
+        }
         setIds([]);
         setEditDay(prevDay => (prevDay === day ? currentDay : day));
     }
@@ -130,10 +136,9 @@ export const AttendenceList = ({ students, batchId }: Props) => {
 
     const isFriday = (date: Date) => date.getDay() === 5;
 
-
     return (
         <div className="space-y-4">
-            <div className="flex items-center gap-x-3">
+            <div className="flex items-center gap-3 flex-wrap">
                 <Button onClick={() => markAllAttendance(AttendenceStatus.P)} variant={ids.length === students.length && !isHoliday ? "outline" : "ghost"} disabled={isPending}>Mark All Present</Button>
                 <Button onClick={() => markAllAttendance(AttendenceStatus.A)} variant={!allChecked ? "outline" : "ghost"} disabled={isPending}>Mark All Absent</Button>
                 <Button onClick={markAsHoliday} variant={isHoliday ? "outline" : "ghost"} disabled={isPending}>Mark as Holiday</Button>
@@ -236,9 +241,19 @@ export const AttendenceList = ({ students, batchId }: Props) => {
                                                                 </DropdownMenuContent>
                                                             </DropdownMenu>
                                                         ) : day?.status === AttendenceStatus.A && !day?.absentReason ? (
-                                                            <Button variant="ghost" size="icon" onClick={() => onOpen(day.id, item)}>
-                                                                <Phone className="w-4 h-4" />
-                                                            </Button>
+                                                            <TooltipProvider>
+                                                                <Tooltip delayDuration={0}>
+                                                                    <TooltipTrigger>
+                                                                        <Button variant="ghost" size="icon" onClick={() => onOpen(day.id, item)}>
+                                                                            <Phone className="w-4 h-4" />
+                                                                        </Button>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent>
+                                                                        <p>Call now</p>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            </TooltipProvider>
+
                                                         ) : null
                                                     }
                                                 </div>

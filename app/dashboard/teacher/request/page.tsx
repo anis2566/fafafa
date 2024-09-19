@@ -15,8 +15,7 @@ import { ContentLayout } from "../../_components/content-layout";
 import { db } from "@/lib/prisma";
 import { RequestList } from "./_components/request-list";
 import { CustomPagination } from "@/components/custom-pagination";
-import { Header } from "../_components/header";
-
+import { Header } from "./_components/header";
 
 export const metadata: Metadata = {
     title: "BEC | Teacher | Request",
@@ -25,62 +24,68 @@ export const metadata: Metadata = {
 
 interface Props {
     searchParams: {
-        name: string;
-        id: string;
-        page: string;
-        perPage: string;
-    }
+        id?: string;
+        name?: string;
+        page?: string;
+        perPage?: string;
+    };
 }
 
-
 const TeacherRequest = async ({ searchParams }: Props) => {
-    const { id, name, page, perPage } = searchParams;
-    const itemsPerPage = parseInt(perPage) || 5;
-    const currentPage = parseInt(page) || 1;
-    const teacherId = id ? parseInt(id) : undefined
+    const {
+        id,
+        name,
+        page = "1",
+        perPage = "5"
+    } = searchParams;
 
-    const requests = await db.teacherRequest.findMany({
-        where: {
-            ...(name && {
-                teacher: {
-                    name: {
-                        contains: name, mode: "insensitive"
-                    }
-                }
-            }),
-            ...(teacherId && {
-                teacher: {
-                    teacherId
-                }
-            }),
-        },
-        include: {
-            user: true,
-            teacher: true
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
+    const itemsPerPage = parseInt(perPage, 10);
+    const currentPage = parseInt(page, 10);
+    const teacherId = id ? parseInt(id) : undefined;
 
-    const totalRequest = await db.teacherRequest.count({
-        where: {
-            ...(name && {
-                teacher: {
-                    name: {
-                        contains: name, mode: "insensitive"
+    const [requests, totalRequest] = await Promise.all([
+        await db.teacherRequest.findMany({
+            where: {
+                ...(name && {
+                    teacher: {
+                        name: {
+                            contains: name, mode: "insensitive"
+                        }
                     }
-                }
-            }),
-            ...(teacherId && {
-                teacher: {
-                    teacherId
-                }
-            })
-        }
-    })
+                }),
+                ...(teacherId && {
+                    teacher: {
+                        teacherId
+                    }
+                }),
+            },
+            include: {
+                user: true,
+                teacher: true
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        await db.teacherRequest.count({
+            where: {
+                ...(name && {
+                    teacher: {
+                        name: {
+                            contains: name, mode: "insensitive"
+                        }
+                    }
+                }),
+                ...(teacherId && {
+                    teacher: {
+                        teacherId
+                    }
+                })
+            }
+        })
+    ])
 
     const totalPage = Math.ceil(totalRequest / itemsPerPage)
 
@@ -111,7 +116,7 @@ const TeacherRequest = async ({ searchParams }: Props) => {
                     <CardTitle>Request List</CardTitle>
                     <CardDescription>A collection of teacher request.</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
                     <Header />
                     <RequestList requests={requests} />
                     <CustomPagination totalPage={totalPage} />

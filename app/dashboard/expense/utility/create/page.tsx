@@ -14,7 +14,7 @@ import { ContentLayout } from "@/app/dashboard/_components/content-layout";
 import { CreateUtilityFrom } from "./_components/utility-form";
 
 export const metadata: Metadata = {
-    title: "BEC | Expense | Utility",
+    title: "BEC | Expense | Utility | Create",
     description: "Basic Education Care",
 };
 

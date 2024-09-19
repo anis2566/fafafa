@@ -2,11 +2,11 @@
 
 import { PaymentStatus } from "@prisma/client";
 
+import { db } from "@/lib/prisma";
 import {
   MonthlyPaymentSchema,
   MonthlyPaymentSchemaType,
-} from "../../../new/[id]/schema";
-import { db } from "@/lib/prisma";
+} from "../../new/[id]/schema";
 
 type UpdatePayment = {
   id: string;
@@ -36,7 +36,7 @@ export const UPDATE_PAYMENT = async ({ id, values }: UpdatePayment) => {
   const dueMonth = await db.monthlyPayment.findFirst({
     where: {
       month: data.month,
-      status: PaymentStatus.Unpaid,
+      studentId: payment.studentId,
     },
   });
 
@@ -44,17 +44,13 @@ export const UPDATE_PAYMENT = async ({ id, values }: UpdatePayment) => {
     throw new Error("Invalid month");
   }
 
-  if (payment.student.monthlyFee !== data.amount) {
-    throw new Error("Invalid amount");
-  }
-
-  const update = await db.monthlyPayment.update({
+  await db.monthlyPayment.update({
     where: {
       id: dueMonth.id,
     },
     data: {
       ...data,
-      status: PaymentStatus.Paid
+      status: PaymentStatus.Paid,
     },
   });
 

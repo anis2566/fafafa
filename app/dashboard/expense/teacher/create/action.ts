@@ -1,9 +1,10 @@
 "use server";
 
-import { db } from "@/lib/prisma";
-import { TeacherPaymentSchema, TeacherPaymentSchemaType } from "./schema";
 import { revalidatePath } from "next/cache";
-import { TeacherPaymentStatus } from "@prisma/client";
+import { TeacherPaymentSchema, TeacherPaymentSchemaType } from "./schema";
+
+import { Status, TeacherPaymentStatus } from "@prisma/client";
+import { db } from "@/lib/prisma";
 
 export const CREATE_TEACHER_PAYMENT = async (
   values: TeacherPaymentSchemaType
@@ -117,8 +118,14 @@ export const CREATE_TEACHER_PAYMENT = async (
   };
 };
 
-export const GET_TEACHERS = async () => {
+export const GET_TEACHERS = async (id?: number) => {
   const teachers = await db.teacher.findMany({
+    where: {
+      ...(id && {
+        teacherId: id,
+      }),
+      status: Status.Active
+    },
     include: {
       fee: true,
       bank: true,
@@ -126,6 +133,7 @@ export const GET_TEACHERS = async () => {
     orderBy: {
       teacherId: "asc",
     },
+    take: 3
   });
 
   return { teachers };

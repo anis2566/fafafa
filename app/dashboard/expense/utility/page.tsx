@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Metadata } from "next";
-import { Expenses } from "@prisma/client";
+import { Expenses, Month } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -25,33 +25,48 @@ export const metadata: Metadata = {
 
 interface Props {
     searchParams: {
-        type: Expenses;
+        type?: Expenses;
+        session?: string;
+        month?: Month;
         page: string;
         perPage: string;
     }
 }
 
 const UtilityList = async ({ searchParams }: Props) => {
-    const { type, page, perPage } = searchParams;
-    const itemsPerPage = parseInt(perPage) || 5;
-    const currentPage = parseInt(page) || 1;
+    const {
+        session,
+        month,
+        type,
+        page = "1",
+        perPage = "5"
+    } = searchParams;
 
-    const expenses = await db.expense.findMany({
-        where: {
-            ...(type && { type })
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
+    const itemsPerPage = parseInt(perPage, 10);
+    const currentPage = parseInt(page, 10);
+    const formatedSession = parseInt(session || `${new Date().getFullYear()}`)
 
-    const totalExpense = await db.expense.count({
-        where: {
-            ...(type && { type })
-        },
-    })
+    const [expenses, totalExpense] = await Promise.all([
+        await db.expense.findMany({
+            where: {
+                session: formatedSession,
+                ...(month && { month }),
+                ...(type && { type })
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        await db.expense.count({
+            where: {
+                session: formatedSession,
+                ...(month && { month }),
+                ...(type && { type })
+            },
+        })
+    ])
 
     const totalPage = Math.ceil(totalExpense / itemsPerPage)
 

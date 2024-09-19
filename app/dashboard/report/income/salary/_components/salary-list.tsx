@@ -38,35 +38,35 @@ export const SalaryList = ({ payments }: PaymentProps) => {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>#ID</TableHead>
-                        <TableHead>Image</TableHead>
-                        <TableHead>Name</TableHead>
+                        <TableHead className="bg-slate-100 dark:bg-background/60">#ID</TableHead>
+                        <TableHead className="bg-slate-100 dark:bg-background/60">Image</TableHead>
+                        <TableHead className="bg-slate-100 dark:bg-background/60">Name</TableHead>
                         {
                             Object.values(Month).map((month, i) => (
-                                <TableHead key={i}>{month}</TableHead>
+                                <TableHead key={i} className="bg-slate-100 dark:bg-background/60">{month}</TableHead>
                             ))
                         }
-                        <TableHead>Total Due</TableHead>
-                        <TableHead>Total Paid</TableHead>
+                        <TableHead className="bg-slate-100 dark:bg-background/60">Total Due</TableHead>
+                        <TableHead className="bg-slate-100 dark:bg-background/60">Total Paid</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {
                         payments.map(item => (
                             <TableRow key={item.studentId}>
-                                <TableCell>{item.studentId}</TableCell>
-                                <TableCell>
+                                <TableCell className="py-1">{item.studentId}</TableCell>
+                                <TableCell className="py-1">
                                     <Avatar>
                                         <AvatarImage src={item.imageUrl} />
                                         <AvatarFallback>{item.name.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                 </TableCell>
-                                <TableCell>{item.name}</TableCell>
+                                <TableCell className="py-1">{item.name}</TableCell>
                                 {
                                     Object.values(Month).map((month, index) => {
                                         const payment = item.payments.find(p => p.month === month);
                                         return (
-                                            <TableCell key={index} className="text-center">
+                                            <TableCell key={index} className="text-center py-1">
                                                 <HoverCard>
                                                     <HoverCardTrigger asChild>
                                                         <Badge className={cn("", payment?.note && "bg-yellow-600 hover:bg-yellow-700")} variant={payment?.status === PaymentStatus.NA ? "outline" : payment?.status === PaymentStatus.Paid ? "default" : payment?.status === PaymentStatus.Unpaid ? "destructive" : "outline"}>
@@ -139,10 +139,10 @@ export const SalaryList = ({ payments }: PaymentProps) => {
                                         );
                                     })
                                 }
-                                <TableCell className="py-3 italic">
+                                <TableCell className="py-3 italic py-1">
                                     {item.payments.filter(item => item.status === PaymentStatus.Unpaid).length} Months
                                 </TableCell>
-                                <TableCell className="py-3 font-semibold">
+                                <TableCell className="py-3 font-semibold py-1">
                                     {item.payments.filter(item => item.status === PaymentStatus.Paid).reduce((acc, curr) => acc + curr.amount, 0)}
                                 </TableCell>
                             </TableRow>
@@ -151,14 +151,14 @@ export const SalaryList = ({ payments }: PaymentProps) => {
                 </TableBody>
                 <TableFooter>
                     <TableRow>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell></TableCell>
-                        <TableCell className="text-md font-semibold">Total</TableCell>
+                        <TableCell className="bg-slate-200/60 dark:bg-background/80"></TableCell>
+                        <TableCell className="bg-slate-200/60 dark:bg-background/80"></TableCell>
+                        <TableCell className="bg-slate-200/60 dark:bg-background/80"></TableCell>
+                        <TableCell className="text-md font-semibold bg-slate-200/60 dark:bg-background/80">Total</TableCell>
                         {
                             Object.values(Month).map((month, i) => {
                                 return (
-                                    <TableCell key={i} className="text-center font-semibold">
+                                    <TableCell key={i} className="text-center font-semibold bg-slate-200/60 dark:bg-background/80">
                                         {
                                             payments.reduce((total, student) => {
                                                 const amount = student.payments.filter(item => item.month === month && item.status === PaymentStatus.Paid).reduce((acc, cur) => acc + cur.amount, 0)
@@ -170,6 +170,13 @@ export const SalaryList = ({ payments }: PaymentProps) => {
                             }
                             )
                         }
+                        <TableCell className="text-center font-semibold bg-slate-200/60 dark:bg-background/80">
+                            {
+                                payments.reduce((total, student) => {
+                                    return total + student.payments.reduce((acc, curr) => acc + (curr.status === PaymentStatus.Paid ? curr.amount : 0), 0);
+                                }, 0)
+                            }
+                        </TableCell>
                     </TableRow>
                 </TableFooter>
             </Table>

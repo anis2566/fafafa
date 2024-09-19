@@ -95,7 +95,7 @@ const TeacherBillReport = async () => {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="text-center">Name</TableHead>
+                                <TableHead>Name</TableHead>
                                 {
                                     Object.values(Month).map((month, i) => (
                                         <TableHead key={i} className="text-center">{month}</TableHead>
@@ -108,7 +108,7 @@ const TeacherBillReport = async () => {
                             {
                                 modifiedPayment.map((item, index) => (
                                     <TableRow key={index}>
-                                        <TableCell className="text-center">{item.teacherName}</TableCell>
+                                        <TableCell>{item.teacherName}</TableCell>
                                         {
                                             Object.values(Month).map((month, i) => {
                                                 const monthData = item.months.find(m => m.month === month);

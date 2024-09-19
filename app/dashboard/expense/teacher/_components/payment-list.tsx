@@ -1,5 +1,4 @@
 import { Teacher, TeacherFee, TeacherPayment, TeacherPaymentStatus } from "@prisma/client"
-import { Edit, EllipsisVertical } from "lucide-react"
 import Link from "next/link"
 
 import {
@@ -10,21 +9,10 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import {
-    HoverCard,
-    HoverCardContent,
-    HoverCardTrigger,
-} from "@/components/ui/hover-card"
 
 import { cn } from "@/lib/utils"
+import { EmptyData } from "@/components/empty-stat"
 
 interface TeacherWithFee extends Teacher {
     fee: TeacherFee | null
@@ -39,6 +27,11 @@ interface Props {
 }
 
 export const PaymentList = ({ payments }: Props) => {
+
+    if(payments.length === 0) {
+        return <EmptyData title="No Payment Found!" />
+    }
+
     return (
         <Table>
             <TableHeader>
@@ -54,8 +47,6 @@ export const PaymentList = ({ payments }: Props) => {
                     <TableHead>Advance Paid</TableHead>
                     <TableHead>Net Total</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Edited</TableHead>
-                    <TableHead>Action</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -63,7 +54,9 @@ export const PaymentList = ({ payments }: Props) => {
                     payments.map((payment) => (
                         <TableRow key={payment.id}>
                             <TableCell className="py-3">{payment.teacher.teacherId}</TableCell>
-                            <TableCell className="py-3">{payment.teacher.name}</TableCell>
+                            <TableCell className="py-3 hover:underline">
+                                <Link href={`/dashboard/teacher/${payment.teacher.id}`}>{payment.teacher.name}</Link>
+                            </TableCell>
                             <TableCell className="py-3">{payment.month}</TableCell>
                             <TableCell className="py-3">{payment.teacher.fee?.perClass}</TableCell>
                             <TableCell className="py-3">{payment.classUnit}</TableCell>
@@ -80,42 +73,6 @@ export const PaymentList = ({ payments }: Props) => {
                                     payment.status === TeacherPaymentStatus.Approve && "bg-green-500",
                                     payment.status === TeacherPaymentStatus.Reject && "bg-rose-500",
                                 )}>{payment.status}</Badge>
-                            </TableCell>
-                            <TableCell className="py-3">
-                                <HoverCard>
-                                    <HoverCardTrigger asChild>
-                                        {
-                                            payment.note ? (
-                                                <Badge className="bg-yellow-600">
-                                                    YES
-                                                </Badge>
-                                            ) : (
-                                                <Badge variant="outline">N/A</Badge>
-                                            )
-                                        }
-                                    </HoverCardTrigger>
-                                    <HoverCardContent className="w-60">
-                                        <p>{payment.note}</p>
-                                    </HoverCardContent>
-                                </HoverCard>
-                            </TableCell>
-                            <TableCell className="py-3">
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="h-8 w-8 p-0">
-                                            <span className="sr-only">Open menu</span>
-                                            <EllipsisVertical className="h-5 w-5" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuItem asChild>
-                                            <Link href={`/dashboard/expense/teacher/edit/${payment.id}`} className="flex items-center gap-x-3">
-                                                <Edit className="w-5 h-5" />
-                                                Update
-                                            </Link>
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
                             </TableCell>
                         </TableRow>
                     ))

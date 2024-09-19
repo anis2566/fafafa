@@ -33,7 +33,7 @@ const Invoice = ({ invoice }: Props) => {
                         <Text style={{ fontSize: "20px" }}>Invoice</Text>
                         <View style={{ flexDirection: "row", gap: "5px" }}>
                             <Text style={{ fontSize: "12px" }}>Invoice #:</Text>
-                            <Text style={{ fontSize: "12px", textTransform: "uppercase" }}>{invoice.id.slice(-6)}</Text>
+                            <Text style={{ fontSize: "12px", textTransform: "uppercase" }}>{invoice.invoiceId}</Text>
                         </View>
                         <Text style={{ fontSize: "12px" }}>Date: {format(invoice.createdAt, "dd MMM yyyy")}</Text>
                     </View>

@@ -5,6 +5,7 @@ import { PaymentStatus } from "@prisma/client";
 import { db } from "@/lib/prisma";
 import { MonthlyPaymentSchemaType } from "./schema";
 import { revalidatePath } from "next/cache";
+import { generateInvoiceId } from "@/lib/utils";
 
 type PayWithCash = {
   values: MonthlyPaymentSchemaType;
@@ -27,6 +28,7 @@ export const PAY_WITH_CASH = async ({ values, studentId }: PayWithCash) => {
       data: {
         ...values,
         status: PaymentStatus.Paid,
+        invoiceId: generateInvoiceId()
       },
     });
 
@@ -43,6 +45,7 @@ export const PAY_WITH_CASH = async ({ values, studentId }: PayWithCash) => {
         session: new Date().getFullYear(),
         studentId,
         status: PaymentStatus.Paid,
+        invoiceId: generateInvoiceId()
       },
     });
 

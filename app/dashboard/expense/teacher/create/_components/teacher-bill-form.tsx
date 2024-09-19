@@ -25,10 +25,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { TeacherPaymentSchema } from "../schema"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 
+import { TeacherPaymentSchema } from "../schema"
 import { SuccessAlert } from "./success-alert"
 import { CREATE_TEACHER_PAYMENT, GET_TEACHERS } from "../action"
 
@@ -36,11 +36,12 @@ export const TeacherBillForm = () => {
     const [fee, setFee] = useState<number>()
     const [open, setOpen] = useState<boolean>(false)
     const [advance, setAdvance] = useState<number>(0)
+    const [id, setId] = useState<number>()
 
     const { data: teachers } = useQuery({
-        queryKey: ["get-teachers-for-bill"],
+        queryKey: ["get-teachers-for-bill", id],
         queryFn: async () => {
-            const res = await GET_TEACHERS()
+            const res = await GET_TEACHERS(id)
             return res.teachers
         }
     })
@@ -107,6 +108,7 @@ export const TeacherBillForm = () => {
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
+                                                <Input placeholder="Search by id..." type="number" onChange={(e) => setId(parseInt(e.target.value))} className="my-2" />
                                                 {
                                                     teachers?.map((v, i) => (
                                                         <SelectItem value={v.id} key={i}>
@@ -134,7 +136,7 @@ export const TeacherBillForm = () => {
                                             </FormControl>
                                             <SelectContent>
                                                 {
-                                                    Object.values(Month).map((v, i) => (
+                                                    Object.values(Month).slice(0, new Date().getMonth() + 1).map((v, i) => (
                                                         <SelectItem value={v} key={i}>{v}</SelectItem>
                                                     ))
                                                 }
@@ -232,7 +234,7 @@ export const TeacherBillForm = () => {
                         {
                             fee && (
                                 <p>
-                                    {(form.watch("classUnit") || 0) * fee + (form.watch("incentive") || 0) - ((form.watch("deductionUnit") || 0) * fee + advance) }
+                                    {(form.watch("classUnit") || 0) * fee + (form.watch("incentive") || 0) - ((form.watch("deductionUnit") || 0) * fee + advance)}
                                 </p>
                             )
                         }

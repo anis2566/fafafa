@@ -3,19 +3,34 @@
 import { SearchIcon } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import queryString from "query-string"
-import { Class, PaymentStatus } from "@prisma/client"
+import { Month } from "@prisma/client"
 import { useEffect, useState } from "react"
 
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+} from "@/components/ui/sheet"
 
 import { useDebounce } from "@/hooks/use-debounce"
 
 
-export const Header = () => {
+interface Props {
+    open: boolean;
+    handleClose: () => void;
+}
+
+export const FilterDrawer = ({ open, handleClose }: Props) => {
     const [search, setSearch] = useState<string>("")
     const [id, setId] = useState<string>("")
+    const [session, setSession] = useState<number>(new Date().getFullYear())
+    const [month, setMonth] = useState<Month | undefined>()
+    const [perPage, setPerPage] = useState<string>()
 
     const pathname = usePathname()
     const router = useRouter()
@@ -34,14 +49,12 @@ export const Header = () => {
         }, { skipEmptyString: true, skipNull: true });
 
         router.push(url);
-    }, [searchValue, router, pathname, searchParams])
+    }, [searchValue, router, pathname])
 
     useEffect(() => {
-        const params = Object.fromEntries(searchParams.entries());
         const url = queryString.stringifyUrl({
             url: pathname,
             query: {
-                ...params,
                 id: searchIdValue
             }
         }, { skipEmptyString: true, skipNull: true });
@@ -50,6 +63,7 @@ export const Header = () => {
     }, [searchIdValue, router, pathname])
 
     const handlePerPageChange = (perPage: string) => {
+        setPerPage(perPage)
         const params = Object.fromEntries(searchParams.entries());
         const url = queryString.stringifyUrl({
             url: pathname,
@@ -62,33 +76,8 @@ export const Header = () => {
         router.push(url)
     }
 
-    const handleStatusChange = (status: PaymentStatus) => {
-        const params = Object.fromEntries(searchParams.entries());
-        const url = queryString.stringifyUrl({
-            url: pathname,
-            query: {
-                ...params,
-                status
-            }
-        }, { skipNull: true, skipEmptyString: true })
-
-        router.push(url)
-    }
-
-    const handleClassChange = (className: Class) => {
-        const params = Object.fromEntries(searchParams.entries());
-        const url = queryString.stringifyUrl({
-            url: pathname,
-            query: {
-                ...params,
-                className: className
-            }
-        }, { skipNull: true, skipEmptyString: true })
-
-        router.push(url)
-    }
-
     const handleSessionChange = (session: string) => {
+        setSession(parseInt(session))
         const params = Object.fromEntries(searchParams.entries());
         const url = queryString.stringifyUrl({
             url: pathname,
@@ -101,12 +90,44 @@ export const Header = () => {
         router.push(url)
     }
 
+    const handleMonthChange = (month: Month) => {
+        setMonth(month)
+        const params = Object.fromEntries(searchParams.entries());
+        const url = queryString.stringifyUrl({
+            url: pathname,
+            query: {
+                ...params,
+                month,
+            }
+        }, { skipNull: true, skipEmptyString: true })
+
+        router.push(url)
+    }
+
+    const handleReset = () => {
+        handleClose()
+        router.push(pathname)
+        setSearch("")
+        setId("")
+        setSession(new Date().getFullYear())
+        setPerPage(undefined)
+        setMonth(undefined)
+    }
+
+
     return (
-        <div className="space-y-2 shadow-sm shadow-primary px-2 py-3">
-            <div className="flex items-center justify-between gap-x-3">
-                <div className="flex items-center gap-x-3">
-                    <Select defaultValue="2024" onValueChange={(value) => handleSessionChange(value)}>
-                        <SelectTrigger className="w-[130px]">
+        <Sheet open={open} onOpenChange={handleClose}>
+            <SheetContent>
+                <SheetHeader className="space-y-0">
+                    <SheetTitle className="text-start">Filter</SheetTitle>
+                    <SheetDescription className="text-start">
+                        Filter search result
+                    </SheetDescription>
+                </SheetHeader>
+
+                <div className="space-y-3 mt-4">
+                    <Select value={session.toString()} onValueChange={(value) => handleSessionChange(value)}>
+                        <SelectTrigger>
                             <SelectValue placeholder="Session" />
                         </SelectTrigger>
                         <SelectContent>
@@ -117,13 +138,13 @@ export const Header = () => {
                             }
                         </SelectContent>
                     </Select>
-                    <Select onValueChange={(value) => handleClassChange(value as Class)}>
-                        <SelectTrigger className="w-[130px]">
-                            <SelectValue placeholder="Class" />
+                    <Select value={month || ""} onValueChange={(value) => handleMonthChange(value as Month)}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Month" />
                         </SelectTrigger>
                         <SelectContent>
                             {
-                                Object.values(Class).map((v, i) => (
+                                Object.values(Month).map((v, i) => (
                                     <SelectItem value={v} key={i}>{v}</SelectItem>
                                 ))
                             }
@@ -133,7 +154,7 @@ export const Header = () => {
                         <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             type="number"
-                            placeholder="Search by ID..."
+                            placeholder="Search by id..."
                             className="w-full appearance-none bg-background pl-8 shadow-none"
                             onChange={(e) => setId(e.target.value)}
                             value={id}
@@ -149,8 +170,8 @@ export const Header = () => {
                             value={search}
                         />
                     </div>
-                    <Select onValueChange={(value) => handlePerPageChange(value)}>
-                        <SelectTrigger className="w-[130px]">
+                    <Select value={perPage || ""} onValueChange={(value) => handlePerPageChange(value)}>
+                        <SelectTrigger>
                             <SelectValue placeholder="Limit" />
                         </SelectTrigger>
                         <SelectContent>
@@ -162,30 +183,14 @@ export const Header = () => {
                         </SelectContent>
                     </Select>
                     <Button
-                        variant="outline"
-                        className="hidden md:flex text-rose-500"
-                        onClick={() => {
-                            setSearch("")
-                            setId("")
-                            router.push(pathname)
-                        }}
+                        variant="destructive"
+                        onClick={handleReset}
                     >
                         Reset
                     </Button>
                 </div>
-                <Select onValueChange={(value) => handleStatusChange(value as PaymentStatus)}>
-                    <SelectTrigger className="w-[130px]">
-                        <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {Object.values(PaymentStatus).map((status) => (
-                            <SelectItem key={status} value={status}>
-                                {status}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
-        </div>
+            </SheetContent>
+        </Sheet>
+
     )
 }

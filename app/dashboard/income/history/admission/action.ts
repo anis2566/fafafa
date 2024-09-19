@@ -25,20 +25,16 @@ export const UPDATE_ADMISSION_PAYMENT = async ({
       id,
     },
     include: {
-        student: {
-            select: {
-                admissionFee: true
-            }
-        }
-    }
+      student: {
+        select: {
+          admissionFee: true,
+        },
+      },
+    },
   });
 
   if (!payment) {
     throw new Error("Payment not found");
-  }
-
-  if(payment.student.admissionFee !== data.amount) {
-    throw new Error("Invalid amount")
   }
 
   await db.admissionPayment.update({
@@ -50,7 +46,7 @@ export const UPDATE_ADMISSION_PAYMENT = async ({
     },
   });
 
-  revalidatePath("/dashboard/salary/admission");
+  revalidatePath("/dashboard/income/history/admission");
 
   return {
     success: "Payment updated",

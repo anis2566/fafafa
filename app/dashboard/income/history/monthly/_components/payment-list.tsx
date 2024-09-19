@@ -21,6 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 import { cn, formatString } from "@/lib/utils";
+import { EmptyData } from "@/components/empty-stat";
 
 export interface PaymentProps {
     payments: {
@@ -33,6 +34,11 @@ export interface PaymentProps {
 }
 
 export const PaymentList = ({ payments }: PaymentProps) => {
+    
+    if(payments.length === 0) {
+        return <EmptyData title="No Salary Found!" />
+    }
+
     return (
         <>
             <Table>
@@ -79,39 +85,39 @@ export const PaymentList = ({ payments }: PaymentProps) => {
                                                             payment?.status === PaymentStatus.Paid && (
                                                                 <div className="space-y-2">
                                                                     <div className="flex items-center gap-x-3">
-                                                                        <div className="shadow-md shadow-primary/80 w-8 h-8 rounded-full flex items-center justify-center">
-                                                                            <DollarSign className="w-5 h-5 text-primary" />
+                                                                        <div className="shadow-md w-8 h-8 rounded-full flex items-center justify-center">
+                                                                            <DollarSign className="w-5 h-5 text-slate-500" />
                                                                         </div>
                                                                         <h3 className="text-md font-semibold text-muted-foreground">{payment.amount}</h3>
                                                                     </div>
                                                                     <div className="flex items-center gap-x-3">
-                                                                        <div className="shadow-md shadow-primary/80 w-8 h-8 rounded-full flex items-center justify-center">
-                                                                            <HandCoins className="w-5 h-5 text-primary" />
+                                                                        <div className="shadow-md w-8 h-8 rounded-full flex items-center justify-center">
+                                                                            <HandCoins className="w-5 h-5 text-slate-500" />
                                                                         </div>
                                                                         <h3 className="text-md font-semibold text-muted-foreground">{formatString(payment.method || "")}</h3>
                                                                     </div>
                                                                     <div className="flex items-center gap-x-3">
-                                                                        <div className="shadow-md shadow-primary/80 w-8 h-8 rounded-full flex items-center justify-center">
-                                                                            <CalendarCheck className="w-5 h-5 text-primary" />
+                                                                        <div className="shadow-md w-8 h-8 rounded-full flex items-center justify-center">
+                                                                            <CalendarCheck className="w-5 h-5 text-slate-500" />
                                                                         </div>
                                                                         <h3 className="text-md font-semibold text-muted-foreground">{format(payment.createdAt, "dd MMM yyyy")}</h3>
                                                                     </div>
                                                                     <div className={cn("hidden items-center gap-x-3", payment.note && "flex")}>
-                                                                        <div className="shadow-md shadow-primary/80 w-8 h-8 rounded-full flex items-center justify-center">
-                                                                            <NotebookText className="w-5 h-5 text-primary" />
+                                                                        <div className="shadow-md w-8 h-8 rounded-full flex items-center justify-center">
+                                                                            <NotebookText className="w-5 h-5 text-slate-500" />
                                                                         </div>
                                                                         <p className="text-md text-muted-foreground text-start">{payment.note}</p>
                                                                     </div>
                                                                     <div className="flex items-center justify-between">
                                                                         <Badge>{payment.month}</Badge>
                                                                         <Button variant="outline" asChild>
-                                                                            <Link href={`/dashboard/salary/monthly/edit/${payment.id}`} className="flex items-center gap-x-2">
-                                                                                <Edit className="w-5 h-5 text-primary" />
+                                                                            <Link href={`/dashboard/income/edit/${payment.id}`} className="flex items-center gap-x-2">
+                                                                                <Edit className="w-5 h-5 text-slate-500" />
                                                                                 Edit
                                                                             </Link>
                                                                         </Button>
                                                                     </div>
-                                                                    <Button asChild variant="gooeyLeft">
+                                                                    <Button asChild variant="outline">
                                                                         <Link href={`/dashboard/invoice/fee/monthly/${payment.id}`} target="_blank">Download Invoice</Link>
                                                                     </Button>
                                                                 </div>

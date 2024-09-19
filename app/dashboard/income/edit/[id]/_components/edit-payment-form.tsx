@@ -8,11 +8,14 @@ import { z } from "zod"
 import { Month, PaymentMethod } from "@prisma/client"
 import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 import { MonthlyPaymentSchema } from "@/app/dashboard/income/new/[id]/schema"
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -24,6 +27,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Textarea } from "@/components/ui/textarea"
 
 import { UPDATE_PAYMENT } from "../action"
 
@@ -33,12 +37,19 @@ interface Props {
 
 export const EditPaymentForm = ({ payment }: Props) => {
 
+    const router = useRouter()
+
+    useEffect(() => {
+        form.setValue("class", payment.class)
+    }, [payment.class])
+
     const { mutate: updatePayment, isPending } = useMutation({
         mutationFn: UPDATE_PAYMENT,
         onSuccess: (data) => {
             toast.success(data.success, {
                 id: "payment-update"
             })
+            router.push("/dashboard/income/history/monthly")
         },
         onError: (error) => {
             toast.error(error.message, {
@@ -53,14 +64,19 @@ export const EditPaymentForm = ({ payment }: Props) => {
             month: payment.month,
             amount: payment.amount,
             method: payment.method ?? "Cash",
+            note: ""
         },
     })
 
     function onSubmit(values: z.infer<typeof MonthlyPaymentSchema>) {
-        toast.loading("Payment updating...", {
-            id: "payment-update"
-        })
-        updatePayment({ id: payment.id, values })
+        if (!form.watch("note")) {
+            toast.error("Fill up edit note")
+        } else {
+            toast.loading("Payment updating...", {
+                id: "payment-update"
+            })
+            updatePayment({ id: payment.id, values })
+        }
     }
 
     return (
@@ -76,7 +92,7 @@ export const EditPaymentForm = ({ payment }: Props) => {
                             name="month"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Class</FormLabel>
+                                    <FormLabel>Month</FormLabel>
                                     <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending}>
                                         <FormControl>
                                             <SelectTrigger>
@@ -131,7 +147,7 @@ export const EditPaymentForm = ({ payment }: Props) => {
                                             </FormItem>
                                             <FormItem className="flex items-center space-x-3 space-y-0">
                                                 <FormControl>
-                                                    <RadioGroupItem value={PaymentMethod.MobileBanking} />
+                                                    <RadioGroupItem value={PaymentMethod.MobileBanking} disabled />
                                                 </FormControl>
                                                 <FormLabel className="font-normal">
                                                     Mobile Banking
@@ -139,6 +155,26 @@ export const EditPaymentForm = ({ payment }: Props) => {
                                             </FormItem>
                                         </RadioGroup>
                                     </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="note"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Note</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            className="resize-none"
+                                            {...field}
+                                            disabled={isPending}
+                                        />
+                                    </FormControl>
+                                    <FormDescription>
+                                        Describe edit reason.
+                                    </FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}

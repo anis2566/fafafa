@@ -2,6 +2,7 @@
 
 import { Status, Teacher, TeacherRequest, User } from "@prisma/client";
 import { Edit, EllipsisVertical, Trash2 } from "lucide-react";
+import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -27,7 +28,7 @@ interface Props {
 
 export const RequestList = ({ requests }: Props) => {
     const { onOpen } = useTeacherStatus()
-    const {onOpen: onOpenDelete} = useTeacherRequestDelete()
+    const { onOpen: onOpenDelete } = useTeacherRequestDelete()
 
     return (
         <Table>
@@ -50,7 +51,9 @@ export const RequestList = ({ requests }: Props) => {
                                     <AvatarFallback>{request?.user?.name?.charAt(0)}</AvatarFallback>
                                 </Avatar>
                             </TableCell>
-                            <TableCell className="py-3">{request.teacher.name}</TableCell>
+                            <TableCell className="py-3 hover:underline">
+                                <Link href={`/dashboard/teacher/${request.teacher.id}`}>{request.teacher.name}</Link>
+                            </TableCell>
                             <TableCell className="py-3">{request.teacher.teacherId}</TableCell>
                             <TableCell className="py-3">
                                 <Badge variant={request.status === Status.Active ? "default" : request.status === Status.Suspended ? "destructive" : "outline"}>{request.status}</Badge>

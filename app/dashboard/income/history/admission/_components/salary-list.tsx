@@ -24,6 +24,7 @@ import {
 
 import { cn, formatString } from "@/lib/utils";
 import { useAddmission } from "@/hooks/use-admission";
+import { EmptyData } from "@/components/empty-stat";
 
 interface AdmissionWithStudent extends AdmissionPayment {
     student: Student
@@ -35,6 +36,10 @@ interface Props {
 
 export const SalaryList = ({ payments }: Props) => {
     const {onOpen} = useAddmission()
+
+    if(payments.length === 0) {
+        return <EmptyData title="No Fee Found!" />
+    }
 
     return (
         <Table>
@@ -55,21 +60,21 @@ export const SalaryList = ({ payments }: Props) => {
                 {
                     payments.map(item => (
                         <TableRow key={item.studentId}>
-                            <TableCell>{item.student.studentId}</TableCell>
-                            <TableCell>
+                            <TableCell className="py-3">{item.student.studentId}</TableCell>
+                            <TableCell className="py-3">
                                 <Avatar>
                                     <AvatarImage src={item.student.imageUrl} />
                                     <AvatarFallback>{item.student.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                             </TableCell>
-                            <TableCell>{item.student.name}</TableCell>
-                            <TableCell>{formatString(item.student.class)}</TableCell>
-                            <TableCell>{format(item.createdAt, "dd MMM yyyy")}</TableCell>
-                            <TableCell>{item.amount}</TableCell>
-                            <TableCell>
+                            <TableCell className="py-3">{item.student.name}</TableCell>
+                            <TableCell className="py-3">{formatString(item.student.class)}</TableCell>
+                            <TableCell className="py-3">{format(item.createdAt, "dd MMM yyyy")}</TableCell>
+                            <TableCell className="py-3">{item.amount}</TableCell>
+                            <TableCell className="py-3">
                                 <Badge>{formatString(item.method)}</Badge>
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="py-3">
                                 <Badge
                                     className={cn(
                                         "text-white",

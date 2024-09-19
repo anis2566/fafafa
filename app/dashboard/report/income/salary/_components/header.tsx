@@ -44,6 +44,10 @@ export const Header = () => {
         router.push(url)
     }
 
+    const handleReset = () => {
+        setSessionValue("")
+    }
+
     return (
         <div className="space-y-2 shadow-sm shadow-primary px-2 py-3">
             <div className="flex items-center justify-between gap-x-3">
@@ -79,18 +83,21 @@ export const Header = () => {
                         </SelectContent>
                     </Select>
                     <Button
-                        variant="outline"
-                        className="hidden md:flex text-rose-500"
-                        onClick={() => {
-                            router.push(pathname)
-                            setValue(Class.Two)
-                            setSessionValue(new Date().getFullYear().toString())
-                        }}
+                        variant="destructive"
+                        className="hidden md:flex"
+                        onClick={handleReset}
                     >
                         Reset
                     </Button>
                 </div>
             </div>
+            <Button
+                variant="destructive"
+                className="md:hidden"
+                onClick={handleReset}
+            >
+                Reset
+            </Button>
         </div>
     )
 }

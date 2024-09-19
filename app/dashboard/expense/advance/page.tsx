@@ -19,57 +19,66 @@ import { CustomPagination } from "@/components/custom-pagination";
 import { Header } from "./_components/header";
 
 export const metadata: Metadata = {
-    title: "BEC | Expense | Advance | History",
+    title: "BEC | Expense | Advance",
     description: "Basic Education Care",
 };
 
 interface Props {
     searchParams: {
-        session: string;
-        month: Month;
-        id: string;
-        name: string;
+        session?: string;
+        month?: Month;
+        id?: string;
+        name?: string;
         page: string;
         perPage: string;
     }
 }
 
 const Advances = async ({ searchParams }: Props) => {
-    const { session, id, name, page, perPage, month } = searchParams;
-    const itemsPerPage = parseInt(perPage) || 5;
-    const currentPage = parseInt(page) || 1;
-    const formatedSession = session ? parseInt(session) : new Date().getFullYear()
-    const teacherId = id ? parseInt(id) : undefined
+    const {
+        session,
+        month,
+        id,
+        name,
+        page = "1",
+        perPage = "5"
+    } = searchParams;
 
-    const advances = await db.teacherAdvance.findMany({
-        where: {
-            session: formatedSession,
-            ...(month && { month }),
-            teacher: {
-                ...(teacherId && { teacherId }),
-                ...(name && { name: { contains: name, mode: "insensitive" } }),
-            }
-        },
-        include: {
-            teacher: true
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
+    const itemsPerPage = parseInt(perPage, 10);
+    const currentPage = parseInt(page, 10);
+    const formatedSession = parseInt(session || `${new Date().getFullYear()}`);
+    const teacherId = id ? parseInt(id) : undefined;
 
-    const totalAdvance = await db.teacherAdvance.count({
-        where: {
-            session: formatedSession,
-            ...(month && { month }),
-            teacher: {
-                ...(teacherId && { teacherId }),
-                ...(name && { name: { contains: name, mode: "insensitive" } }),
-            }
-        },
-    })
+    const [advances, totalAdvance] = await Promise.all([
+        await db.teacherAdvance.findMany({
+            where: {
+                session: formatedSession,
+                ...(month && { month }),
+                teacher: {
+                    ...(teacherId && { teacherId }),
+                    ...(name && { name: { contains: name, mode: "insensitive" } }),
+                }
+            },
+            include: {
+                teacher: true
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        await db.teacherAdvance.count({
+            where: {
+                session: formatedSession,
+                ...(month && { month }),
+                teacher: {
+                    ...(teacherId && { teacherId }),
+                    ...(name && { name: { contains: name, mode: "insensitive" } }),
+                }
+            },
+        })
+    ])
 
     const totalPage = Math.ceil(totalAdvance / itemsPerPage)
 

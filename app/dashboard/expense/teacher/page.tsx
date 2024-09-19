@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Metadata } from "next";
-import { Month } from "@prisma/client";
+import { Class, Month } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -25,52 +25,76 @@ export const metadata: Metadata = {
 
 interface Props {
     searchParams: {
-        month: Month;
-        page: string;
-        perPage: string;
-        id: string;
-    }
+        session?: string;
+        month?: Month;
+        id?: string;
+        name?: string;
+        page?: string;
+        perPage?: string;
+    };
 }
 
 const HouseRent = async ({ searchParams }: Props) => {
-    const { month, id, page, perPage } = searchParams;
-    const itemsPerPage = parseInt(perPage) || 5;
-    const currentPage = parseInt(page) || 1;
-    const formatedId = id ? parseInt(id) : undefined
+    const {
+        session,
+        id,
+        month,
+        name,
+        page = "1",
+        perPage = "5"
+    } = searchParams;
 
-    const payments = await db.teacherPayment.findMany({
-        where: {
-            ...(month && { month }),
-            ...(formatedId && {
-                teacher: {
-                    teacherId: formatedId
-                }
-            })
-        },
-        include: {
-            teacher: {
-                include: {
-                    fee: true
-                }
-            }
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
+    const itemsPerPage = parseInt(perPage, 10);
+    const currentPage = parseInt(page, 10);
+    const formatedSession = parseInt(session || `${new Date().getFullYear()}`);
+    const teacherId = id ? parseInt(id) : undefined;
 
-    const totalPayment = await db.teacherPayment.count({
-        where: {
-            ...(month && { month }),
-            ...(formatedId && {
+    const [payments, totalPayment] = await Promise.all([
+        await db.teacherPayment.findMany({
+            where: {
+                session: formatedSession,
+                ...(month && { month }),
+                ...(teacherId && {
+                    teacher: {
+                        teacherId
+                    }
+                }),
+                ...(name && {
+                    teacher: {
+                        name: { contains: name, mode: "insensitive" }
+                    }
+                })
+            },
+            include: {
                 teacher: {
-                    teacherId: formatedId
+                    include: {
+                        fee: true
+                    }
                 }
-            })
-        },
-    })
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        await db.teacherPayment.count({
+            where: {
+                session: formatedSession,
+                ...(month && { month }),
+                ...(teacherId && {
+                    teacher: {
+                        teacherId
+                    }
+                }),
+                ...(name && {
+                    teacher: {
+                        name: { contains: name, mode: "insensitive" }
+                    }
+                })
+            },
+        })
+    ])
 
     const totalPage = Math.ceil(totalPayment / itemsPerPage)
 

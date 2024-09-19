@@ -17,7 +17,7 @@ export const CREATE_EXPENSE = async (values: ExpenseSchemaType) => {
     data: {
       ...data,
       session: new Date().getFullYear(),
-      month: Object.values(Month)[new Date().getMonth()]
+      month: Object.values(Month)[new Date().getMonth()],
     },
   });
 

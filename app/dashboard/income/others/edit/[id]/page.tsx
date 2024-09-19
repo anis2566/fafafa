@@ -11,12 +11,12 @@ import {
     BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
 
-import { ContentLayout } from "@/app/dashboard/_components/content-layout";
 import { db } from "@/lib/prisma";
-import { EditTeacherBillForm } from "./_components/edit-teacher-bill-form";
+import { ContentLayout } from "@/app/dashboard/_components/content-layout";
+import { EditIncomeForm } from "./_components/edit-income-form";
 
 export const metadata: Metadata = {
-    title: "BEC | Expense | Teacher Bill | Edit",
+    title: "BEC | Income | Others | Edit",
     description: "Basic Education Care",
 };
 
@@ -26,17 +26,17 @@ interface Props {
     }
 }
 
-const EditTeacherBill = async ({ params: { id } }: Props) => {
-    const payment = await db.teacherPayment.findUnique({
+const EditOtherIncome = async ({ params: { id } }: Props) => {
+    const income = await db.income.findUnique({
         where: {
             id
         }
     })
 
-    if (!payment) redirect("/dashboard")
+    if (!income) redirect("/dashboard")
 
     return (
-        <ContentLayout title="Expense">
+        <ContentLayout title="Income">
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
@@ -47,7 +47,7 @@ const EditTeacherBill = async ({ params: { id } }: Props) => {
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link href="/dashboard/expense/teacher">Teacher Bill</Link>
+                            <Link href="/dashboard/income/history/others">Others Income</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
@@ -57,9 +57,9 @@ const EditTeacherBill = async ({ params: { id } }: Props) => {
                 </BreadcrumbList>
             </Breadcrumb>
 
-            <EditTeacherBillForm payment={payment} />
+            <EditIncomeForm income={income} />
         </ContentLayout>
     )
 }
 
-export default EditTeacherBill
+export default EditOtherIncome

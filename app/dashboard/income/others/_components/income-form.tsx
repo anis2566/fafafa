@@ -34,7 +34,7 @@ export const IncomeForm = () => {
             toast.success(data.success, {
                 id: "create-income"
             });
-            // router.push("/dashboard/salary/others")
+            router.push("/dashboard/income/others")
         },
         onError: (error) => {
             toast.error(error.message, {

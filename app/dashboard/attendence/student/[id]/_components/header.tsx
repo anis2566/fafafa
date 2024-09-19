@@ -69,8 +69,8 @@ export const Header = () => {
                         />
                     </div>
                     <Button
-                        variant="outline"
-                        className="hidden md:flex text-rose-500"
+                        variant="destructive"
+                        className="hidden md:flex"
                         onClick={() => {
                             setSearch("")
                             setId("")
@@ -81,6 +81,17 @@ export const Header = () => {
                     </Button>
                 </div>
             </div>
+            <Button
+                variant="destructive"
+                className="md:hidden"
+                onClick={() => {
+                    setSearch("")
+                    setId("")
+                    router.push(pathname)
+                }}
+            >
+                Reset
+            </Button>
         </div>
     )
 }

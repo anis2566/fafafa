@@ -361,6 +361,7 @@ model AdmissionPayment {
 
 model MonthlyPayment {
   id            String          @id @default(cuid())
+  invoiceId     String?
   amount        Int
   session       Int
   month         Month

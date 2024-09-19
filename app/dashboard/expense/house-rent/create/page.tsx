@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 
 const HouseRent = () => {
     return (
-        <ContentLayout title="Expense">
+        <ContentLayout title="Expense"> 
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>

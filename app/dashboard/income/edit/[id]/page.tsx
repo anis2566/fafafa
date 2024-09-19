@@ -16,7 +16,7 @@ import { db } from "@/lib/prisma";
 import { EditPaymentForm } from "./_components/edit-payment-form";
 
 export const metadata: Metadata = {
-    title: "BEC | Edit Salary",
+    title: "BEC | Income | Salary | Edit",
     description: "Basic Education Care",
 };
 
@@ -47,7 +47,7 @@ const EditPayment = async ({ params: { id } }: Props) => {
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild>
-                            <Link href="/dashboard/salary/monthly">Salary</Link>
+                            <Link href="/dashboard/income/history/monthly">Salary</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
@@ -56,7 +56,7 @@ const EditPayment = async ({ params: { id } }: Props) => {
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
-            
+
             <EditPaymentForm payment={payment} />
         </ContentLayout>
     )

@@ -59,7 +59,7 @@ export const PaymentForm = ({ student, unpaidMonth }: Props) => {
                 ? 'https://basiceducationcare.vercel.app'
                 : 'http://localhost:3000';
             window.open(`${baseUrl}/dashboard/invoice/fee/monthly/${data.id}`, "_blank");
-            router.push("/dashboard/income/monthly")
+            router.push("/dashboard/income/history/monthly")
         },
         onError: (error) => {
             toast.error(error.message, {

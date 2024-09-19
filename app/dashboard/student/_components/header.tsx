@@ -26,7 +26,7 @@ export const Header = () => {
     const [id, setId] = useState<string>("")
     const [session, setSession] = useState<number>(new Date().getFullYear())
     const [className, setClassName] = useState<Class | undefined>()
-    const [perPage, setPerPage] = useState<number>()
+    const [perPage, setPerPage] = useState<string>()
     const [open, setOpen] = useState<boolean>(false)
 
     const pathname = usePathname()
@@ -64,7 +64,7 @@ export const Header = () => {
     }, [searchIdValue, router, pathname])
 
     const handlePerPageChange = (perPage: string) => {
-        setPerPage(parseInt(perPage))
+        setPerPage(perPage)
         const params = Object.fromEntries(searchParams.entries());
         const url = queryString.stringifyUrl({
             url: pathname,
@@ -185,7 +185,7 @@ export const Header = () => {
                         Reset
                     </Button>
                 </div>
-                <Select value={perPage?.toString() || ""} onValueChange={(value) => handlePerPageChange(value)}>
+                <Select value={perPage || ""} onValueChange={(value) => handlePerPageChange(value)}>
                     <SelectTrigger className="w-[130px]">
                         <SelectValue placeholder="Limit" />
                     </SelectTrigger>

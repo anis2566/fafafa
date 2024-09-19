@@ -125,7 +125,7 @@ export const HouseRentForm = () => {
                                         </FormControl>
                                         <SelectContent>
                                             {
-                                                Object.values(Month).map((v, i) => (
+                                                Object.values(Month).slice(0, new Date().getMonth() + 1).map((v, i) => (
                                                     <SelectItem value={v} key={i}>{v}</SelectItem>
                                                 ))
                                             }

@@ -24,8 +24,8 @@ export const metadata: Metadata = {
 
 interface Props {
     searchParams: {
-        session: string;
-        className: Class;
+        session?: string;
+        className?: Class;
     }
 }
 

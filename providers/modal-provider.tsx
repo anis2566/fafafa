@@ -12,9 +12,6 @@ import { DeleteMonthlyFeeModal } from "@/app/dashboard/fee/monthly/_components/d
 import { UpdateMonthlyFeeModal } from "@/app/dashboard/fee/monthly/_components/update-fee-modal"
 import { DeleteRoomModal } from "@/app/dashboard/room/_components/delete-modal"
 
-// ROOM
-import { UpdateAdmissionPaymentModal } from "@/app/dashboard/income/admission/_components/update-modal"
-
 // STUDNET
 import { AddStudentModal } from "@/app/dashboard/batch/[id]/_components/add-student-modal"
 import { RemoveStudentModal } from "@/app/dashboard/batch/[id]/_components/remove-student-modal"
@@ -44,6 +41,7 @@ import { UpdateLeaveClassModal } from "@/app/dashboard/teacher/leave/[id]/_compo
 import { UpdateLeaveStatussModal } from "@/app/dashboard/teacher/leave/_components/status-modal"
 import { DeleteNoticeModal } from "@/app/dashboard/notice/_components/delete-modal"
 import { AddClassModal } from "@/app/dashboard/batch/[id]/_components/add-class-modal"
+import { UpdateAdmissionPaymentModal } from "@/app/dashboard/income/history/admission/_components/update-modal"
 
 export const ModalProvider = () => {
     return (

@@ -28,8 +28,8 @@ interface Props {
         id: string;
     },
     searchParams: {
-        id: string;
-        name: string;
+        id?: string;
+        name?: string;
     }
 }
 

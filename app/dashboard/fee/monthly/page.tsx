@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Metadata } from "next";
-import { Class as PrismaClass } from "@prisma/client"
+import { Class } from "@prisma/client"
 
 import {
     Breadcrumb,
@@ -20,45 +20,52 @@ import { Header } from "../admission/_components/header";
 import { FeeList } from "./_components/fee-list";
 
 export const metadata: Metadata = {
-    title: "BEC | Monthly Fee",
+    title: "BEC | Fee | Monthly",
     description: "Basic Education Care",
 };
 
 interface Props {
     searchParams: {
-        class: PrismaClass;
-        page: string;
-        perPage: string;
-    }
+        className?: Class;
+        page?: string;
+        perPage?: string;
+    };
 }
 
 const MonthlyFee = async ({ searchParams }: Props) => {
-    const { class: classname, page, perPage } = searchParams
-    const itemsPerPage = parseInt(perPage) || 5;
-    const currentPage = parseInt(page) || 1;
+    const {
+        className,
+        page = "1",
+        perPage = "5"
+    } = searchParams;
 
-    const fees = await db.monthlyFee.findMany({
-        where: {
-            ...(classname && {
-                class: {
-                    equals: classname
-                }
-            })
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
+    const itemsPerPage = parseInt(perPage, 10);
+    const currentPage = parseInt(page, 10);
 
-    const totalFee = await db.monthlyFee.count({
-        where: {
-            ...(classname && {
-                class: classname
-            })
-        }
-    })
+    const [fees, totalFee] = await Promise.all([
+        await db.monthlyFee.findMany({
+            where: {
+                ...(className && {
+                    class: {
+                        equals: className
+                    }
+                })
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        await db.monthlyFee.count({
+            where: {
+                ...(className && {
+                    class: className
+                })
+            }
+        })
+    ])
+
 
     const totalPage = Math.ceil(totalFee / itemsPerPage)
 

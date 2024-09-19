@@ -3,6 +3,7 @@
 import { Month, PaymentMethod, PaymentStatus } from "@prisma/client";
 
 import { db } from "@/lib/prisma";
+import { generateInvoiceId } from "@/lib/utils";
 
 export const PAY_WITH_CASH = async (id: string) => {
   const student = await db.student.findUnique({
@@ -16,6 +17,8 @@ export const PAY_WITH_CASH = async (id: string) => {
   }
 
   const currentMonthIndex = new Date().getMonth();
+
+  const invoiceId = generateInvoiceId();
 
   const paymentId = await db.$transaction(async (ctx) => {
     await ctx.admissionPayment.create({
@@ -38,6 +41,7 @@ export const PAY_WITH_CASH = async (id: string) => {
         status: PaymentStatus.Paid,
         studentId: student.id,
         month: Object.values(Month)[currentMonthIndex],
+        invoiceId: invoiceId,
       },
     });
 

@@ -23,6 +23,7 @@ import {
 
 import { ContentLayout } from "../../_components/content-layout";
 import { db } from "@/lib/prisma";
+import { formatString } from "@/lib/utils";
 
 export const metadata: Metadata = {
     title: "BEC | Report | Daily",
@@ -43,116 +44,115 @@ const DailyReport = async () => {
         },
     };
 
-    const todaySalary = await db.monthlyPayment.aggregate({
-        where: {
-            updatedAt: {
-                gte: today,
-                lt: tomorrow,
+    const [todaySalary, todayِAdmission, todayِHouseRent, todayِUtility, todayِTeacherAdvance] = await Promise.all([
+        await db.monthlyPayment.aggregate({
+            where: {
+                updatedAt: {
+                    gte: today,
+                    lt: tomorrow,
+                },
+                status: PaymentStatus.Paid
             },
-            status: PaymentStatus.Paid
-        },
-        _sum: {
-            amount: true
-        },
-        _count: {
-            _all: true
-        }
-    })
-
-    const todayِAdmission = await db.admissionPayment.aggregate({
-        where: {
-            OR: [
-                {
-                    ...todayFilter,
-                    status: PaymentStatus.Paid
-                },
-                {
-                    updatedAt: {
-                        gte: today,
-                        lt: tomorrow,
+            _sum: {
+                amount: true
+            },
+            _count: {
+                _all: true
+            }
+        }),
+        await db.admissionPayment.aggregate({
+            where: {
+                OR: [
+                    {
+                        ...todayFilter,
+                        status: PaymentStatus.Paid
                     },
-                    status: PaymentStatus.Paid
-                }
-            ]
-        },
-        _sum: {
-            amount: true
-        },
-        _count: {
-            _all: true
-        }
-    })
-
-    const todayِHouseRent = await db.housePayment.aggregate({
-        where: {
-            OR: [
-                {
-                    ...todayFilter,
-                },
-                {
-                    updatedAt: {
-                        gte: today,
-                        lt: tomorrow,
+                    {
+                        updatedAt: {
+                            gte: today,
+                            lt: tomorrow,
+                        },
+                        status: PaymentStatus.Paid
+                    }
+                ]
+            },
+            _sum: {
+                amount: true
+            },
+            _count: {
+                _all: true
+            }
+        }),
+        await db.housePayment.aggregate({
+            where: {
+                OR: [
+                    {
+                        ...todayFilter,
                     },
-                }
-            ]
-        },
-        _sum: {
-            amount: true
-        },
-        _count: {
-            _all: true
-        }
-    })
-
-    const todayِUtility = await db.expense.groupBy({
-        by: ["type"],
-        where: {
-            OR: [
-                {
-                    ...todayFilter,
-                },
-                {
-                    updatedAt: {
-                        gte: today,
-                        lt: tomorrow,
+                    {
+                        updatedAt: {
+                            gte: today,
+                            lt: tomorrow,
+                        },
+                    }
+                ]
+            },
+            _sum: {
+                amount: true
+            },
+            _count: {
+                _all: true
+            }
+        }),
+        await db.expense.groupBy({
+            by: ["type"],
+            where: {
+                OR: [
+                    {
+                        ...todayFilter,
                     },
-                }
-            ]
-        },
-        _sum: {
-            amount: true
-        },
-        _count: {
-            _all: true
-        }
-    })
-
-    const todayِTeacherAdvance = await db.teacherAdvance.aggregate({
-        where: {
-            OR: [
-                {
-                    ...todayFilter,
-                    status: TransactionStatus.Approve
-                },
-                {
-                    updatedAt: {
-                        gte: today,
-                        lt: tomorrow,
+                    {
+                        updatedAt: {
+                            gte: today,
+                            lt: tomorrow,
+                        },
+                    }
+                ]
+            },
+            _sum: {
+                amount: true
+            },
+            _count: {
+                _all: true
+            }
+        }),
+        await db.teacherAdvance.aggregate({
+            where: {
+                OR: [
+                    {
+                        ...todayFilter,
+                        status: TransactionStatus.Approve
                     },
-                    status: TransactionStatus.Approve
-                }
-            ]
-        },
-        _sum: {
-            amount: true
-        },
-        _count: {
-            _all: true
-        }
-    })
+                    {
+                        updatedAt: {
+                            gte: today,
+                            lt: tomorrow,
+                        },
+                        status: TransactionStatus.Approve
+                    }
+                ]
+            },
+            _sum: {
+                amount: true
+            },
+            _count: {
+                _all: true
+            }
+        })
+    ])
 
     const totalIncome = (todaySalary._sum.amount ?? 0) + (todayِAdmission._sum.amount ?? 0);
+
     const totalExpenses = (todayِHouseRent._sum.amount ?? 0) +
         todayِUtility.reduce((acc, item) => acc + (item._sum.amount ?? 0), 0) +
         (todayِTeacherAdvance._sum.amount ?? 0)
@@ -237,7 +237,7 @@ const DailyReport = async () => {
                                 {
                                     todayِUtility.map((item, index) => (
                                         <TableRow key={index}>
-                                            <TableCell>{item.type}</TableCell>
+                                            <TableCell>{formatString(item.type)}</TableCell>
                                             <TableCell>{item._count._all ?? 0}</TableCell>
                                             <TableCell>{item._sum.amount}</TableCell>
                                         </TableRow>
