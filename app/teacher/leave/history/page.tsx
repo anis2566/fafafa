@@ -37,29 +37,30 @@ const LeaveHistory = async ({ searchParams }: Props) => {
 
     const { teacherId } = await GET_TEACHER()
 
-    const leaves = await db.leaveApp.findMany({
-        where: {
-            teacherId
-        },
-        include: {
-            classes: {
-                select: {
-                    id: true
+    const [leaves, totalLeave] = await Promise.all([
+        await db.leaveApp.findMany({
+            where: {
+                teacherId
+            },
+            include: {
+                classes: {
+                    select: {
+                        id: true
+                    }
                 }
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        await db.leaveApp.count({
+            where: {
+                teacherId
             }
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
-
-    const totalLeave = await db.leaveApp.count({
-        where: {
-            teacherId
-        }
-    })
+        })
+    ])
 
     const totalPage = Math.ceil(totalLeave / itemsPerPage)
 

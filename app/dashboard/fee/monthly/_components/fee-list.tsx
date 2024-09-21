@@ -44,10 +44,10 @@ export const FeeList = ({ fees }: Props) => {
                 {
                     fees.map((fee, index) => (
                         <TableRow key={fee.id}>
-                            <TableCell>{index + 1}</TableCell>
-                            <TableCell>{formatString(fee.class)}</TableCell>
-                            <TableCell>{fee.amount}</TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-2">{index + 1}</TableCell>
+                            <TableCell className="py-2">{formatString(fee.class)}</TableCell>
+                            <TableCell className="py-2">{fee.amount}</TableCell>
+                            <TableCell className="py-2">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" className="h-8 w-8 p-0">

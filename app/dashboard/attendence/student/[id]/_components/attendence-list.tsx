@@ -173,16 +173,16 @@ export const AttendenceList = ({ students, batchId }: Props) => {
                     {
                         students.map(item => (
                             <TableRow key={item.id}>
-                                <TableCell>{item.studentId}</TableCell>
-                                <TableCell>{item.name}</TableCell>
-                                <TableCell>
+                                <TableCell className="py-1">{item.studentId}</TableCell>
+                                <TableCell className="py-1">{item.name}</TableCell>
+                                <TableCell className="py-1">
                                     <Avatar>
                                         <AvatarImage src={item.imageUrl} />
                                         <AvatarFallback>{item.name.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                 </TableCell>
-                                <TableCell>{item.payments.length}</TableCell>
-                                <TableCell className={cn("bg-slate-200 text-accent-foreground", editDay !== currentDay && "hidden")}>
+                                <TableCell className="py-1">{item.payments.length}</TableCell>
+                                <TableCell className={cn("bg-slate-200 text-accent-foreground py-1", editDay !== currentDay && "hidden")}>
                                     {
                                         item.attendences.find(it => it.day === currentDay) && (
                                             <Checkbox
@@ -205,7 +205,7 @@ export const AttendenceList = ({ students, batchId }: Props) => {
 
                                         if (day?.day === editDay && editDay !== currentDay) {
                                             return (
-                                                <TableCell key={i} className={cn("bg-slate-200 text-accent-foreground text-center", isDayFriday && "bg-rose-300 text-white")}>
+                                                <TableCell key={i} className={cn("bg-slate-200 text-accent-foreground text-center py-1", isDayFriday && "bg-rose-300 text-white")}>
                                                     <Checkbox
                                                         className="-ml-4"
                                                         checked={ids.includes(item.id)}
@@ -216,7 +216,7 @@ export const AttendenceList = ({ students, batchId }: Props) => {
                                             )
                                         }
                                         return (
-                                            <TableCell key={i} className={cn("text-center", isDayFriday && "bg-rose-300 text-white", day?.status === AttendenceStatus.H && "bg-rose-300 text-white")}>
+                                            <TableCell key={i} className={cn("text-center py-1", isDayFriday && "bg-rose-300 text-white", day?.status === AttendenceStatus.H && "bg-rose-300 text-white")}>
                                                 <div className="flex items-center justify-center">
                                                     {
                                                         day?.status === AttendenceStatus.NA && "-"
@@ -261,7 +261,7 @@ export const AttendenceList = ({ students, batchId }: Props) => {
                                         )
                                     })
                                 }
-                                <TableCell>
+                                <TableCell className="py-1">
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                             <Button variant="ghost" className="h-8 w-8 p-0">

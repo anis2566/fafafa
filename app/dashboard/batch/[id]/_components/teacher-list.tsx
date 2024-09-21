@@ -31,8 +31,8 @@ export const TeacherList = ({ classes }: Props) => {
                 {
                     classes.map(item => (
                         <TableRow key={item.id}>
-                            <TableCell>{item.teacher.teacherId}</TableCell>
-                            <TableCell>{item.teacher.name}</TableCell>
+                            <TableCell className="py-3">{item.teacher.teacherId}</TableCell>
+                            <TableCell className="py-3">{item.teacher.name}</TableCell>
                         </TableRow>
                     ))
                 }

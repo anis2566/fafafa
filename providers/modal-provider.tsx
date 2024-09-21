@@ -42,6 +42,7 @@ import { UpdateLeaveStatussModal } from "@/app/dashboard/teacher/leave/_componen
 import { DeleteNoticeModal } from "@/app/dashboard/notice/_components/delete-modal"
 import { AddClassModal } from "@/app/dashboard/batch/[id]/_components/add-class-modal"
 import { UpdateAdmissionPaymentModal } from "@/app/dashboard/income/history/admission/_components/update-modal"
+import { UpdateTeacherBillStatussModal } from "@/app/dashboard/expense/teacher/approval/_components/status-modal"
 
 export const ModalProvider = () => {
     return (
@@ -93,6 +94,7 @@ export const ModalProvider = () => {
             <UpdateLeaveStatussModal />
             <DeleteNoticeModal />
             <AddClassModal />
+            <UpdateTeacherBillStatussModal />
         </>
     )
 }

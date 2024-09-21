@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { BookOpen, BuildingIcon, Clock, Layers } from "lucide-react";
 import { format } from "date-fns";
+import { Day } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
 
 type ClassData = {
     time: string;
-    day: string;
+    day: Day;
     batchName: string | null;
     subjectName: string;
     date: Date;
@@ -34,11 +35,12 @@ type ClassData = {
 
 type GroupedData = {
     date: string;
+    day: Day;
     classes: {
         time: string;
         batchName: string | null;
         subjectName: string;
-        day: string;
+        day: Day;
         roomName: number;
     }[];
 };
@@ -67,6 +69,7 @@ const ProxyClass = async () => {
                 acc[dateString] = {
                     date: dateString,
                     classes: [],
+                    day
                 };
             }
             acc[dateString].classes.push({ day, batchName, subjectName, time, roomName });
@@ -109,7 +112,12 @@ const ProxyClass = async () => {
                             {
                                 groupedData.map((item, index) => (
                                     <TableRow key={index}>
-                                        <TableCell className="border">{format(item.date, "dd MMM yyyy")}</TableCell>
+                                        <TableCell className="border">
+                                            <p className="text-muted-foreground">
+                                                {format(item.date, "dd MMM")}
+                                            </p>
+                                            <p>{item.day}</p>
+                                        </TableCell>
                                         {
                                             item.classes.map((cls, i) => (
                                                 <TableCell key={i} className="border">

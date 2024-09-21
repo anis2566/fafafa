@@ -61,24 +61,24 @@ export const LeaveList = ({ leaves }: Props) => {
                 {
                     leaves?.map(leave => (
                         <TableRow key={leave.id}>
-                            <TableCell className="py-3">{leave.teacher.teacherId}</TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-1">{leave.teacher.teacherId}</TableCell>
+                            <TableCell className="py-1">
                                 <Avatar>
                                     <AvatarImage src={leave.teacher.imageUrl} />
                                     <AvatarFallback>{leave.teacher.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                             </TableCell>
-                            <TableCell className="py-3 hover:underline">
+                            <TableCell className="py-1 hover:underline">
                                 <Link href={`/dashboard/teacher/${leave.teacherId}`}>{leave.teacher.name}</Link>
                             </TableCell>
-                            <TableCell className="py-3">{format(leave.dates[0], "dd MMM")} {leave.dates.length > 1 && "- " + format(leave.dates[leave.dates.length - 1], "dd MMM")}</TableCell>
-                            <TableCell className="py-3">{leave.days[0]} {leave.days.length > 1 && "-" + leave.days[leave.days.length - 1]}</TableCell>
-                            <TableCell className="py-3">{leave.classes.length}</TableCell>
-                            <TableCell className="py-3">{leave.classes.filter(item => item.teacherId !== null).length}</TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-1">{format(leave.dates[0], "dd MMM")} {leave.dates.length > 1 && "- " + format(leave.dates[leave.dates.length - 1], "dd MMM")}</TableCell>
+                            <TableCell className="py-1">{leave.days[0]} {leave.days.length > 1 && "-" + leave.days[leave.days.length - 1]}</TableCell>
+                            <TableCell className="py-1">{leave.classes.length}</TableCell>
+                            <TableCell className="py-1">{leave.classes.filter(item => item.teacherId !== null).length}</TableCell>
+                            <TableCell className="py-1">
                                 <Badge variant={leave.status === LeaveStatus.Approved ? "default" : leave.status === LeaveStatus.Rejected ? "destructive" : "secondary"}>{leave.status}</Badge>
                             </TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-1">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" className="h-8 w-8 p-0">

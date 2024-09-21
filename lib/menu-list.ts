@@ -32,6 +32,7 @@ import {
   Megaphone,
   GitFork,
   MessageSquareMore,
+  CircleCheckBig,
 } from "lucide-react";
 
 type Submenu = {
@@ -244,6 +245,12 @@ export function getMenuList(pathname: string): Group[] {
               label: "List",
               active: pathname === "/dashboard/expense/teacher",
               icon: List,
+            },
+            {
+              href: "/dashboard/expense/teacher/approval",
+              label: "Approval",
+              active: pathname === "/dashboard/expense/teacher/approval",
+              icon: CircleCheckBig,
             },
           ],
         },
@@ -499,7 +506,7 @@ export function getMenuList(pathname: string): Group[] {
             },
             {
               href: "/dashboard/income/history/monthly",
-              label: "Monthly",
+              label: "Salary",
               active: pathname === "/dashboard/income/history/monthly",
               icon: CalendarDays,
             },

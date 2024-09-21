@@ -50,10 +50,10 @@ export const RoomList = ({ rooms }: Props) => {
                 {
                     rooms.map((room, index) => (
                         <TableRow key={room.id}>
-                            <TableCell className="py-1">{room.name}</TableCell>
-                            <TableCell className="py-1">{room.capacity}</TableCell>
-                            <TableCell className="py-1">{room.house.name}</TableCell>
-                            <TableCell className="py-1">
+                            <TableCell className="py-0">{room.name}</TableCell>
+                            <TableCell className="py-0">{room.capacity}</TableCell>
+                            <TableCell className="py-0">{room.house.name}</TableCell>
+                            <TableCell className="py-0">
                                 <TableCell key={index} className="text-center">
                                     <HoverCard>
                                         <HoverCardTrigger asChild>
@@ -79,7 +79,7 @@ export const RoomList = ({ rooms }: Props) => {
                                     </HoverCard>
                                 </TableCell>
                             </TableCell>
-                            <TableCell className="py-1">
+                            <TableCell className="py-0">
                                 <TableCell key={index} className="text-center">
                                     <HoverCard>
                                         <HoverCardTrigger asChild>

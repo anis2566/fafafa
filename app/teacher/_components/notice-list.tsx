@@ -48,7 +48,7 @@ export function NoticeList({
     return (
         <div
             className={cn(
-                "relative flex h-[500px] w-full flex-col p-6 overflow-hidden rounded-lg border bg-background md:shadow-xl",
+                "relative flex h-[330px] w-full max-w-[400px] flex-col p-6 overflow-hidden rounded-lg border bg-background",
                 className,
             )}
         >

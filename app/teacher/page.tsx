@@ -79,9 +79,9 @@ const TeacherDashboard = async () => {
                 </BreadcrumbList>
             </Breadcrumb>
 
-            <div className="mt-4 grid md:grid-cols-3 gap-6">
-                <div className="md:col-span-2 space-y-5">
-                    {/* <div className="grid md:grid-cols-2 gap-6">
+            <div className="mt-4 flex flex-col md:flex-row gap-6">
+                <div className="flex-1 space-y-8">
+                    <div className="grid md:grid-cols-2 gap-6">
                         <Card className="flex flex-col">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0">
                                 <CardTitle className="text-md font-medium">Class Today</CardTitle>
@@ -100,7 +100,7 @@ const TeacherDashboard = async () => {
                                 {todayProxy}
                             </CardContent>
                         </Card>
-                    </div> */}
+                    </div>
                     <Card>
                         <CardHeader>
                             <CardTitle>Recent Leave</CardTitle>

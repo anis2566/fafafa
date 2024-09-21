@@ -50,11 +50,11 @@ export const SubjectList = ({ subjects }: Props) => {
                 {
                     subjects.map((subject) => (
                         <TableRow key={subject.id}>
-                            <TableCell>{subject.name}</TableCell>
-                            <TableCell>{formatString(subject.class)}</TableCell>
-                            <TableCell>{formatString(subject.level)}</TableCell>
-                            <TableCell>{formatString(subject.group ? subject.group : "-")}</TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-1">{subject.name}</TableCell>
+                            <TableCell className="py-1">{formatString(subject.class)}</TableCell>
+                            <TableCell className="py-1">{formatString(subject.level)}</TableCell>
+                            <TableCell className="py-1">{formatString(subject.group ? subject.group : "-")}</TableCell>
+                            <TableCell className="py-1">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" className="h-8 w-8 p-0">

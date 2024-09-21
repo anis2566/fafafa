@@ -75,6 +75,14 @@ export const AttendenceForm = () => {
         }
     })
 
+    const handleMarkAll = () => {
+        setStudentIds(students.map(item => item.id))
+    }
+
+    const handleUnmarkAll = () => {
+        setStudentIds([])
+    }
+
     const { mutate: createAttendence, isPending: isCreating } = useMutation({
         mutationFn: CREATE_ATTENDENCE,
         onSuccess: (data) => {
@@ -221,6 +229,10 @@ export const AttendenceForm = () => {
                             <CardTitle>Students</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
+                            <div className="flex items-center gap-3 flex-wrap">
+                                <Button onClick={handleMarkAll} variant={students.length === studentIds.length ? "default" : "outline"}>Mark All</Button>
+                                <Button onClick={handleUnmarkAll} variant={students.length === studentIds.length ? "outline" : "default"}>Unmark All</Button>
+                            </div>
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -234,16 +246,16 @@ export const AttendenceForm = () => {
                                     {
                                         students.map(student => (
                                             <TableRow key={student.id}>
-                                                <TableCell className="py-2">{student.studentId}</TableCell>
-                                                <TableCell className="py-2">
+                                                <TableCell className="py-1">{student.studentId}</TableCell>
+                                                <TableCell className="py-1">
                                                     <Avatar>
                                                         <AvatarImage src={student.imageUrl} />
                                                         <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
                                                     </Avatar>
                                                 </TableCell>
-                                                <TableCell className="py-2">{student.name}</TableCell>
-                                                <TableCell className="py-2">
-                                                    <Checkbox onCheckedChange={() => toggleStudent(student.id)} />
+                                                <TableCell className="py-1">{student.name}</TableCell>
+                                                <TableCell className="py-1">
+                                                    <Checkbox checked={studentIds.includes(student.id)} onCheckedChange={() => toggleStudent(student.id)} />
                                                 </TableCell>
                                             </TableRow>
                                         ))

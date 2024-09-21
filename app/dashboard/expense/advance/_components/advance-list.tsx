@@ -46,20 +46,20 @@ export const AdvanceList = ({ advances }: Props) => {
                 {
                     advances.map((advance) => (
                         <TableRow key={advance.id}>
-                            <TableCell className="py-2">{advance.teacher.teacherId}</TableCell>
-                            <TableCell className="py-2">
+                            <TableCell className="py-1">{advance.teacher.teacherId}</TableCell>
+                            <TableCell className="py-1">
                                 <Avatar>
                                     <AvatarImage src={advance.teacher.imageUrl} />
                                     <AvatarFallback>{advance.teacher.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                             </TableCell>
-                            <TableCell className="py-2 hover:underline">
+                            <TableCell className="py-1 hover:underline">
                                 <Link href={`/dashboard/teacher/${advance.teacher.id}`}>{advance.teacher.name}</Link>
                             </TableCell>
-                            <TableCell className="py-2">{format(advance.createdAt, "dd MMM yyyy")}</TableCell>
-                            <TableCell className="py-2">{advance.month}</TableCell>
-                            <TableCell className="py-2">{advance.amount}</TableCell>
-                            <TableCell className="py-2">
+                            <TableCell className="py-1">{format(advance.createdAt, "dd MMM yyyy")}</TableCell>
+                            <TableCell className="py-1">{advance.month}</TableCell>
+                            <TableCell className="py-1">{advance.amount}</TableCell>
+                            <TableCell className="py-1">
                                 <Badge>{advance.status}</Badge>
                             </TableCell>
                         </TableRow>

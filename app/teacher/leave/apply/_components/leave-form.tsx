@@ -68,7 +68,6 @@ export const LeaveFrom = () => {
             id: "create-app"
         });
 
-        // Convert string dates back to Date objects
         const formattedValues = {
             ...values,
             dates: values.dates.map(date => new Date(date))

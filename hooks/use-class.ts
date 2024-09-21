@@ -32,3 +32,5 @@ export const useAddClass = create<AddClassState>()((set) => ({
   onOpen: (batchId, time, day) => set({ open: true, batchId, time, day }),
   onClose: () => set({ open: false, batchId: "", time: "", day: Day.Friday }),
 }));
+
+

@@ -8,7 +8,7 @@ import {
     BreadcrumbLink,
     BreadcrumbList,
     BreadcrumbPage,
-    BreadcrumbSeparator
+    BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -19,72 +19,86 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table"
-
+} from "@/components/ui/table";
 import { ContentLayout } from "../../_components/content-layout";
 import { db } from "@/lib/prisma";
 
 export const metadata: Metadata = {
-    title: "BEC | Income Overview",
+    title: "BEC | Income | Overview",
     description: "Basic Education Care",
 };
 
-
 const OverView = async () => {
-    const admissionIncome = await db.admissionPayment.groupBy({
-        by: ["month"],
-        where: {
-            status: PaymentStatus.Paid
-        },
-        _sum: {
-            amount: true
-        }
-    })
+    const [admissionIncome, payments, othersIncome] = await Promise.all([
+        db.admissionPayment.groupBy({
+            by: ["month"],
+            where: {
+                status: PaymentStatus.Paid,
+            },
+            _sum: {
+                amount: true,
+            },
+        }),
+        db.monthlyPayment.groupBy({
+            by: ["class", "month"],
+            where: {
+                status: PaymentStatus.Paid,
+            },
+            _sum: {
+                amount: true,
+            },
+        }),
+        db.income.groupBy({
+            by: ["month"],
+            _sum: {
+                amount: true,
+            },
+        }),
+    ]);
 
-    const admissionIncomeTotal = admissionIncome.reduce((acc, curr) => acc + (curr._sum.amount ?? 0), 0)
+    // Calculate total amounts
+    const admissionIncomeTotal = admissionIncome.reduce((acc, curr) => acc + (curr._sum.amount ?? 0), 0);
+    const paymentTotal = payments.reduce((acc, curr) => acc + (curr._sum.amount ?? 0), 0);
+    const othersIncomeTotal = othersIncome.reduce((acc, curr) => acc + (curr._sum.amount ?? 0), 0);
 
-    const payments = await db.monthlyPayment.groupBy({
-        by: ["class", "month"],
-        where: {
-            status: PaymentStatus.Paid
-        },
-        _sum: {
-            amount: true
-        }
-    })
+    // Organize payments by class and months
+    const modifiedPayment = payments.reduce(
+        (acc: { class: string; months: { month: Month; amount: number }[] }[], payment) => {
+            const existingClass = acc.find((item) => item.class === payment.class);
 
-    const paymentTotal = payments.reduce((acc, curr) => acc + (curr._sum.amount ?? 0), 0)
-
-    const modifiedPayment = payments.reduce((acc: { class: string, months: { month: Month, amount: number }[] }[], payment) => {
-        const existingClass = acc.find(item => item.class === payment.class);
-
-        if (existingClass) {
-            existingClass.months.push({
-                month: payment.month,
-                amount: payment._sum.amount ?? 0
-            });
-        } else {
-            acc.push({
-                class: payment.class,
-                months: [{
+            if (existingClass) {
+                existingClass.months.push({
                     month: payment.month,
-                    amount: payment._sum.amount ?? 0
-                }]
-            });
-        }
+                    amount: payment._sum.amount ?? 0,
+                });
+            } else {
+                acc.push({
+                    class: payment.class,
+                    months: [
+                        {
+                            month: payment.month,
+                            amount: payment._sum.amount ?? 0,
+                        },
+                    ],
+                });
+            }
 
-        return acc;
-    }, []);
+            return acc;
+        },
+        []
+    );
 
-    const othersIncome = await db.income.groupBy({
-        by: ["month",],
-        _sum: {
-            amount: true
-        }
-    })
-
-    const othersIncomeTotal = othersIncome.reduce((acc, curr) => acc + (curr._sum.amount ?? 0), 0)
-
+    // Helper to get total amount for a specific month
+    const getTotalForMonth = (month: Month): number => {
+        return (
+            (admissionIncome.find((m) => m.month === month)?._sum.amount ?? 0) +
+            modifiedPayment.reduce((total, item) => {
+                const monthData = item.months.find((m) => m.month === month);
+                return total + (monthData?.amount ?? 0);
+            }, 0) +
+            (othersIncome.find((m) => m.month === month)?._sum.amount ?? 0)
+        );
+    };
 
     return (
         <ContentLayout title="Report">
@@ -117,101 +131,72 @@ const OverView = async () => {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Income Type</TableHead>
-                                {
-                                    Object.values(Month).map((month, i) => (
-                                        <TableHead key={i} className="text-center">{month}</TableHead>
-                                    ))
-                                }
-                                <TableHead>Total</TableHead>
+                                <TableHead className="bg-slate-100 dark:bg-background/60">Income Type</TableHead>
+                                {Object.values(Month).map((month, i) => (
+                                    <TableHead key={i} className="text-center bg-slate-100 dark:bg-background/60">
+                                        {month}
+                                    </TableHead>
+                                ))}
+                                <TableHead className="bg-slate-100 dark:bg-background/60">Total</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
+                            {/* Admission Row */}
                             <TableRow>
-                                <TableCell>Admission</TableCell>
-                                {
-                                    Object.values(Month).map((month, i) => {
-                                        const monthData = admissionIncome.find(m => m.month === month);
-                                        return (
-                                            <TableCell key={i} className="text-center">
-                                                {monthData ? monthData._sum.amount : 0}
-                                            </TableCell>
-                                        );
-                                    })
-                                }
-                                <TableCell className="font-semibold">
-                                    {admissionIncomeTotal}
-                                </TableCell>
-                            </TableRow>
-                            {
-                                modifiedPayment.map((item, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell>{item.class}</TableCell>
-                                        {
-                                            Object.values(Month).map((month, i) => {
-                                                const monthData = item.months.find(m => m.month === month);
-                                                return (
-                                                    <TableCell key={i} className="text-center">
-                                                        {monthData ? monthData.amount : 0}
-                                                    </TableCell>
-                                                );
-                                            })
-                                        }
-                                        <TableCell className="font-semibold">
-                                            {item.months.reduce((total, m) => total + m.amount, 0)}
+                                <TableCell className="py-3">Admission</TableCell>
+                                {Object.values(Month).map((month, i) => {
+                                    const monthData = admissionIncome.find((m) => m.month === month);
+                                    return (
+                                        <TableCell key={i} className="text-center py-3">
+                                            {monthData ? monthData._sum.amount : 0}
                                         </TableCell>
-                                    </TableRow>
-                                ))
-                            }
-                            <TableRow>
-                                <TableCell>Others</TableCell>
-                                {
-                                    Object.values(Month).map((month, i) => {
-                                        const monthData = othersIncome.find(m => m.month === month);
+                                    );
+                                })}
+                                <TableCell className="font-semibold py-3">{admissionIncomeTotal}</TableCell>
+                            </TableRow>
+
+                            {/* Monthly Payments Rows */}
+                            {modifiedPayment.map((item, index) => (
+                                <TableRow key={index} className="py-3">
+                                    <TableCell>{item.class}</TableCell>
+                                    {Object.values(Month).map((month, i) => {
+                                        const monthData = item.months.find((m) => m.month === month);
                                         return (
-                                            <TableCell key={i} className="text-center">
-                                                {monthData ? monthData._sum.amount : 0}
+                                            <TableCell key={i} className="text-center py-3">
+                                                {monthData ? monthData.amount : 0}
                                             </TableCell>
                                         );
-                                    })
-                                }
-                                <TableCell className="font-semibold">{othersIncomeTotal}</TableCell>
+                                    })}
+                                    <TableCell className="font-semibold py-3">
+                                        {item.months.reduce((total, m) => total + m.amount, 0)}
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+
+                            {/* Other Income Row */}
+                            <TableRow>
+                                <TableCell className="py-3">Others</TableCell>
+                                {Object.values(Month).map((month, i) => {
+                                    const monthData = othersIncome.find((m) => m.month === month);
+                                    return (
+                                        <TableCell key={i} className="text-center py-3">
+                                            {monthData ? monthData._sum.amount : 0}
+                                        </TableCell>
+                                    );
+                                })}
+                                <TableCell className="font-semibold py-3">{othersIncomeTotal}</TableCell>
                             </TableRow>
                         </TableBody>
                         <TableFooter>
                             <TableRow>
-                                <TableCell className="font-semibold">Total</TableCell>
-                                {
-                                    Object.values(Month).map((month, i) => {
-                                        const totalAmountForMonth = 
-                                            (admissionIncome.find(m => m.month === month)?._sum.amount ?? 0) +
-                                            modifiedPayment.reduce((total, item) => {
-                                                const monthData = item.months.find(m => m.month === month);
-                                                return total + (monthData ? monthData.amount : 0);
-                                            }, 0) +
-                                            (othersIncome.find(m => m.month === month)?._sum.amount ?? 0);
-
-                                        return (
-                                            <TableCell key={i} className="text-center font-semibold">
-                                                {totalAmountForMonth}
-                                            </TableCell>
-                                        );
-                                    })
-                                }
-                                <TableCell className="font-semibold">
-                                    {
-                                        Object.values(Month).reduce((grandTotal, month) => {
-                                            const monthTotal = 
-                                                (admissionIncome.find(m => m.month === month)?._sum.amount ?? 0) +
-                                                modifiedPayment.reduce((total, item) => {
-                                                    const monthData = item.months.find(m => m.month === month);
-                                                    return total + (monthData ? monthData.amount : 0);
-                                                }, 0) +
-                                                (othersIncome.find(m => m.month === month)?._sum.amount ?? 0);
-
-                                            return grandTotal + monthTotal;
-                                        }, 0)
-                                    }
+                                <TableCell className="font-semibold bg-slate-100 dark:bg-background/60">Total</TableCell>
+                                {Object.values(Month).map((month, i) => (
+                                    <TableCell key={i} className="text-center font-semibold bg-slate-100 dark:bg-background/60">
+                                        {getTotalForMonth(month)}
+                                    </TableCell>
+                                ))}
+                                <TableCell className="font-semibold bg-slate-100 dark:bg-background/60">
+                                    {admissionIncomeTotal + paymentTotal + othersIncomeTotal}
                                 </TableCell>
                             </TableRow>
                         </TableFooter>
@@ -219,7 +204,7 @@ const OverView = async () => {
                 </CardContent>
             </Card>
         </ContentLayout>
-    )
-}
+    );
+};
 
-export default OverView
+export default OverView;

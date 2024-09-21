@@ -61,21 +61,21 @@ export const StudentList = ({ students }: Props) => {
                 {
                     students.map(student => (
                         <TableRow key={student.id}>
-                            <TableCell className="py-3">{student.studentId}</TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-1">{student.studentId}</TableCell>
+                            <TableCell className="py-1">
                                 <Avatar>
                                     <AvatarImage src={student.imageUrl} />
                                     <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
                             </TableCell>
-                            <TableCell className="py-3 hover:underline">
+                            <TableCell className="py-1 hover:underline">
                                 <Link href={`/dashboard/student/${student.id}`}>{student.name}</Link>
                             </TableCell>
-                            <TableCell className="py-3">{formatString(student.class)}</TableCell>
-                            <TableCell className="py-3">{student.fPhone}</TableCell>
-                            <TableCell className="py-3">{student.mPhone}</TableCell>
-                            <TableCell className="py-3">{student.payments.length > 0 ? `${student.payments.length} Months` : "Paid"}</TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-1">{formatString(student.class)}</TableCell>
+                            <TableCell className="py-1">{student.fPhone}</TableCell>
+                            <TableCell className="py-1">{student.mPhone}</TableCell>
+                            <TableCell className="py-1">{student.payments.length > 0 ? `${student.payments.length} Months` : "Paid"}</TableCell>
+                            <TableCell className="py-1">
                                 <HoverCard>
                                     <HoverCardTrigger asChild>
                                         <Badge className="text-white dark:text-white/80">
@@ -87,7 +87,7 @@ export const StudentList = ({ students }: Props) => {
                                     </HoverCardContent>
                                 </HoverCard>
                             </TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-1">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" className="h-8 w-8 p-0">

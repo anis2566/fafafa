@@ -54,13 +54,13 @@ export const HouseList = ({ houses }: Props) => {
                 {
                     houses.map((house) => (
                         <TableRow key={house.id}>
-                            <TableCell className="py-3">{house.name}</TableCell>
-                            <TableCell className="py-3">{house.roomCount}</TableCell>
-                            <TableCell className="py-3">{house.rooms.length}</TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-2">{house.name}</TableCell>
+                            <TableCell className="py-2">{house.roomCount}</TableCell>
+                            <TableCell className="py-2">{house.rooms.length}</TableCell>
+                            <TableCell className="py-2">
                                 <Badge variant={house.status === HouseStatus.Deactive ? "destructive" : "default"}>{house.status}</Badge>
                             </TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-2">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" className="h-8 w-8 p-0">

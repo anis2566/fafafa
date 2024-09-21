@@ -34,7 +34,7 @@ const TeacherBillReport = async () => {
         by: ["month", "teacherName"],
         where: {
             status: {
-                not: TeacherPaymentStatus.Dismiss
+                equals: TeacherPaymentStatus.Approve
             }
         },
         _sum: {
@@ -64,6 +64,15 @@ const TeacherBillReport = async () => {
         return acc;
     }, []);
 
+    const totalForMonth = (month: Month) => {
+        return payments.find((p) => p.month === month)?._sum.amount ?? 0;
+    };
+
+    const grandTotal = Object.values(Month).reduce(
+        (total, month) => total + totalForMonth(month),
+        0
+    );
+
     return (
         <ContentLayout title="Report">
             <Breadcrumb>
@@ -88,38 +97,38 @@ const TeacherBillReport = async () => {
 
             <Card className="mt-4">
                 <CardHeader>
-                    <CardTitle>Teacher Bill Report</CardTitle>
+                    <CardTitle>Teacher Bill</CardTitle>
                     <CardDescription>Teacher bill overview.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Name</TableHead>
+                                <TableHead className="bg-slate-100 dark:bg-background/60">Name</TableHead>
                                 {
                                     Object.values(Month).map((month, i) => (
-                                        <TableHead key={i} className="text-center">{month}</TableHead>
+                                        <TableHead key={i} className="text-center bg-slate-100 dark:bg-background/60">{month}</TableHead>
                                     ))
                                 }
-                                <TableHead>Total</TableHead>
+                                <TableHead className="bg-slate-100 dark:bg-background/60">Total</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {
                                 modifiedPayment.map((item, index) => (
                                     <TableRow key={index}>
-                                        <TableCell>{item.teacherName}</TableCell>
+                                        <TableCell className="py-3">{item.teacherName}</TableCell>
                                         {
                                             Object.values(Month).map((month, i) => {
                                                 const monthData = item.months.find(m => m.month === month);
                                                 return (
-                                                    <TableCell key={i} className="text-center">
+                                                    <TableCell key={i} className="text-center py-3">
                                                         {monthData ? monthData.amount : 0}
                                                     </TableCell>
                                                 );
                                             })
                                         }
-                                        <TableCell className="font-semibold">
+                                        <TableCell className="font-semibold py-3">
                                             {item.months.reduce((total, m) => total + m.amount, 0)}
                                         </TableCell>
                                     </TableRow>
@@ -128,21 +137,19 @@ const TeacherBillReport = async () => {
                         </TableBody>
                         <TableFooter>
                             <TableRow>
-                                <TableCell className="text-cente font-semiboldr">M. Total</TableCell>
+                                <TableCell className="text-cente font-semibold bg-slate-100 dark:bg-background/60">M. Total</TableCell>
                                 {
                                     Object.values(Month).map((month, i) => {
-                                        const totalAmountForMonth = modifiedPayment.reduce((total, item) => {
-                                            const monthData = item.months.find(m => m.month === month);
-                                            return total + (monthData ? monthData.amount : 0);
-                                        }, 0);
                                         return (
-                                            <TableCell key={i} className="text-center font-semibold">
-                                                {totalAmountForMonth}
+                                            <TableCell key={i} className="text-center font-semibold bg-slate-100 dark:bg-background/60">
+                                                {totalForMonth(month)}
                                             </TableCell>
                                         );
                                     })
                                 }
-                                <TableCell></TableCell>
+                                <TableCell className="text-center font-semibold bg-slate-100 dark:bg-background/60">
+                                    {grandTotal}
+                                </TableCell>
                             </TableRow>
                         </TableFooter>
                     </Table>

@@ -44,21 +44,21 @@ export const RequestList = ({ requests }: Props) => {
                 {
                     requests.map(request => (
                         <TableRow key={request.id}>
-                            <TableCell className="py-3">{request.user.name}</TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-1">{request.user.name}</TableCell>
+                            <TableCell className="py-1">
                                 <Avatar>
                                     <AvatarImage src={request.user.image || ""} />
                                     <AvatarFallback>{request?.user?.name?.charAt(0)}</AvatarFallback>
                                 </Avatar>
                             </TableCell>
-                            <TableCell className="py-3 hover:underline">
+                            <TableCell className="py-1 hover:underline">
                                 <Link href={`/dashboard/teacher/${request.teacher.id}`}>{request.teacher.name}</Link>
                             </TableCell>
-                            <TableCell className="py-3">{request.teacher.teacherId}</TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-1">{request.teacher.teacherId}</TableCell>
+                            <TableCell className="py-1">
                                 <Badge variant={request.status === Status.Active ? "default" : request.status === Status.Suspended ? "destructive" : "outline"}>{request.status}</Badge>
                             </TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-1">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" className="h-8 w-8 p-0">

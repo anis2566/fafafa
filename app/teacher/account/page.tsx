@@ -57,22 +57,23 @@ const Account = async ({ searchParams }: Props) => {
 
     if (!teacher) redirect("/teacher")
 
-    const advances = await db.teacherAdvance.findMany({
-        where: {
-            teacherId: teacher.id,
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
-
-    const totalAdvance = await db.teacherAdvance.count({
-        where: {
-            teacherId: teacher.id,
-        },
-    })
+    const [advances, totalAdvance] = await Promise.all([
+        await db.teacherAdvance.findMany({
+            where: {
+                teacherId: teacher.id,
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        await db.teacherAdvance.count({
+            where: {
+                teacherId: teacher.id,
+            },
+        })
+    ])
 
     const totalPage = Math.ceil(totalAdvance / itemsPerPage)
 

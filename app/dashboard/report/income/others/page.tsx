@@ -75,12 +75,10 @@ const OtherReport = async () => {
 
             <Card className="mt-4">
                 <CardHeader>
-                    <CardTitle>Others Report</CardTitle>
+                    <CardTitle>Others</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <IncomeList data={modifiedPayments} />
-                    {/* <Header />
-                    <SalaryList payments={payments} /> */}
                 </CardContent>
             </Card>
         </ContentLayout>

@@ -60,20 +60,20 @@ export const PaymentList = ({ payments }: PaymentProps) => {
                     {
                         payments.map(item => (
                             <TableRow key={item.studentId}>
-                                <TableCell>{item.studentId}</TableCell>
-                                <TableCell>
+                                <TableCell className="py-1">{item.studentId}</TableCell>
+                                <TableCell className="py-1">
                                     <Avatar>
                                         <AvatarImage src={item.imageUrl} />
                                         <AvatarFallback>{item.name.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                 </TableCell>
-                                <TableCell>{item.name}</TableCell>
-                                <TableCell>{formatString(item.class)}</TableCell>
+                                <TableCell className="py-1">{item.name}</TableCell>
+                                <TableCell className="py-1">{formatString(item.class)}</TableCell>
                                 {
                                     Object.values(Month).map((month, index) => {
                                         const payment = item.payments.find(p => p.month === month);
                                         return (
-                                            <TableCell key={index} className="text-center">
+                                            <TableCell key={index} className="text-center py-1">
                                                 <HoverCard>
                                                     <HoverCardTrigger asChild>
                                                         <Badge className={cn("", payment?.note && "bg-yellow-600 hover:bg-yellow-700")} variant={payment?.status === PaymentStatus.NA ? "outline" : payment?.status === PaymentStatus.Paid ? "default" : payment?.status === PaymentStatus.Unpaid ? "destructive" : "outline"}>
@@ -149,7 +149,7 @@ export const PaymentList = ({ payments }: PaymentProps) => {
                                         );
                                     })
                                 }
-                                <TableCell className="py-3">
+                                <TableCell className="py-1">
                                     {item.payments.filter(item => item.status === PaymentStatus.Unpaid).length} Months
                                 </TableCell>
                             </TableRow>

@@ -74,7 +74,7 @@ const SalaryIncome = async ({ searchParams }: Props) => {
 
             <Card className="mt-4">
                 <CardHeader>
-                    <CardTitle>Salary Report</CardTitle>
+                    <CardTitle>Salary</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <Header />

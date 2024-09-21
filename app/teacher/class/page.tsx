@@ -89,7 +89,7 @@ const TeacherClass = async () => {
                     <CardDescription>A collection of teacher class.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <ClassList classes={groupedData} />
+                    <ClassList classes={groupedData} plainClasses={classes} />
                 </CardContent>
             </Card>
         </ContentLayout>

@@ -30,36 +30,37 @@ interface Props {
     }
 }
 
-const Payment = async ({searchParams}:Props) => {
+const Payment = async ({ searchParams }: Props) => {
     const { page, perPage } = searchParams;
     const itemsPerPage = parseInt(perPage) || 5;
     const currentPage = parseInt(page) || 1;
 
     const { teacherId } = await GET_TEACHER()
 
-    const payments = await db.teacherPayment.findMany({
-        where: {
-            teacherId
-        },
-        include: {
-            teacher: {
-                include: {
-                    fee: true
+    const [payments, totalPayment] = await Promise.all([
+        await db.teacherPayment.findMany({
+            where: {
+                teacherId
+            },
+            include: {
+                teacher: {
+                    include: {
+                        fee: true
+                    }
                 }
-            }
-        },
-        orderBy: {
-            createdAt: "desc"
-        },
-        skip: (currentPage - 1) * itemsPerPage,
-        take: itemsPerPage,
-    })
-
-    const totalPayment = await db.teacherPayment.count({
-        where: {
-            teacherId
-        },
-    })
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        await db.teacherPayment.count({
+            where: {
+                teacherId
+            },
+        })
+    ])
 
     const totalPage = Math.ceil(totalPayment / itemsPerPage)
 

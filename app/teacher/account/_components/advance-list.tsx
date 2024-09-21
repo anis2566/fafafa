@@ -28,9 +28,9 @@ export const AdvanceList = ({ advances }: Props) => {
                 {
                     advances.map(item => (
                         <TableRow key={item.id}>
-                            <TableCell>{format(item.createdAt, "dd MMM yyyy")}</TableCell>
-                            <TableCell>{item.month}</TableCell>
-                            <TableCell>{item.amount}</TableCell>
+                            <TableCell className="py-3">{format(item.createdAt, "dd MMM yyyy")}</TableCell>
+                            <TableCell className="py-3">{item.month}</TableCell>
+                            <TableCell className="py-3">{item.amount}</TableCell>
                         </TableRow>
                     ))
                 }

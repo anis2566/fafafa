@@ -49,12 +49,12 @@ export const NoticeList = ({ notices }: Props) => {
                 {
                     notices.map((notice) => (
                         <TableRow key={notice.id}>
-                            <TableCell className="py-3 truncate">{notice.text}</TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-2 truncate">{notice.text}</TableCell>
+                            <TableCell className="py-2">
                                 <Badge>{notice.type}</Badge>
                             </TableCell>
-                            <TableCell className="py-3">{format(notice.createdAt, "dd MMM yyyy")}</TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-2">{format(notice.createdAt, "dd MMM yyyy")}</TableCell>
+                            <TableCell className="py-2">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" className="h-8 w-8 p-0">

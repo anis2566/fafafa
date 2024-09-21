@@ -80,10 +80,10 @@ export const AttendenceForm = () => {
                                     {
                                         batches?.map((batch, index) => (
                                             <TableRow key={index}>
-                                                <TableCell>{index + 1}</TableCell>
-                                                <TableCell>{batch.name}</TableCell>
-                                                <TableCell>{formatTime(batch.time[0], "start")} - {formatTime(batch.time[batch.time.length - 1], "end")}</TableCell>
-                                                <TableCell>
+                                                <TableCell className="py-1">{index + 1}</TableCell>
+                                                <TableCell className="py-1">{batch.name}</TableCell>
+                                                <TableCell className="py-1">{formatTime(batch.time[0], "start")} - {formatTime(batch.time[batch.time.length - 1], "end")}</TableCell>
+                                                <TableCell className="py-1">
                                                     <Button asChild size="sm">
                                                         <Link href={`/dashboard/attendence/student/${batch.id}`}>Enter</Link>
                                                     </Button>

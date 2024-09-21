@@ -55,12 +55,12 @@ export const PaymentList = ({ payments }: Props) => {
                 {
                     payments.map((payment) => (
                         <TableRow key={payment.id}>
-                            <TableCell className="py-3">{payment.houseName}</TableCell>
-                            <TableCell className="py-3">{payment.month}</TableCell>
-                            <TableCell className="py-3">{payment.amount}</TableCell>
-                            <TableCell className="py-3">{formatString(payment.method || "")}</TableCell>
-                            <TableCell className="py-3">{format(payment.createdAt, "dd MMM yyyy")}</TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-2">{payment.houseName}</TableCell>
+                            <TableCell className="py-2">{payment.month}</TableCell>
+                            <TableCell className="py-2">{payment.amount}</TableCell>
+                            <TableCell className="py-2">{formatString(payment.method || "")}</TableCell>
+                            <TableCell className="py-2">{format(payment.createdAt, "dd MMM yyyy")}</TableCell>
+                            <TableCell className="py-2">
                                 <HoverCard>
                                     <HoverCardTrigger asChild>
                                         {
@@ -78,7 +78,7 @@ export const PaymentList = ({ payments }: Props) => {
                                     </HoverCardContent>
                                 </HoverCard>
                             </TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-2">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" className="h-8 w-8 p-0">

@@ -42,11 +42,11 @@ export const IncomeList = ({ incomes }: Props) => {
                 {
                     incomes.map(item => (
                         <TableRow key={item.id}>
-                            <TableCell>{item.name}</TableCell>
-                            <TableCell>{item.amount}</TableCell>
-                            <TableCell>{item.month}</TableCell>
-                            <TableCell>{format(item.createdAt, "dd MMM yyyy")}</TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-2">{item.name}</TableCell>
+                            <TableCell className="py-2">{item.amount}</TableCell>
+                            <TableCell className="py-2">{item.month}</TableCell>
+                            <TableCell className="py-2">{format(item.createdAt, "dd MMM yyyy")}</TableCell>
+                            <TableCell className="py-2">
                                 <HoverCard>
                                     <HoverCardTrigger asChild>
                                         {
@@ -64,7 +64,7 @@ export const IncomeList = ({ incomes }: Props) => {
                                     </HoverCardContent>
                                 </HoverCard>
                             </TableCell>
-                            <TableCell className="py-3">
+                            <TableCell className="py-2">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <Button variant="ghost" className="h-8 w-8 p-0">

@@ -1,4 +1,5 @@
 import { LeaveApp, LeaveStatus } from "@prisma/client"
+import { format } from "date-fns"
 
 import {
     Table,
@@ -9,7 +10,6 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { format } from "date-fns"
 
 interface LeaveWithClasses extends LeaveApp {
     classes: { id: string }[]
@@ -36,7 +36,7 @@ export const LeaveList = ({ leaves }: Props) => {
                     leaves?.map((leave, i) => (
                         <TableRow key={leave.id}>
                             <TableCell className="py-3">{i + 1}</TableCell>
-                            <TableCell className="py-3">{format(leave.dates[0], "dd MMM yyyy")}  {leave.dates.length > 1 && "- " + format(leave.dates[leave.dates.length - 1], "dd MMM yyyy")}</TableCell>
+                            <TableCell className="py-3">{format(leave.dates[0], "dd MMM")}  {leave.dates.length > 1 && "- " + format(leave.dates[leave.dates.length - 1], "dd MMM")}</TableCell>
                             <TableCell className="py-3">{leave.days[0]} - {leave.days[leave.days.length - 1]}</TableCell>
                             <TableCell className="py-3">{leave.classes.length}</TableCell>
                             <TableCell className="py-3">
