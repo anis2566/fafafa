@@ -12,6 +12,7 @@ type SendNotification = {
     name?: string;
     redirectUrl?: string;
     status?: string;
+    month?: string;
   };
 };
 

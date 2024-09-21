@@ -17,9 +17,7 @@ export const CREATE_NOTICE = async (values: NoticeSchemaType) => {
   }
 
   await db.notice.create({
-    data: {
-      ...data,
-    },
+    data: { ...data },
   });
 
   const { userId } = await GET_USER();
@@ -38,9 +36,10 @@ export const CREATE_NOTICE = async (values: NoticeSchemaType) => {
     });
 
     if (subscribers.length > 0) {
-      for (const item of subscribers) {
-        await webPush
-          .sendNotification(
+      // Push notifications in parallel
+      const pushPromises = subscribers.map(async (item) => {
+        try {
+          await webPush.sendNotification(
             {
               endpoint: item.endpoint,
               keys: {
@@ -49,9 +48,8 @@ export const CREATE_NOTICE = async (values: NoticeSchemaType) => {
               },
             },
             JSON.stringify({
-              title: "Import Notice",
+              title: "New Notice",
               body: data.text,
-              // sound: "/notification.mp3"
             }),
             {
               vapidDetails: {
@@ -60,34 +58,31 @@ export const CREATE_NOTICE = async (values: NoticeSchemaType) => {
                 privateKey: process.env.WEB_PUSH_PRIVATE_KEY!,
               },
             }
-          )
-          .catch(async (error) => {
-            console.error("Error sending push notification: ", error);
-            if (error instanceof WebPushError && error.statusCode === 410) {
-              console.log("Push subscription expired, deleting...");
-              await db.pushSubscriber.delete({
-                where: {
-                  id: item.id,
-                },
-              });
-            }
-          });
+          );
+        } catch (error) {
+          console.error("Error sending push notification:", error);
+
+          if (error instanceof WebPushError && error.statusCode === 410) {
+            console.log("Push subscription expired, deleting...");
+            await db.pushSubscriber.delete({
+              where: { id: item.id },
+            });
+          }
+        }
 
         await sendNotification({
           trigger: "notice",
-          actor: {
-            id: userId,
-          },
+          actor: { id: userId },
           recipients: [item.userId],
           data: {},
         });
-      }
+      });
+
+      await Promise.all(pushPromises); // Wait for all push notifications
     }
   }
 
-  revalidatePath("/dashboard/notice");
+  await revalidatePath("/dashboard/notice");
 
-  return {
-    success: "Notice created",
-  };
+  return { success: "Notice created" };
 };

@@ -86,7 +86,7 @@ export const GET_DASHBOARD_DATA = async () => {
       take: 3,
     }),
   ]);
-console.log(students)
+
   // Weekly salary by day processing
   const weeklySalaryByDay = weeklySalary.reduce(
     (acc: { [key: string]: { day: Day; amount: number } }, item) => {
