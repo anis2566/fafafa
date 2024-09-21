@@ -6,6 +6,8 @@ import { NoticeType, Role, Status } from "@prisma/client";
 
 import { db } from "@/lib/prisma";
 import { NoticeSchema, NoticeSchemaType } from "./schema";
+import { sendNotification } from "@/services/notification.service";
+import { GET_USER } from "@/services/user.service";
 
 export const CREATE_NOTICE = async (values: NoticeSchemaType) => {
   const { data, success } = NoticeSchema.safeParse(values);
@@ -19,6 +21,8 @@ export const CREATE_NOTICE = async (values: NoticeSchemaType) => {
       ...data,
     },
   });
+
+  const { userId } = await GET_USER();
 
   if (data.type === NoticeType.Teacher) {
     const subscribers = await db.pushSubscriber.findMany({
@@ -68,6 +72,15 @@ export const CREATE_NOTICE = async (values: NoticeSchemaType) => {
               });
             }
           });
+
+        await sendNotification({
+          trigger: "notice",
+          actor: {
+            id: userId,
+          },
+          recipients: [item.userId],
+          data: {},
+        });
       }
     }
   }
