@@ -28,6 +28,7 @@ export const WebPushProvider = ({
             } catch (error) {
                 console.error(error);
                 if (Notification.permission === "denied") {
+                    alert("Please enabled notification on your browser settings")
                     console.warn("Push notifications are denied in browser settings");
                 } else {
                     console.error("Failed to set up push notifications");

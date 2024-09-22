@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { toast } from "sonner"
 import { useMutation } from "@tanstack/react-query"
-import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -19,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input"
 
 import { APPLY_TEACHER } from "../action"
+import { signOut } from "next-auth/react"
 
 const TeacherApplySchema = z.object({
     teacherId: z.number().min(1, { message: "required" }),
@@ -26,7 +26,10 @@ const TeacherApplySchema = z.object({
 })
 
 export const ApplyForm = () => {
-    const router = useRouter()
+
+    const handleSignOut = async () => {
+        await signOut();
+      };
 
     const { mutate: applyTeacher, isPending } = useMutation({
         mutationFn: APPLY_TEACHER,
@@ -34,7 +37,7 @@ export const ApplyForm = () => {
             toast.success(data.success, {
                 id: "apply"
             })
-            router.push("/teacher")
+            handleSignOut()
         },
         onError: (error) => {
             toast.error(error.message, {

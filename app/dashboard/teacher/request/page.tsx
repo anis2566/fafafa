@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Metadata } from "next";
+import { Status } from "@prisma/client";
 
 import {
     Breadcrumb,
@@ -26,6 +27,7 @@ interface Props {
     searchParams: {
         id?: string;
         name?: string;
+        status?: Status;
         page?: string;
         perPage?: string;
     };
@@ -35,6 +37,7 @@ const TeacherRequest = async ({ searchParams }: Props) => {
     const {
         id,
         name,
+        status,
         page = "1",
         perPage = "5"
     } = searchParams;
@@ -58,6 +61,7 @@ const TeacherRequest = async ({ searchParams }: Props) => {
                         teacherId
                     }
                 }),
+                ...(status && { status })
             },
             include: {
                 user: true,
@@ -82,7 +86,8 @@ const TeacherRequest = async ({ searchParams }: Props) => {
                     teacher: {
                         teacherId
                     }
-                })
+                }),
+                ...(status && { status })
             }
         })
     ])

@@ -3,7 +3,7 @@
 import { SearchIcon } from "lucide-react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import queryString from "query-string"
-import { Month } from "@prisma/client"
+import { Month, TransactionStatus } from "@prisma/client"
 import { useEffect, useState } from "react"
 
 import { Input } from "@/components/ui/input"
@@ -31,6 +31,7 @@ export const FilterDrawer = ({ open, handleClose }: Props) => {
     const [session, setSession] = useState<number>(new Date().getFullYear())
     const [month, setMonth] = useState<Month | undefined>()
     const [perPage, setPerPage] = useState<string>()
+    const [status, setStatus] = useState<TransactionStatus | undefined>()
 
     const pathname = usePathname()
     const router = useRouter()
@@ -104,6 +105,20 @@ export const FilterDrawer = ({ open, handleClose }: Props) => {
         router.push(url)
     }
 
+    const handleStatusChange = (status: TransactionStatus) => {
+        setStatus(status)
+        const params = Object.fromEntries(searchParams.entries());
+        const url = queryString.stringifyUrl({
+            url: pathname,
+            query: {
+                ...params,
+                status,
+            }
+        }, { skipNull: true, skipEmptyString: true })
+
+        router.push(url)
+    }
+
     const handleReset = () => {
         router.push(pathname)
         setSearch("")
@@ -111,6 +126,7 @@ export const FilterDrawer = ({ open, handleClose }: Props) => {
         setSession(new Date().getFullYear())
         setPerPage(undefined)
         setMonth(undefined)
+        setStatus(undefined)
     }
 
 
@@ -169,6 +185,18 @@ export const FilterDrawer = ({ open, handleClose }: Props) => {
                             value={search}
                         />
                     </div>
+                    <Select value={status || ""} onValueChange={(value) => handleStatusChange(value as TransactionStatus)}>
+                        <SelectTrigger className="w-[130px]">
+                            <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {
+                                Object.values(TransactionStatus).map((v, i) => (
+                                    <SelectItem value={v} key={i}>{v}</SelectItem>
+                                ))
+                            }
+                        </SelectContent>
+                    </Select>
                     <Select value={perPage || ""} onValueChange={(value) => handlePerPageChange(value)}>
                         <SelectTrigger>
                             <SelectValue placeholder="Limit" />

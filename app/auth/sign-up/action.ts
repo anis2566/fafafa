@@ -12,7 +12,7 @@ import streamServerClient from "@/lib/stream";
 
 const knock = new Knock(process.env.NEXT_PUBLIC_KNOCK_API_KEY);
 
-export const SIGN_UP = async (values: SignInSchemaType) => {
+export const SIGN_UP_USER = async (values: SignInSchemaType) => {
   const { data, success } = SignUpSchema.safeParse(values);
   if (!success) {
     throw new Error("Invalid input value");
@@ -60,7 +60,9 @@ export const SIGN_UP = async (values: SignInSchemaType) => {
   //   }
   // );
 
-  redirect("/auth/sign-in");
+  return {
+    success: "Registration successfull",
+  };
 
   // if (res?.success) {
   //   redirect(`/auth/verify/${newUser.id}`);

@@ -41,7 +41,7 @@ export const BillList = ({ payments }: Props) => {
     const {onOpen} = useTeacherBill()
 
     if (payments.length === 0) {
-        return <EmptyData title="No Payment Found!" />
+        return <EmptyData title="No Bill Found!" />
     }
 
     return (

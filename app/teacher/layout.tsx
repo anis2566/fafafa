@@ -1,27 +1,22 @@
 import { Role, Status } from "@prisma/client"
-import { redirect } from "next/navigation"
 
-import { auth } from "@/auth"
 import { Pending } from "./_components/pending"
 import { TeacherLayoutComp } from "./_components/teacher-layout"
 import { AppKnockProviders } from "@/providers/knock-provider"
 import { WebPushProvider } from "@/providers/web-push-provider"
+import { GET_USER } from "@/services/user.service"
 
 const TeacherLayout = async ({ children }: { children: React.ReactNode }) => {
-    const session = await auth()
+    const { role, status, userId } = await GET_USER()
 
-    if (!session?.status || !session.userId) {
-        redirect("/")
-    }
-
-    const isTeacher = session.role === Role.Teacher
+    const isTeacher = role === Role.Teacher
 
     return (
         <WebPushProvider>
-            <AppKnockProviders userId={session.userId}>
+            <AppKnockProviders userId={userId}>
                 <TeacherLayoutComp>
                     {
-                        isTeacher && session.status === Status.Pending ? <Pending /> : children
+                        isTeacher && status === Status.Pending ? <Pending /> : children
                     }
                 </TeacherLayoutComp>
             </AppKnockProviders>

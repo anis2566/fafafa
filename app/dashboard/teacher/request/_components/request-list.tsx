@@ -16,6 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 import { useTeacherRequestDelete, useTeacherStatus } from "@/hooks/use-teacher";
+import { EmptyData } from "@/components/empty-stat";
 
 interface RequestWithTeacherAndUser extends TeacherRequest {
     user: User;
@@ -30,13 +31,17 @@ export const RequestList = ({ requests }: Props) => {
     const { onOpen } = useTeacherStatus()
     const { onOpen: onOpenDelete } = useTeacherRequestDelete()
 
+    if (requests.length === 0) {
+        return <EmptyData title="No Request Found!" />
+    }
+
     return (
         <Table>
             <TableHeader>
+                <TableHead>Teacher Id</TableHead>
+                <TableHead>Teacher Name</TableHead>
                 <TableHead>User Name</TableHead>
                 <TableHead>Image</TableHead>
-                <TableHead>Teacher Name</TableHead>
-                <TableHead>Teacher Id</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Action</TableHead>
             </TableHeader>
@@ -44,6 +49,10 @@ export const RequestList = ({ requests }: Props) => {
                 {
                     requests.map(request => (
                         <TableRow key={request.id}>
+                            <TableCell className="py-1 hover:underline">
+                                <Link href={`/dashboard/teacher/${request.teacher.id}`}>{request.teacher.name}</Link>
+                            </TableCell>
+                            <TableCell className="py-1">{request.teacher.teacherId}</TableCell>
                             <TableCell className="py-1">{request.user.name}</TableCell>
                             <TableCell className="py-1">
                                 <Avatar>
@@ -51,10 +60,6 @@ export const RequestList = ({ requests }: Props) => {
                                     <AvatarFallback>{request?.user?.name?.charAt(0)}</AvatarFallback>
                                 </Avatar>
                             </TableCell>
-                            <TableCell className="py-1 hover:underline">
-                                <Link href={`/dashboard/teacher/${request.teacher.id}`}>{request.teacher.name}</Link>
-                            </TableCell>
-                            <TableCell className="py-1">{request.teacher.teacherId}</TableCell>
                             <TableCell className="py-1">
                                 <Badge variant={request.status === Status.Active ? "default" : request.status === Status.Suspended ? "destructive" : "outline"}>{request.status}</Badge>
                             </TableCell>

@@ -1,13 +1,12 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { Role } from "@prisma/client";
 import { z } from "zod";
+import webPush, { WebPushError } from "web-push";
 
-import { auth } from "@/auth";
 import { db } from "@/lib/prisma";
 import { sendNotification } from "@/services/notification.service";
-import { GET_HR } from "@/services/user.service";
+import { GET_HR, GET_USER } from "@/services/user.service";
 
 const TeacherApplySchema = z.object({
   teacherId: z.number().min(1, { message: "required" }),
@@ -21,9 +20,7 @@ export const APPLY_TEACHER = async (values: TeacherApplySchemaType) => {
 
   if (!success) throw new Error("Invalid input value");
 
-  const session = await auth();
-
-  if (!session || !session.userId) redirect("/auth/sign-in");
+  const { userId, user } = await GET_USER();
 
   const teacher = await db.teacher.findFirst({
     where: {
@@ -37,13 +34,13 @@ export const APPLY_TEACHER = async (values: TeacherApplySchemaType) => {
   await db.teacherRequest.create({
     data: {
       teacherId: teacher.id,
-      userId: session.userId,
+      userId: userId,
     },
   });
 
   await db.user.update({
     where: {
-      id: session.userId,
+      id: userId,
     },
     data: {
       role: Role.Teacher,
@@ -52,11 +49,53 @@ export const APPLY_TEACHER = async (values: TeacherApplySchemaType) => {
 
   const { id } = await GET_HR();
 
+  const subscribers = await db.pushSubscriber.findMany({
+    where: { userId: id },
+  });
+
+  if (subscribers.length > 0) {
+    const pushPromises = subscribers.map(async (item) => {
+      try {
+        await webPush.sendNotification(
+          {
+            endpoint: item.endpoint,
+            keys: {
+              auth: item.auth,
+              p256dh: item.p256dh,
+            },
+          },
+          JSON.stringify({
+            title: `Teacher Request`,
+            body: `You have a teacher request from teacher ${teacher.name}`,
+          }),
+          {
+            vapidDetails: {
+              subject: "mailto:anis@flowchat.com",
+              publicKey: process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY!,
+              privateKey: process.env.WEB_PUSH_PRIVATE_KEY!,
+            },
+          }
+        );
+      } catch (error) {
+        console.error("Error sending push notification:", error);
+
+        if (error instanceof WebPushError && error.statusCode === 410) {
+          console.log("Push subscription expired, deleting...");
+          await db.pushSubscriber.delete({
+            where: { id: item.id },
+          });
+        }
+      }
+    });
+
+    await Promise.all(pushPromises);
+  }
+
   await sendNotification({
     trigger: "teacher-request",
     actor: {
-      id: session.userId,
-      name: session.user.name || "",
+      id: userId,
+      name: user.name || "",
     },
     recipients: [id],
     data: {

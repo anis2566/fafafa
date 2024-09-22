@@ -1,7 +1,15 @@
+import { Role } from "@prisma/client"
+import { redirect } from "next/navigation"
+
 import { Card, CardContent } from "@/components/ui/card"
 import { ApplyForm } from "./_components/apply-form"
+import { GET_USER } from "@/services/user.service"
 
-const Apply = () => {
+const Apply = async () => {
+    const {role} = await GET_USER()
+
+    if(role === Role.Teacher) redirect("/teacher")
+
     return (
         <div className="w-full h-screen flex items-center justify-center">
             <Card className="w-full max-w-xl">

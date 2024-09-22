@@ -43,6 +43,7 @@ import { DeleteNoticeModal } from "@/app/dashboard/notice/_components/delete-mod
 import { AddClassModal } from "@/app/dashboard/batch/[id]/_components/add-class-modal"
 import { UpdateAdmissionPaymentModal } from "@/app/dashboard/income/history/admission/_components/update-modal"
 import { UpdateTeacherBillStatussModal } from "@/app/dashboard/expense/teacher/approval/_components/status-modal"
+import { UpdateAdvanceStatussModal } from "@/app/dashboard/expense/advance/approval/_components/status-modal"
 
 export const ModalProvider = () => {
     return (
@@ -95,6 +96,7 @@ export const ModalProvider = () => {
             <DeleteNoticeModal />
             <AddClassModal />
             <UpdateTeacherBillStatussModal />
+            <UpdateAdvanceStatussModal />
         </>
     )
 }

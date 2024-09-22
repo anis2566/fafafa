@@ -1,134 +1,186 @@
-"use client"
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { Eye, EyeOff } from "lucide-react"
-import { useState } from "react"
-import Link from "next/link"
-import { useMutation } from "@tanstack/react-query"
-import { toast } from "sonner"
-import { useSearchParams } from "next/navigation"
+import { FcGoogle } from "react-icons/fc";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
-import { SignInSchema } from "../schema"
-import { SIGN_IN_USER } from "../action"
-import { useSession } from "next-auth/react"
-import { Role } from "@prisma/client"
-
+import { SIGN_IN_USER } from "../action";
+import { SignInSchema } from "../schema";
 
 export const SignInForm = () => {
-    const [showPassword, setShowPassword] = useState<boolean>(false)
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
-    const searchParams = useSearchParams()
-    const callbackUrl = searchParams.get("callbackUrl")
-    const {update} = useSession()
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
+  const router = useRouter()
 
-    const togglePassword = () => {
-        setShowPassword(prev => !prev)
-    }
+  const togglePassword = () => {
+    setShowPassword((prev) => !prev);
+  };
 
-    const { mutate: signInUser, isPending } = useMutation({
-        mutationFn: SIGN_IN_USER,
-        onSuccess: (data) =>  {
-            toast.success(data?.success, {
-                id: "sign-in-user"
-            })
-            update({
-                role: Role.HR
-            })
-            console.log("trigerred")
-        },
-        onError: (error) => {
-            toast.error(error.message, {
-                id: "sign-in-user"
-            })
-        }
-    })
+  const { mutate: signInUser, isPending } = useMutation({
+    mutationFn: SIGN_IN_USER,
+    onSuccess: (data) => {
+      toast.success("Login successful", {
+        id: "sign-in-user",
+      });
+      router.push(`/redirect?redirectUrl=${callbackUrl}`)
+    },
+    onError: (error) => {
+      toast.error(error.message, {
+        id: "sign-in-user",
+      });
+    },
+  });
 
-    const form = useForm<z.infer<typeof SignInSchema>>({
-        resolver: zodResolver(SignInSchema),
-        defaultValues: {
-            email: "",
-            password: ""
-        },
-    })
+  const form = useForm<z.infer<typeof SignInSchema>>({
+    resolver: zodResolver(SignInSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-    function onSubmit(values: z.infer<typeof SignInSchema>) {
-        toast.loading("Login...", {
-            id: "sign-in-user"
-        })
-        signInUser({ values, callbackUrl: callbackUrl ? callbackUrl : "/" })
-    }
+  function onSubmit(values: z.infer<typeof SignInSchema>) {
+    toast.loading("Login...", {
+      id: "sign-in-user",
+    });
+    signInUser({ values, callbackUrl: callbackUrl ? callbackUrl : "/" });
+  }
 
-    return (
+//   const signInWithGoogle = async () => {
+//     await SIGN_IN_WITH_GOOGLE({ callback: callbackUrl });
+//   };
+
+  return (
+    <Card className="w-full max-w-[500px] rounded-sm">
+      <CardHeader>
+        <CardTitle className="text-xl">Welcome back</CardTitle>
+        <CardDescription>
+          Sign in to your account to continue your journey.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-8">
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <div>
-                    <h1 className="text-center text-xl font-semibold text-primary border-b border-primary max-w-fit mx-auto">Sign In</h1>
-                </div>
-                <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Enter your email" {...field} type="text" disabled={isPending} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Password</FormLabel>
-                            <FormControl>
-                                <div className="relative">
-                                    <Input placeholder="Enter your email" {...field} type={showPassword ? "text" : "password"} disabled={isPending} />
-                                    <Button variant="ghost" size="icon" className="absolute right-0 top-0" onClick={togglePassword} type="button" disabled={isPending}>
-                                        {
-                                            showPassword ? (
-                                                <EyeOff className="w-5 h-5" />
-                                            ) : (
-                                                <Eye className="w-5 h-5" />
-                                            )
-                                        }
-                                    </Button>
-                                </div>
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <div className="flex justify-between items-center flex-wrap">
-                    <Button type="submit" disabled={isPending}>Submit</Button>
-                    <Button variant="linkHover2" asChild className="text-primary" disabled={isPending}>
-                        <Link href="/auth/forgot-password">
-                            Forgot Password?
-                        </Link>
-                    </Button>
-                </div>
-                <div className="flex items-center text-muted-foreground">
-                    <p>Do not have an account?</p>
-                    <Button asChild variant="linkHover2" className="text-primary" disabled={isPending}>
-                        <Link href="/auth/sign-up">Sign Up</Link>
-                    </Button>
-                </div>
-            </form>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      placeholder="Email"
+                      {...field}
+                      disabled={isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        placeholder="Password"
+                        {...field}
+                        type={showPassword ? "text" : "password"}
+                        disabled={isPending}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0"
+                        onClick={togglePassword}
+                        type="button"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5" />
+                        ) : (
+                          <Eye className="h-5 w-5" />
+                        )}
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div>
+              <Button type="submit" className="w-full" disabled={isPending}>
+                Continue
+              </Button>
+              <div className="flex items-center text-sm">
+                <p className="text-muted-foreground">Fotgot password?</p>
+                <Button
+                  variant="link"
+                  className="text-md font-bold tracking-wider text-slate-600"
+                  asChild
+                  disabled={isPending}
+                >
+                  <Link href="/auth/reset">Reset</Link>
+                </Button>
+              </div>
+            </div>
+          </form>
         </Form>
-    )
-}
+        <div className="flex items-center">
+          <div className="h-[1px] w-full bg-slate-500" />
+          <Badge variant="outline">OR</Badge>
+          <div className="h-[1px] w-full bg-slate-500" />
+        </div>
+        <Button
+          variant="outline"
+          className="relative flex w-full items-center justify-center"
+          disabled={isPending}
+        //   onClick={signInWithGoogle}
+        >
+          <FcGoogle className="absolute left-5" size={20} />
+          Continue with Google
+        </Button>
+      </CardContent>
+      <CardFooter className="flex items-center text-sm">
+        <p className="text-muted-foreground">Don&apos;t have an account?</p>
+        <Button
+          variant="link"
+          className="text-md font-bold tracking-wider text-sky-600"
+          asChild
+          disabled={isPending}
+        >
+          <Link href="/auth/sign-up">Sign Up</Link>
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+};

@@ -10,12 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 
 import { useDebounce } from "@/hooks/use-debounce"
+import { Status } from "@prisma/client"
 
 
 export const Header = () => {
     const [search, setSearch] = useState<string>("")
     const [id, setId] = useState<string>("")
     const [perPage, setPerPage] = useState<string>()
+    const [status, setStatus] = useState<Status | undefined>()
 
     const pathname = usePathname()
     const router = useRouter()
@@ -61,11 +63,26 @@ export const Header = () => {
         router.push(url)
     }
 
+    const handleStatusChange = (status: Status) => {
+        setStatus(status)
+        const params = Object.fromEntries(searchParams.entries());
+        const url = queryString.stringifyUrl({
+            url: pathname,
+            query: {
+                ...params,
+                status,
+            }
+        }, { skipNull: true, skipEmptyString: true })
+
+        router.push(url)
+    }
+
     const handleReset = () => {
         router.push(pathname)
         setSearch("")
         setId("")
         setPerPage(undefined)
+        setStatus(undefined)
     }
 
 
@@ -93,6 +110,18 @@ export const Header = () => {
                             value={search}
                         />
                     </div>
+                    <Select value={status || ""} onValueChange={(value) => handleStatusChange(value as Status)}>
+                        <SelectTrigger className="w-[130px]">
+                            <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {
+                                Object.values(Status).map((v, i) => (
+                                    <SelectItem value={v} key={i}>{v}</SelectItem>
+                                ))
+                            }
+                        </SelectContent>
+                    </Select>
                     <Button
                         variant="destructive"
                         className="hidden md:flex"

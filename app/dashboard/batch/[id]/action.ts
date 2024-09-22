@@ -1,8 +1,11 @@
 "use server";
 
 import { db } from "@/lib/prisma";
+import { sendNotification } from "@/services/notification.service";
+import { GET_USER } from "@/services/user.service";
 import { Class, Day, Status } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import webPush, { WebPushError } from "web-push";
 
 type GetStudent = {
   id: number | undefined;
@@ -105,6 +108,9 @@ export const REMOVE_CLASS_FROM_BATCH = async (id: string) => {
     where: {
       id,
     },
+    include: {
+      teacher: true,
+    },
   });
 
   if (!batchClass) {
@@ -116,6 +122,59 @@ export const REMOVE_CLASS_FROM_BATCH = async (id: string) => {
       id,
     },
   });
+
+  if (batchClass.teacher.userId) {
+    const subscribers = await db.pushSubscriber.findMany({
+      where: { userId: batchClass.teacher.userId },
+    });
+
+    if (subscribers.length > 0) {
+      const pushPromises = subscribers.map(async (item) => {
+        try {
+          await webPush.sendNotification(
+            {
+              endpoint: item.endpoint,
+              keys: {
+                auth: item.auth,
+                p256dh: item.p256dh,
+              },
+            },
+            JSON.stringify({
+              title: `Schedule Changed`,
+              body: `Your class schedule has been changed. Please checkout.`,
+            }),
+            {
+              vapidDetails: {
+                subject: "mailto:anis@flowchat.com",
+                publicKey: process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY!,
+                privateKey: process.env.WEB_PUSH_PRIVATE_KEY!,
+              },
+            }
+          );
+        } catch (error) {
+          console.error("Error sending push notification:", error);
+
+          if (error instanceof WebPushError && error.statusCode === 410) {
+            console.log("Push subscription expired, deleting...");
+            await db.pushSubscriber.delete({
+              where: { id: item.id },
+            });
+          }
+        }
+      });
+
+      await Promise.all(pushPromises);
+    }
+
+    const { userId } = await GET_USER();
+
+    await sendNotification({
+      trigger: "schedule-changed",
+      actor: { id: userId },
+      recipients: [batchClass.teacher.userId],
+      data: {},
+    });
+  }
 
   revalidatePath(`/dashboard/batch/${batchClass.batchId}`);
   revalidatePath(`/dashboard/teacher/${batchClass.teacherId}`);
@@ -239,6 +298,7 @@ export const ADD_BATCH_CLASS = async ({
     },
     select: {
       name: true,
+      userId: true,
     },
   });
 
@@ -269,6 +329,59 @@ export const ADD_BATCH_CLASS = async ({
       roomId: batch.roomId,
     },
   });
+
+  if (teacher.userId) {
+    const subscribers = await db.pushSubscriber.findMany({
+      where: { userId: teacher.userId },
+    });
+
+    if (subscribers.length > 0) {
+      const pushPromises = subscribers.map(async (item) => {
+        try {
+          await webPush.sendNotification(
+            {
+              endpoint: item.endpoint,
+              keys: {
+                auth: item.auth,
+                p256dh: item.p256dh,
+              },
+            },
+            JSON.stringify({
+              title: `Schedule Changed`,
+              body: `Your class schedule has been changed. Please checkout.`,
+            }),
+            {
+              vapidDetails: {
+                subject: "mailto:anis@flowchat.com",
+                publicKey: process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY!,
+                privateKey: process.env.WEB_PUSH_PRIVATE_KEY!,
+              },
+            }
+          );
+        } catch (error) {
+          console.error("Error sending push notification:", error);
+
+          if (error instanceof WebPushError && error.statusCode === 410) {
+            console.log("Push subscription expired, deleting...");
+            await db.pushSubscriber.delete({
+              where: { id: item.id },
+            });
+          }
+        }
+      });
+
+      await Promise.all(pushPromises);
+    }
+
+    const { userId } = await GET_USER();
+
+    await sendNotification({
+      trigger: "schedule-changed",
+      actor: { id: userId },
+      recipients: [teacher.userId],
+      data: {},
+    });
+  }
 
   revalidatePath(`/dashboard/batch/${batchId}`);
 

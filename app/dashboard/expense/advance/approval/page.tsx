@@ -11,15 +11,14 @@ import {
     BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
-import { ContentLayout } from "../../_components/content-layout";
 import { db } from "@/lib/prisma";
+import { ContentLayout } from "@/app/dashboard/_components/content-layout";
 import { AdvanceList } from "./_components/advance-list";
 import { CustomPagination } from "@/components/custom-pagination";
-import { Header } from "./_components/header";
+import { Header } from "../_components/header";
 
 export const metadata: Metadata = {
-    title: "BEC | Expense | Advance",
+    title: "BEC | Expense | Advance | Approval",
     description: "Basic Education Care",
 };
 
@@ -30,12 +29,12 @@ interface Props {
         status?: TransactionStatus;
         id?: string;
         name?: string;
-        page: string;
-        perPage: string;
-    }
+        page?: string;
+        perPage?: string;
+    };
 }
 
-const Advances = async ({ searchParams }: Props) => {
+const AdvanceApproval = async ({ searchParams }: Props) => {
     const {
         session,
         month,
@@ -96,15 +95,15 @@ const Advances = async ({ searchParams }: Props) => {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>Advance</BreadcrumbPage>
+                        <BreadcrumbPage>Advance Approval</BreadcrumbPage>
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
 
             <Card className="mt-4">
                 <CardHeader>
-                    <CardTitle>Advance History</CardTitle>
-                    <CardDescription>A collection of advance.</CardDescription>
+                    <CardTitle>Advance Request</CardTitle>
+                    <CardDescription>A collection of advance request.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <Header />
@@ -112,8 +111,10 @@ const Advances = async ({ searchParams }: Props) => {
                     <CustomPagination totalPage={totalPage} />
                 </CardContent>
             </Card>
+
+            {/* <TeacherBillForm /> */}
         </ContentLayout>
     )
 }
 
-export default Advances
+export default AdvanceApproval

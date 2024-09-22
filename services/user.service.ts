@@ -26,8 +26,21 @@ export const GET_USER = async () => {
   return {
     user,
     userId: user.id,
-    role: user.role
+    role: user.role,
+    status: user.status
   };
+};
+
+export const GET_ADMIN = async () => {
+  const admin = await db.user.findFirst({
+    where: {
+      role: Role.Admin,
+    },
+  });
+
+  if (!admin) throw new Error("Admin not found");
+
+  return { id: admin.id, admin };
 };
 
 export const GET_HR = async () => {
@@ -40,6 +53,18 @@ export const GET_HR = async () => {
   if (!hr) throw new Error("Hr not found");
 
   return { id: hr.id, hr };
+};
+
+export const GET_ACCOUNTANT = async () => {
+  const accountant = await db.user.findFirst({
+    where: {
+      role: Role.Accountant,
+    },
+  });
+
+  if (!accountant) throw new Error("Accountant not found");
+
+  return { id: accountant.id, accountant };
 };
 
 export const GET_USER_BY_EMAIL = async (email: string) => {

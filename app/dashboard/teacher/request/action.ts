@@ -2,8 +2,11 @@
 
 import { Role, Status } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import webPush, { WebPushError } from "web-push";
 
 import { db } from "@/lib/prisma";
+import { GET_USER } from "@/services/user.service";
+import { sendNotification } from "@/services/notification.service";
 
 type UpdateStatus = {
   id: string;
@@ -14,6 +17,9 @@ export const UPDATE_TEACHER_STATUS = async ({ id, status }: UpdateStatus) => {
   const app = await db.teacherRequest.findUnique({
     where: {
       id,
+    },
+    include: {
+      teacher: true,
     },
   });
 
@@ -50,6 +56,63 @@ export const UPDATE_TEACHER_STATUS = async ({ id, status }: UpdateStatus) => {
     },
   });
 
+  if (app.teacher.userId) {
+    const subscribers = await db.pushSubscriber.findMany({
+      where: { userId: app.teacher.userId },
+    });
+
+    console.log(subscribers)
+
+    if (subscribers.length > 0) {
+      const pushPromises = subscribers.map(async (item) => {
+        try {
+          await webPush.sendNotification(
+            {
+              endpoint: item.endpoint,
+              keys: {
+                auth: item.auth,
+                p256dh: item.p256dh,
+              },
+            },
+            JSON.stringify({
+              title: `Account Approval`,
+              body: `Your teacher account has been ${status}`,
+            }),
+            {
+              vapidDetails: {
+                subject: "mailto:anis@flowchat.com",
+                publicKey: process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY!,
+                privateKey: process.env.WEB_PUSH_PRIVATE_KEY!,
+              },
+            }
+          );
+        } catch (error) {
+          console.error("Error sending push notification:", error);
+
+          if (error instanceof WebPushError && error.statusCode === 410) {
+            console.log("Push subscription expired, deleting...");
+            await db.pushSubscriber.delete({
+              where: { id: item.id },
+            });
+          }
+        }
+      });
+
+      await Promise.all(pushPromises);
+    }
+
+    const { userId } = await GET_USER();
+
+    await sendNotification({
+      trigger: "teacher-response",
+      actor: { id: userId },
+      recipients: [app.teacher.userId],
+      data: {
+        status,
+      },
+    });
+  }
+
   revalidatePath("/dashboard/teacher/request");
 
   return {
@@ -75,7 +138,7 @@ export const DELETE_REQUEST = async (id: string) => {
       },
       data: {
         role: Role.User,
-        status: Status.Pending
+        status: Status.Pending,
       },
     });
     await ctx.teacherRequest.delete({

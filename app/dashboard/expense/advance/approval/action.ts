@@ -1,46 +1,36 @@
 "use server";
 
-import { LeaveStatus } from "@prisma/client";
+import { TransactionStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import webPush, { WebPushError } from "web-push";
 
 import { db } from "@/lib/prisma";
-import { GET_USER } from "@/services/user.service";
 import { sendNotification } from "@/services/notification.service";
+import { GET_ACCOUNTANT, GET_USER } from "@/services/user.service";
 
 type UpdateStatus = {
   id: string;
-  status: LeaveStatus;
+  status: TransactionStatus;
 };
 
-export const UPDATE_LEAVE_STATUS = async ({ id, status }: UpdateStatus) => {
-  const app = await db.leaveApp.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      teacher: {
-        select: {
-          userId: true,
-        },
-      },
-    },
+export const UPDATE_STATUS = async ({ id, status }: UpdateStatus) => {
+  const advance = await db.teacherAdvance.findUnique({
+    where: { id },
+    include: { teacher: true },
   });
 
-  if (!app) throw new Error("Application not found");
+  if (!advance) {
+    throw new Error("Advance not found");
+  }
 
-  await db.leaveApp.update({
-    where: {
-      id,
-    },
-    data: {
-      status,
-    },
+  await db.teacherAdvance.update({
+    where: { id },
+    data: { status },
   });
 
-  if (app.teacher.userId) {
+  if (advance.teacher.userId) {
     const subscribers = await db.pushSubscriber.findMany({
-      where: { userId: app.teacher.userId },
+      where: { userId: advance.teacher.userId },
     });
 
     if (subscribers.length > 0) {
@@ -55,8 +45,8 @@ export const UPDATE_LEAVE_STATUS = async ({ id, status }: UpdateStatus) => {
               },
             },
             JSON.stringify({
-              title: `Leave Response`,
-              body: `Your leave request has been ${LeaveStatus.Approved}`,
+              title: `Advance Response`,
+              body: `Advance request of teacher ${advance.teacher.name} has been ${status}`,
             }),
             {
               vapidDetails: {
@@ -82,20 +72,20 @@ export const UPDATE_LEAVE_STATUS = async ({ id, status }: UpdateStatus) => {
     }
 
     const { userId } = await GET_USER();
+    const { id } = await GET_ACCOUNTANT();
 
     await sendNotification({
-      trigger: "leave-response",
+      trigger: "advance-response",
       actor: { id: userId },
-      recipients: [app.teacher.userId],
+      recipients: [id],
       data: {
-        status: LeaveStatus.Approved,
+        teacher: advance.teacher.name,
+        status,
       },
     });
   }
 
-  revalidatePath("/dashboard/teacher/leave");
+  await revalidatePath("/dashboard/expense/advance/approval");
 
-  return {
-    success: "Status updated",
-  };
+  return { success: "Status updated" };
 };

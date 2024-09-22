@@ -1,6 +1,9 @@
+"use client"
+
 import { Teacher, TeacherAdvance, TransactionStatus } from "@prisma/client";
 import { format } from "date-fns";
 import Link from "next/link";
+import { EllipsisVertical, RefreshCcw } from "lucide-react";
 
 import {
     Table,
@@ -12,9 +15,17 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
 
 import { EmptyData } from "@/components/empty-stat";
 import { cn } from "@/lib/utils";
+import { useAdvance } from "@/hooks/use-advance";
 
 interface AdvanceWithTeacher extends TeacherAdvance {
     teacher: Teacher;
@@ -25,9 +36,10 @@ interface Props {
 }
 
 export const AdvanceList = ({ advances }: Props) => {
+    const {onOpen} = useAdvance()
 
     if (advances.length === 0) {
-        return <EmptyData title="No Advance Found!" />
+        return <EmptyData title="No Request Found!" />
     }
 
     return (
@@ -41,6 +53,7 @@ export const AdvanceList = ({ advances }: Props) => {
                     <TableHead>Month</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Action</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -67,6 +80,22 @@ export const AdvanceList = ({ advances }: Props) => {
                                     advance.status === TransactionStatus.Approve && "bg-green-500",
                                     advance.status === TransactionStatus.Reject && "bg-rose-500",
                                 )}>{advance.status}</Badge>
+                            </TableCell>
+                            <TableCell className="py-2">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" className="h-8 w-8 p-0" disabled={advance.status === TransactionStatus.Approve}>
+                                            <span className="sr-only">Open menu</span>
+                                            <EllipsisVertical className="h-5 w-5" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem className="flex items-center gap-x-3" onClick={() => onOpen(advance.id)}>
+                                            <RefreshCcw className="w-5 h-5" />
+                                            Change Status
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </TableCell>
                         </TableRow>
                     ))

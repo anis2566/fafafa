@@ -312,6 +312,12 @@ export function getMenuList(pathname: string): Group[] {
               active: pathname === "/dashboard/expense/advance",
               icon: History,
             },
+            {
+              href: "/dashboard/expense/advance/approval",
+              label: "Approval",
+              active: pathname === "/dashboard/expense/advance/approval",
+              icon: CircleCheckBig,
+            },
           ],
         },
       ],

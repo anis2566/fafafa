@@ -18,6 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ContentLayout } from "../../_components/content-layout";
 import { GET_TEACHER } from "@/services/user.service";
 import { db } from "@/lib/prisma";
+import { CustomPagination } from "@/components/custom-pagination";
 
 export const metadata: Metadata = {
     title: "BEC | Class | Proxy",
@@ -45,21 +46,45 @@ type GroupedData = {
     }[];
 };
 
-const ProxyClass = async () => {
+interface Props {
+    searchParams: {
+        page: string;
+        perPage: string;
+    }
+}
+
+const ProxyClass = async ({ searchParams }: Props) => {
+
+    const { page, perPage } = searchParams;
+    const itemsPerPage = parseInt(perPage) || 5;
+    const currentPage = parseInt(page) || 1;
+
     const { teacherId } = await GET_TEACHER()
 
-    const classes = await db.leaveClass.groupBy({
-        by: ["time", "day", "batchName", "subjectName", "date", "roomName"],
-        where: {
-            teacherId,
-            date: {
-                gte: new Date()
+    const [classes, totalClasses] = await Promise.all([
+        await db.leaveClass.groupBy({
+            by: ["time", "day", "batchName", "subjectName", "date", "roomName"],
+            where: {
+                teacherId,
+                date: {
+                    gte: new Date()
+                }
+            },
+            orderBy: {
+                time: "desc"
+            },
+            skip: (currentPage - 1) * itemsPerPage,
+            take: itemsPerPage,
+        }),
+        await db.leaveClass.count({
+            where: {
+                teacherId,
+                date: {
+                    gte: new Date()
+                }
             }
-        },
-        orderBy: {
-            time: "desc"
-        }
-    })
+        })
+    ])
 
     const groupedData: GroupedData[] = Object.values(
         classes.reduce((acc: { [key: string]: GroupedData }, curr: ClassData) => {
@@ -77,7 +102,7 @@ const ProxyClass = async () => {
         }, {})
     );
 
-    console.log(groupedData)
+    const totalPage = Math.ceil(totalClasses / itemsPerPage)
 
     return (
         <ContentLayout title="Class">
@@ -147,6 +172,7 @@ const ProxyClass = async () => {
                             }
                         </TableBody>
                     </Table>
+                    <CustomPagination totalPage={totalPage} />
                 </CardContent>
             </Card>
         </ContentLayout>

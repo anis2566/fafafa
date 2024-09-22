@@ -13,6 +13,8 @@ type SendNotification = {
     redirectUrl?: string;
     status?: string;
     month?: string;
+    teacher?: string;
+    amount?: string;
   };
 };
 

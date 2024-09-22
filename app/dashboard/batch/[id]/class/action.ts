@@ -1,10 +1,13 @@
 "use server";
 
 import { Class, Level } from "@prisma/client";
+import webPush, { WebPushError } from "web-push";
 
 import { db } from "@/lib/prisma";
 import { BatchClassSchema, BatchClassSchemaType } from "./schema";
 import { revalidatePath } from "next/cache";
+import { GET_USER } from "@/services/user.service";
+import { sendNotification } from "@/services/notification.service";
 
 type CreateBatchClass = {
   id: string;
@@ -77,6 +80,7 @@ export const CREATE_BATCH_CLASS = async ({ id, values }: CreateBatchClass) => {
     },
     select: {
       name: true,
+      userId: true,
     },
   });
 
@@ -107,6 +111,59 @@ export const CREATE_BATCH_CLASS = async ({ id, values }: CreateBatchClass) => {
         roomName: batch.room.name,
         roomId: batch.roomId,
       },
+    });
+  }
+
+  if (teacher.userId) {
+    const subscribers = await db.pushSubscriber.findMany({
+      where: { userId: teacher.userId },
+    });
+
+    if (subscribers.length > 0) {
+      const pushPromises = subscribers.map(async (item) => {
+        try {
+          await webPush.sendNotification(
+            {
+              endpoint: item.endpoint,
+              keys: {
+                auth: item.auth,
+                p256dh: item.p256dh,
+              },
+            },
+            JSON.stringify({
+              title: `Schedule Changed`,
+              body: `Your class schedule has been changed. Please checkout.`,
+            }),
+            {
+              vapidDetails: {
+                subject: "mailto:anis@flowchat.com",
+                publicKey: process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY!,
+                privateKey: process.env.WEB_PUSH_PRIVATE_KEY!,
+              },
+            }
+          );
+        } catch (error) {
+          console.error("Error sending push notification:", error);
+
+          if (error instanceof WebPushError && error.statusCode === 410) {
+            console.log("Push subscription expired, deleting...");
+            await db.pushSubscriber.delete({
+              where: { id: item.id },
+            });
+          }
+        }
+      });
+
+      await Promise.all(pushPromises);
+    }
+
+    const { userId } = await GET_USER();
+
+    await sendNotification({
+      trigger: "schedule-changed",
+      actor: { id: userId },
+      recipients: [teacher.userId],
+      data: {},
     });
   }
 
